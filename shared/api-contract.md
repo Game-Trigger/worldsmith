@@ -58,6 +58,11 @@ A reply is accepted only if it is valid JSON, matches the schema, and `server/mo
 
 The page runs the reply in its Web Worker before writing it to the editor. If that run fails, it asks once more with `error` and `attempt: 2`; if that fails too, nothing is written. A good reply replaces the editor content (after the confirm bar if the learner had their own edits), runs through the normal `run()`, and the page's goal checks decide pass or fail. Undo restores the previous code and scene. Page-side timeout 13 s.
 
+## `POST /api/forge` (AI Forge)
+Request (JSON, at most 20 000 bytes): `lang` (`"tr"` or `"en"`), `description` (1 to 120 characters, what to model), `existing` (list of at most 30 model names the learner already has, `a-z0-9_`).
+
+`200`: `{name, label, parts, explanation, source: "llm", model}` as defined by [`forge-schema.json`](forge-schema.json). `parts` has 2 to 24 items `{shape: box|cylinder|cone|sphere|pyramid, color: "#rrggbb", position: [x, y, z], size: [w, h, d], rotation_y}`; the object stands on y = 0, x and z within -3..3. `name` is already made unique against `existing`. `400`, `413`, `429`, `503` as for `/api/coach`; the 503 body has `reason` (for example `name: ...` or `parts[2].size: ...`) and the page shows it. The reply is accepted only if it matches the schema and `server/forge_validate.py` (ranges, colours, name, not tiny, at least two colours); otherwise one retry with the reason appended. The page validates and clamps everything again before drawing. Details: `docs/FORGE.md`.
+
 ## Fallback is on the page
 On any non-200 or network failure the page shows its built-in rule-based feedback (`source: "rules"`) with a visible "Rule-based coach" tag, the reason, and a retry link. This also covers having no server at all, which is why the fallback lives in the page and not in the server.
 

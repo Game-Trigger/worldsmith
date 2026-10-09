@@ -190,6 +190,17 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
 .pm-result[hidden] { display: none; }
 .pm-result p { margin: 0 0 6px; }
 .pm-result .tag { margin-top: 6px; font-size: 11.5px; color: var(--muted); }
+.fg-cap { margin: 0 0 4px !important; font-size: 12.5px; color: var(--muted); }
+.fg-code { margin: 0 0 8px; padding: 6px 9px; border-radius: 6px; background: var(--panel-2); font: 12.5px/1.45 var(--f-mono); overflow-wrap: anywhere; white-space: pre-wrap; }
+.fg-head { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.fg-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.fg-none { margin: 0; font-size: 13px; color: var(--muted); }
+.fg-item { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); overflow: hidden; }
+.fg-item button { background: transparent; border: 0; color: var(--text); cursor: pointer; padding: 6px 10px; min-height: 36px; font: 13px var(--f-body); }
+.fg-item button:hover { background: var(--panel-2); }
+.fg-item button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.fg-item .del { color: var(--muted); border-left: 1px solid var(--line); padding: 6px 9px; }
+.fg-item button:disabled { opacity: 0.5; cursor: not-allowed; }
 .ed-body .CodeMirror { position: absolute; inset: 0; height: 100%; }
 .status { display: flex; gap: 8px; align-items: baseline; padding: 7px 12px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); min-height: 34px; font-variant-numeric: tabular-nums; }
 .status span { min-width: 0; overflow-wrap: anywhere; }
@@ -272,6 +283,12 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
 .cm-err-line { background: var(--err-soft); }
 .cm-err-gutter { color: var(--err) !important; font-weight: 700; }
 
+/* ---------- narrow screens: give the editor panes room ---------- */
+@media (max-width: 959px), (max-height: 639px) {
+  .editor { height: clamp(400px, 64vh, 580px); }
+  .ed-bar .file { display: none; }
+}
+
 /* ---------- desktop workbench ---------- */
 @media (min-width: 960px) and (min-height: 640px) {
   .app { display: grid; grid-template-columns: minmax(0, 1fr) 390px; grid-template-rows: auto minmax(0, 1fr); height: 100%; }
@@ -295,6 +312,7 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
   .btn.small { min-height: 44px; }
   .step { min-height: 44px; justify-content: center; }
   .ed-tabs button { min-height: 44px; }
+  .fg-item button { min-height: 44px; min-width: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
@@ -337,6 +355,7 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
         <div class="seg ed-tabs" role="tablist" aria-label="Editor mode">
           <button type="button" role="tab" id="tabCode" aria-controls="edBody" aria-selected="true" data-i="tabCode"></button>
           <button type="button" role="tab" id="tabPrompt" aria-controls="pm" aria-selected="false" data-i="tabPrompt"></button>
+          <button type="button" role="tab" id="tabForge" aria-controls="fg" aria-selected="false" data-i="tabForge"></button>
         </div>
         <span class="file">world.js</span>
         <span class="sp"></span>
@@ -364,6 +383,28 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
           <button type="button" class="btn small" id="pmShowCode" data-i="pmShowCode"></button>
           <div class="tag" id="pmTag"></div>
         </div>
+      </div>
+      <div class="pm fg" id="fg" role="tabpanel" aria-labelledby="tabForge" hidden>
+        <p class="pm-off" id="fgOff" role="note" hidden></p>
+        <label for="fgText" data-i="fgLabel"></label>
+        <textarea id="fgText" maxlength="120" rows="2" autocomplete="off" spellcheck="true"></textarea>
+        <div class="pm-row">
+          <span class="pm-count" id="fgCount">0 / 120</span>
+          <span class="sp"></span>
+          <button type="button" class="btn small" id="fgUndo" hidden data-i="pmUndo"></button>
+          <button type="button" class="btn primary" id="fgGo"><span data-i="fgGo"></span><kbd>Ctrl+Enter</kbd></button>
+        </div>
+        <div class="pm-status" id="fgStatus" role="status" aria-live="polite"></div>
+        <div class="pm-result" id="fgResult" hidden>
+          <p id="fgExplain"></p>
+          <p class="fg-cap" id="fgCap"></p>
+          <pre class="fg-code" id="fgLine"></pre>
+          <button type="button" class="btn small" id="fgShowCode" data-i="pmShowCode"></button>
+          <div class="tag" id="fgTag"></div>
+        </div>
+        <div class="fg-head" id="fgHead"></div>
+        <ul class="fg-list" id="fgList"></ul>
+        <p class="fg-none" id="fgNone" hidden></p>
       </div>
       <div class="status" id="status" role="status"></div>
     </div>
@@ -477,6 +518,27 @@ const UI = {
     pmOffRules: "Prompt modu kapalı çünkü Kural modundasın (hiçbir şey gönderilmez). Açmak için koç başlığından AI'yı seç.",
     cModel: 'Editördeki kendi değişikliklerinin yerine modelin kodu yazılacak (Geri al ile dönebilirsin). Devam edilsin mi?',
     pmTag: (m) => `AI tarafından yazıldı · ${m}`,
+    tabForge: 'Atölye', chipModel: 'Model',
+    fgLabel: 'Oyun dünyan için bir nesne tarif et. AI onu basit şekillerden modeller ve spawn("isim", x, z) komutuyla koduna ekler.',
+    fgPlaceholder: 'Örnek: taş bir kule, tepesinde kırmızı bir bayrak',
+    fgGo: 'Modelle', fgBusy: 'AI nesneyi şekillerden kuruyor…',
+    fgEmpty: 'Önce ne modelleyeceğini yaz, örneğin "ahşap bir yel değirmeni".',
+    fgDone: (label, n) => `"${label}" hazır: ${n} parçadan oluşuyor.`,
+    fgPlaced: () => 'Sahneye yerleştirildi. Bu satır kodunun sonuna eklendi; sayıları değiştirerek yerini ve boyunu ayarla:',
+    fgTag: (m) => `AI tarafından modellendi · ${m}`, fgUndone: 'Son eklenen satır geri alındı.',
+    fgMine: 'Modellerin (tıklayınca sahneye bir tane daha koyar)', fgNone: 'Henüz modelin yok. Yukarıya bir nesne tarif et, AI üretsin.',
+    fgDel: (l) => `${l} modelini sil`, cDelModel: 'Bu model silinecek. Kodunda hâlâ kullanıyorsan hata verir. Devam edilsin mi?',
+    fgTimeout: 'Model 13 saniye içinde yanıt vermedi. Tekrar dene ya da tarifi kısalt.',
+    fgOffline: 'Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.',
+    fgRate: (s) => `Çok fazla istek gönderildi. ${s} saniye sonra tekrar dene.`,
+    fgBad: (r) => `Model geçerli bir nesne üretemedi (${r}). Tarifi daha basit yazıp tekrar dene.`,
+    fgFull: 'En fazla 12 model saklanır. Önce birini sil.',
+    fgOffNoServer: 'Atölye kapalı: bu sayfa AI sunucusu olmadan açıldı, nesneyi modelleyecek model yok. Kod sekmesinde devam edebilirsin.',
+    fgOffNoKey: 'Atölye kapalı: sunucuda dil modeli için API anahtarı tanımlı değil. Kod sekmesinde devam edebilirsin.',
+    fgOffRules: "Atölye kapalı çünkü Kural modundasın (hiçbir şey gönderilmez). Açmak için koç başlığından AI'yı seç.",
+    fgOffChecking: 'Sunucu aranıyor… Atölye sunucu hazır olunca açılır.',
+    errModel: (n, known) => `\`spawn("${n}")\`: "${n}" adında bir model yok.${known.length ? ' Elindeki modeller: ' + known.join(', ') + '.' : ' Önce Atölye sekmesinde bir nesne modelle.'}`,
+    errSpawnLimit: (m) => `Sahneye en fazla ${m} özel model yerleştirilebilir. Döngün çok fazla \`spawn\` çağırıyor olabilir.`,
   },
   en: {
     path: 'Environment design path', mission: (n, t) => `Mission ${n} of ${t}`, goals: 'Goals', coach: 'Coach',
@@ -522,6 +584,27 @@ const UI = {
     pmOffRules: 'Prompt mode is off because you chose Rules (nothing is sent). Pick AI in the coach header to turn it on.',
     cModel: "The model's code will replace your own edits in the editor (Undo brings them back). Continue?",
     pmTag: (m) => `Written by AI · ${m}`,
+    tabForge: 'Forge', chipModel: 'Models',
+    fgLabel: 'Describe an object for your game world. The AI models it from simple shapes and adds it to your code with spawn("name", x, z).',
+    fgPlaceholder: 'Example: a stone tower with a red flag on top',
+    fgGo: 'Model it', fgBusy: 'The AI is building the object from shapes…',
+    fgEmpty: 'Write what to model first, for example "a wooden windmill".',
+    fgDone: (label, n) => `"${label}" is ready: ${n} parts.`,
+    fgPlaced: () => 'Placed in the scene. This line was added to the end of your code; change the numbers to move or resize it:',
+    fgTag: (m) => `Modelled by AI · ${m}`, fgUndone: 'The last added line was undone.',
+    fgMine: 'Your models (click to place one more)', fgNone: 'No models yet. Describe an object above and the AI will build it.',
+    fgDel: (l) => `Delete the ${l} model`, cDelModel: 'This model will be deleted. Code that still uses it will fail. Continue?',
+    fgTimeout: 'The model did not answer within 13 seconds. Try again or shorten the description.',
+    fgOffline: 'Could not reach the server. Check your connection and try again.',
+    fgRate: (s) => `Too many requests. Try again in ${s} seconds.`,
+    fgBad: (r) => `The model could not build a valid object (${r}). Try a simpler description.`,
+    fgFull: 'At most 12 models are kept. Delete one first.',
+    fgOffNoServer: 'Forge is off: this page was opened without the AI server, so there is no model to build the object. You can keep going in the Code tab.',
+    fgOffNoKey: 'Forge is off: the server has no API key for a language model. You can keep going in the Code tab.',
+    fgOffRules: 'Forge is off because you are in Rules mode (nothing is sent). Pick AI in the coach header to turn it on.',
+    fgOffChecking: 'Looking for the server… Forge opens once it is ready.',
+    errModel: (n, known) => `\`spawn("${n}")\`: there is no model called "${n}".${known.length ? ' Your models: ' + known.join(', ') + '.' : ' Build one in the Forge tab first.'}`,
+    errSpawnLimit: (m) => `A scene can hold at most ${m} custom models. Your loop may be calling \`spawn\` too often.`,
   },
 };
 
@@ -821,11 +904,13 @@ function workerBody() {
       if (v < lo || v > hi) throw new ApiError({ code: 'range', fn, arg, lo, hi, got: v });
       return v;
     };
-    const place = (kind, x, z, size) => {
+    const known = Array.isArray(e.data.models) ? e.data.models.map(String) : [];
+    let spawns = 0;
+    const place = (kind, x, z, size, name) => {
       if (size === undefined) size = 1;
       x = num(kind, 'x', x, MIN, MAX); z = num(kind, 'z', z, MIN, MAX); size = num(kind, 'size', size, 0.3, 4);
       if (++objects > LIMIT) throw new ApiError({ code: 'limit', max: LIMIT });
-      cmds.push({ t: kind, x, z, size });
+      cmds.push(name === undefined ? { t: kind, x, z, size } : { t: kind, x, z, size, name });
     };
     const api = {
       ground(color) {
@@ -835,6 +920,12 @@ function workerBody() {
       tree(x, z, size) { place('tree', x, z, size); },
       rock(x, z, size) { place('rock', x, z, size); },
       house(x, z, size) { place('house', x, z, size); },
+      spawn(name, x, z, size) {
+        if (typeof name !== 'string') throw new ApiError({ code: 'str', fn: 'spawn', arg: 'name', got: show(name) });
+        if (!known.includes(name)) throw new ApiError({ code: 'model', name, known });
+        if (++spawns > 60) throw new ApiError({ code: 'spawnlimit', max: 60 });
+        place('spawn', x, z, size, name);
+      },
       sun(h) { cmds.push({ t: 'sun', h: num('sun', 'height', h, 0, 90) }); },
       fog(a) { cmds.push({ t: 'fog', a: num('fog', 'amount', a, 0, 1) }); },
       random(lo, hi) {
@@ -858,7 +949,7 @@ function workerBody() {
     }
   };
 }
-const API_NAMES = ['ground', 'tree', 'rock', 'house', 'sun', 'fog', 'random'];
+const API_NAMES = ['ground', 'tree', 'rock', 'house', 'sun', 'fog', 'random', 'spawn'];
 let worker = null;
 function spawnWorker() {
   const src = '(' + workerBody.toString() + ')();';
@@ -886,7 +977,7 @@ function execute(code) {
       resolve(Object.assign({}, e.data, { ms: Math.max(1, Math.round(performance.now() - t0)) }));
     };
     w.onerror = (e) => { clearTimeout(boot); clearTimeout(timer); worker = null; resolve({ ok: false, line: null, info: { code: 'raw', name: 'Error', message: e.message || 'unknown' }, ms: 0 }); };
-    w.postMessage({ code });
+    w.postMessage({ code, models: Object.keys(fg.models) });
   });
 }
 
@@ -901,11 +992,15 @@ function explain(info) {
   const tr = state.lang === 'tr';
   switch (info.code) {
     case 'num': return tr ? `\`${info.fn}()\`: \`${info.arg}\` bir sayı olmalı, ama ${info.got} geldi.` : `\`${info.fn}()\`: \`${info.arg}\` must be a number, but got ${info.got}.`;
-    case 'str': return tr ? `\`${info.fn}()\`: \`${info.arg}\` tırnak içinde bir yazı olmalı, ör. \`"#6a994e"\`; ${info.got} geldi.` : `\`${info.fn}()\`: \`${info.arg}\` must be text in quotes, e.g. \`"#6a994e"\`; got ${info.got}.`;
+    case 'str':
+      if (info.fn === 'spawn') return tr ? '`spawn()`: model adı tırnak içinde bir yazı olmalı, ör. `spawn("yel_degirmeni", 3, -2)`.' : '`spawn()`: the model name must be text in quotes, e.g. `spawn("windmill", 3, -2)`.';
+      return tr ? `\`${info.fn}()\`: \`${info.arg}\` tırnak içinde bir yazı olmalı, ör. \`"#6a994e"\`; ${info.got} geldi.` : `\`${info.fn}()\`: \`${info.arg}\` must be text in quotes, e.g. \`"#6a994e"\`; got ${info.got}.`;
     case 'range': return tr ? `\`${info.fn}()\`: \`${info.arg}\` ${info.lo} ile ${info.hi} arasında olmalı, ${info.got} verdin.` : `\`${info.fn}()\`: \`${info.arg}\` must be between ${info.lo} and ${info.hi}, you gave ${info.got}.`;
     case 'limit': return tr ? `Sahneye en fazla ${info.max} nesne eklenebilir. Döngün çok fazla nesne üretiyor olabilir.` : `A scene can hold at most ${info.max} objects. Your loop may be creating too many.`;
     case 'timeout': return tr ? 'Kod 1,5 saniyede bitmedi. Sonsuz bir döngü olabilir: `while` ya da `for` içinde çıkış koşulu var mı?' : 'The code did not finish in 1.5 seconds. It may be an endless loop: does your `while` or `for` have an exit condition?';
     case 'color': return tr ? `\`ground()\`: \`${info.value}\` geçerli bir renk değil. \`"#6a994e"\` gibi bir kod ya da \`"green"\` gibi İngilizce bir renk adı kullan.` : `\`ground()\`: \`${info.value}\` is not a valid colour. Use a code like \`"#6a994e"\` or a name like \`"green"\`.`;
+    case 'model': return tt().errModel(info.name, info.known || []);
+    case 'spawnlimit': return tt().errSpawnLimit(info.max);
     case 'noworker': return tt().noWorker;
     default: break;
   }
@@ -939,6 +1034,41 @@ const world = new THREE.Group();
 const cam = { az: 0.7, polar: 1.0, zoom: 1, idle: 0 };
 const popList = [];
 const UNIT = { tree: 1.55, rock: 1.4, house: 2.0 };
+/* AI Forge registry: objects the model built from primitive shapes, kept in this browser. */
+const FG_KEY = 'worldsmith.forge.v1', FG_MAX = 12, FG_SHAPES = ['box', 'cylinder', 'cone', 'sphere', 'pyramid'];
+const fg = { models: {}, busy: false, req: 0, undo: null };
+const fgClamp = (v, lo, hi, d) => (typeof v === 'number' && isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d);
+/* Whatever the server (or storage) hands over is rebuilt field by field, so nothing unchecked reaches three.js. */
+function sanitizeModel(d) {
+  if (!d || typeof d !== 'object' || typeof d.name !== 'string' || !/^[a-z][a-z0-9_]{2,19}$/.test(d.name) || !Array.isArray(d.parts)) return null;
+  const parts = [];
+  for (const p of d.parts.slice(0, 24)) {
+    if (!p || !FG_SHAPES.includes(p.shape) || !Array.isArray(p.position) || !Array.isArray(p.size)) continue;
+    parts.push({
+      shape: p.shape,
+      color: typeof p.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(p.color) ? p.color.toLowerCase() : '#888888',
+      position: [fgClamp(p.position[0], -3, 3, 0), fgClamp(p.position[1], 0, 6, 0), fgClamp(p.position[2], -3, 3, 0)],
+      size: [fgClamp(p.size[0], 0.05, 4, 1), fgClamp(p.size[1], 0.05, 4, 1), fgClamp(p.size[2], 0.05, 4, 1)],
+      rotation_y: fgClamp(p.rotation_y, -360, 360, 0),
+    });
+  }
+  if (parts.length < 2) return null;
+  const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+  for (const p of parts) for (let i = 0; i < 3; i++) { lo[i] = Math.min(lo[i], p.position[i] - p.size[i] / 2); hi[i] = Math.max(hi[i], p.position[i] + p.size[i] / 2); }
+  const big = Math.max(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]);
+  return {
+    name: d.name, label: typeof d.label === 'string' && d.label.trim() ? d.label.trim().slice(0, 40) : d.name, parts,
+    cx: (lo[0] + hi[0]) / 2, cz: (lo[2] + hi[2]) / 2, base: lo[1],
+    unit: fgClamp(4.4 / Math.max(big, 0.5), 0.8, 5, 1),   // normalised so every model is about as big as a tree at size 1
+  };
+}
+function fgSave() { try { localStorage.setItem(FG_KEY, JSON.stringify(Object.values(fg.models))); } catch (e) { /* storage unavailable */ } }
+(function fgLoad() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(FG_KEY) || '[]');
+    if (Array.isArray(raw)) raw.slice(0, FG_MAX).forEach((d) => { const m = sanitizeModel(d); if (m) fg.models[m.name] = m; });
+  } catch (e) { /* ignore a broken store */ }
+})();
 
 if (gl) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -966,6 +1096,10 @@ const G = {
   roof: new THREE.ConeGeometry(1, 1, 4),
 };
 const hash = (x, z) => (Math.imul(Math.round(x * 100) ^ 0x9e3779b1, 73856093) ^ Math.imul(Math.round(z * 100) ^ 0x85ebca6b, 19349663)) >>> 0;
+const FG_GEO = {
+  box: G.box, cylinder: new THREE.CylinderGeometry(0.5, 0.5, 1, 10), cone: new THREE.ConeGeometry(0.5, 1, 10),
+  sphere: new THREE.IcosahedronGeometry(0.5, 1), pyramid: new THREE.ConeGeometry(0.7071, 1, 4),
+};
 const mesh = (geo, color, x, y, z, sx, sy, sz) => {
   const m = new THREE.Mesh(geo, mat(color));
   m.position.set(x, y, z); m.scale.set(sx, sy, sz);
@@ -1004,6 +1138,16 @@ function makeHouse(x, z, s) {
   g.add(roof);
   g.add(mesh(G.box, '#3a2c22', 0, 0.42, 0.82, 0.38, 0.84, 0.06));
   g.rotation.y = ((h % 4) * Math.PI) / 2;
+  return g;
+}
+
+function makeModel(def) {
+  const g = new THREE.Group();
+  for (const p of def.parts) {
+    const m = mesh(FG_GEO[p.shape], p.color, p.position[0] - def.cx, p.position[1] - def.base, p.position[2] - def.cz, p.size[0], p.size[1], p.size[2]);
+    m.rotation.y = (p.rotation_y * Math.PI) / 180 + (p.shape === 'pyramid' ? Math.PI / 4 : 0);
+    g.add(m);
+  }
   return g;
 }
 
@@ -1049,10 +1193,12 @@ function rebuild(cmds, groundRgb, sunH, fogA) {
   const now = performance.now();
   let i = 0;
   for (const c of cmds) {
-    if (c.t !== 'tree' && c.t !== 'rock' && c.t !== 'house') continue;
-    const g = c.t === 'tree' ? makeTree(c.x, c.z, c.size) : c.t === 'rock' ? makeRock(c.x, c.z, c.size) : makeHouse(c.x, c.z, c.size);
+    if (c.t !== 'tree' && c.t !== 'rock' && c.t !== 'house' && c.t !== 'spawn') continue;
+    const def = c.t === 'spawn' ? fg.models[c.name] : null;
+    if (c.t === 'spawn' && !def) continue;
+    const g = def ? makeModel(def) : c.t === 'tree' ? makeTree(c.x, c.z, c.size) : c.t === 'rock' ? makeRock(c.x, c.z, c.size) : makeHouse(c.x, c.z, c.size);
     g.position.set(c.x, 0, c.z);
-    const sz = c.size * UNIT[c.t];
+    const sz = c.size * (def ? def.unit : UNIT[c.t]);
     g.scale.setScalar(reduceMotion ? sz : 0.001);
     world.add(g);
     if (!reduceMotion) popList.push({ g, size: sz, t0: now + Math.min(i * 9, 420) });
@@ -1159,11 +1305,12 @@ function parseColor(str) {
 }
 function analyse(code, cmds) {
   const stripped = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
-  const c = { code, cmds, counts: { tree: 0, rock: 0, house: 0 }, trees: [], houses: [], sunH: null, fogA: null, hasLoop: /\b(for|while)\b|\.forEach\s*\(|\.map\s*\(/.test(stripped) };
+  const c = { code, cmds, counts: { tree: 0, rock: 0, house: 0, spawn: 0 }, trees: [], houses: [], sunH: null, fogA: null, hasLoop: /\b(for|while)\b|\.forEach\s*\(|\.map\s*\(/.test(stripped) };
   for (const k of cmds) {
     if (k.t === 'tree') { c.counts.tree++; c.trees.push(k); }
     else if (k.t === 'rock') c.counts.rock++;
     else if (k.t === 'house') { c.counts.house++; c.houses.push(k); }
+    else if (k.t === 'spawn') c.counts.spawn++;
     else if (k.t === 'sun') c.sunH = k.h;
     else if (k.t === 'fog') c.fogA = k.a;
   }
@@ -1190,9 +1337,10 @@ function addMsg(kind, text, extra) {
 
 function renderChips(c) {
   const T = tt();
-  $('#chips').innerHTML = [['chipTree', c ? c.counts.tree : 0], ['chipRock', c ? c.counts.rock : 0], ['chipHouse', c ? c.counts.house : 0]]
-    .map(([k, n]) => `<span class="chip">${esc(T[k])}<b>${n}</b></span>`).join('');
-  $('#empty').hidden = !!(c && c.cmds.some((k) => k.t === 'tree' || k.t === 'rock' || k.t === 'house'));
+  const chips = [['chipTree', c ? c.counts.tree : 0], ['chipRock', c ? c.counts.rock : 0], ['chipHouse', c ? c.counts.house : 0]];
+  if (c && c.counts.spawn) chips.push(['chipModel', c.counts.spawn]);
+  $('#chips').innerHTML = chips.map(([k, n]) => `<span class="chip">${esc(T[k])}<b>${n}</b></span>`).join('');
+  $('#empty').hidden = !!(c && c.cmds.some((k) => k.t === 'tree' || k.t === 'rock' || k.t === 'house' || k.t === 'spawn'));
 }
 function renderGoals(c) {
   const m = MISSIONS[state.cur];
@@ -1407,7 +1555,7 @@ async function run(silent) {
   state.last = { mission: state.cur, ctx };
   renderChips(ctx);
   renderGoals(ctx);
-  const nObj = ctx.counts.tree + ctx.counts.rock + ctx.counts.house;
+  const nObj = ctx.counts.tree + ctx.counts.rock + ctx.counts.house + ctx.counts.spawn;
   setStatus('ok', tt().ok(nObj, res.ms));
   if (silent) return;
 
@@ -1492,13 +1640,18 @@ function renderPrompt() {
   $('#pmUndo').disabled = pm.busy;
   $('#tabCode').setAttribute('aria-selected', String(pm.tab === 'code'));
   $('#tabPrompt').setAttribute('aria-selected', String(pm.tab === 'prompt'));
+  $('#tabForge').setAttribute('aria-selected', String(pm.tab === 'forge'));
   $('#edBody').hidden = pm.tab !== 'code';
   $('#pm').hidden = pm.tab !== 'prompt';
+  $('#fg').hidden = pm.tab !== 'forge';
+  renderForge();
 }
 function setTab(t) {
   pm.tab = t;
   renderPrompt();
-  if (t === 'code') { cm.refresh(); cm.focus(); } else if (!$('#pmText').disabled) $('#pmText').focus();
+  if (t === 'code') { cm.refresh(); cm.focus(); }
+  else if (t === 'forge') { if (!$('#fgText').disabled) $('#fgText').focus(); }
+  else if (!$('#pmText').disabled) $('#pmText').focus();
 }
 async function askModel(body) {
   const ctl = new AbortController();
@@ -1558,6 +1711,7 @@ async function modelIt() {
 }
 $('#tabCode').addEventListener('click', () => setTab('code'));
 $('#tabPrompt').addEventListener('click', () => setTab('prompt'));
+$('#tabForge').addEventListener('click', () => setTab('forge'));
 $('#pmText').addEventListener('input', () => { $('#pmCount').textContent = `${$('#pmText').value.length} / 400`; });
 $('#pmText').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('#pmGo').click(); } });
 $('#pmText').addEventListener('focus', () => setTimeout(() => { try { $('#pmText').scrollIntoView({ block: 'nearest' }); } catch (e) { /* old browser */ } }, 300));
@@ -1579,6 +1733,116 @@ $('#pmUndo').addEventListener('click', () => {
   run(true);
 });
 $('#pmShowCode').addEventListener('click', () => setTab('code'));
+
+/* =====================================================================
+   AI Forge: the learner describes an object, the model builds it from primitive shapes (POST /api/forge).
+   The model never writes code here. The object is registered under its name and the learner places it with spawn().
+   ===================================================================== */
+const FG_SPOTS = [[0, 0], [7, 4], [-7, 4], [7, -5], [-7, -5], [0, 9], [0, -9], [12, 0], [-12, 0]];
+function fgStatus(kind, text) {
+  const el = $('#fgStatus');
+  el.className = 'pm-status' + (kind ? ' ' + kind : '');
+  el.textContent = text;
+}
+function renderForge() {
+  const T = tt(), ready = aiOn();
+  const off = ready ? '' : !state.ai && state.server === 'ready' ? T.fgOffRules
+    : { checking: T.fgOffChecking, nokey: T.fgOffNoKey, noserver: T.fgOffNoServer }[state.server] || T.fgOffNoServer;
+  $('#fgOff').hidden = ready;
+  $('#fgOff').textContent = off;
+  $('#fgText').disabled = !ready || fg.busy;
+  $('#fgText').placeholder = T.fgPlaceholder;
+  $('#fgGo').disabled = !ready || fg.busy;
+  $('#fgUndo').hidden = !fg.undo;
+  $('#fgUndo').disabled = fg.busy;
+  const list = Object.values(fg.models);
+  $('#fgHead').textContent = list.length ? T.fgMine : '';
+  $('#fgNone').hidden = list.length > 0;
+  $('#fgNone').textContent = T.fgNone;
+  $('#fgList').innerHTML = list.map((m) => `<li class="fg-item"><button type="button" data-use="${esc(m.name)}">${esc(m.label)}</button><button type="button" class="del" data-del="${esc(m.name)}" aria-label="${esc(T.fgDel(m.label))}" title="${esc(T.fgDel(m.label))}">×</button></li>`).join('');
+}
+function fgLine(name) {
+  const used = (cm.getValue().match(/\bspawn\s*\(/g) || []).length;
+  const [x, z] = FG_SPOTS[used % FG_SPOTS.length];
+  return `spawn("${name}", ${x}, ${z});`;
+}
+/* Adds one spawn line to the end of the learner's code and runs it, so the object appears in the scene. */
+function fgPlace(name) {
+  fg.undo = { code: cm.getValue(), dirty: state.dirty };
+  const line = fgLine(name), last = cm.lastLine(), tail = cm.getLine(last);
+  clearErr();
+  cm.replaceRange((tail.trim() ? '\n' : '') + line, { line: last, ch: tail.length });
+  state.dirty = true;
+  run(true);
+  return line;
+}
+async function askForge(body) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), MODEL_TIMEOUT);
+  try {
+    const r = await fetch('/api/forge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
+    let data = null;
+    try { data = await r.json(); } catch (e) { data = null; }
+    if (r.ok && data && data.source === 'llm') {
+      const m = sanitizeModel(data);
+      if (m) return { ok: true, model: m, reply: data };
+      return { ok: false, text: tt().fgBad('shape') };
+    }
+    const err = (data && data.error) || {};
+    if (r.status === 429) return { ok: false, text: tt().fgRate(err.retry_after || 60) };
+    return { ok: false, text: tt().fgBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
+  } catch (e) {
+    return { ok: false, text: e && e.name === 'AbortError' ? tt().fgTimeout : tt().fgOffline };
+  } finally { clearTimeout(timer); }
+}
+async function forgeIt() {
+  const T = tt(), text = $('#fgText').value.trim();
+  if (fg.busy || !aiOn()) return;
+  if (!text) { fgStatus('err', T.fgEmpty); $('#fgText').focus(); return; }
+  if (Object.keys(fg.models).length >= FG_MAX) { fgStatus('err', T.fgFull); return; }
+  const id = ++fg.req;
+  fg.busy = true; $('#fgResult').hidden = true; fgStatus('busy', T.fgBusy); renderForge();
+  const res = await askForge({ lang: state.lang, description: text.slice(0, 120), existing: Object.keys(fg.models) });
+  if (id !== fg.req) return;
+  fg.busy = false;
+  if (!res.ok) { fgStatus('err', res.text); renderForge(); return; }
+  fg.models[res.model.name] = res.model;
+  fgSave();
+  const line = fgPlace(res.model.name);
+  $('#fgExplain').textContent = res.reply.explanation;
+  $('#fgCap').textContent = T.fgPlaced(line);
+  $('#fgLine').textContent = line;
+  $('#fgTag').textContent = T.fgTag(res.reply.model || 'AI');
+  $('#fgResult').hidden = false;
+  fgStatus('ok', T.fgDone(res.model.label, res.model.parts.length));
+  renderForge();
+  try { $('#fgResult').scrollIntoView({ block: 'nearest' }); } catch (e) { /* old browser */ }
+}
+$('#fgText').addEventListener('input', () => { $('#fgCount').textContent = `${$('#fgText').value.length} / 120`; });
+$('#fgText').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('#fgGo').click(); } });
+$('#fgText').addEventListener('focus', () => setTimeout(() => { try { $('#fgText').scrollIntoView({ block: 'nearest' }); } catch (e) { /* old browser */ } }, 300));
+$('#fgGo').addEventListener('click', forgeIt);
+$('#fgShowCode').addEventListener('click', () => setTab('code'));
+$('#fgUndo').addEventListener('click', () => {
+  if (!fg.undo || fg.busy) return;
+  const u = fg.undo;
+  fg.undo = null;
+  clearErr();
+  cm.setValue(u.code);
+  state.dirty = u.dirty;
+  $('#fgResult').hidden = true;
+  fgStatus('ok', tt().fgUndone);
+  renderForge();
+  run(true);
+});
+$('#fgList').addEventListener('click', (e) => {
+  const use = e.target.closest('[data-use]'), del = e.target.closest('[data-del]');
+  if (use && fg.models[use.dataset.use]) { fgPlace(use.dataset.use); renderForge(); }
+  else if (del && fg.models[del.dataset.del]) {
+    const name = del.dataset.del;
+    ask(tt().cDelModel, () => { delete fg.models[name]; fgSave(); renderForge(); });
+  }
+});
 
 $('#btnRun').addEventListener('click', () => run(false));
 $('#btnReset').addEventListener('click', () => ask(tt().cReset, () => { clearErr(); cm.setValue(pick(MISSIONS[state.cur].starter)); state.dirty = false; run(true); }));

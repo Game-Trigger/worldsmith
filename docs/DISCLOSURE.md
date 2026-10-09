@@ -18,6 +18,7 @@ Everything used to build Worldsmith. Update it in the same commit that adds anyt
 | Lesson content for the coach (goals, typical gaps, reference solutions for the leak gate) | `content/lessons.json` |
 | AI coach client in the page: AI/Rules toggle, server probe, fallback with a visible tag, showcase, follow-up task | `src.html` (the coach client section) |
 | Tests, 30-case evaluation set, harness | `tests/` |
+| AI Forge: the model builds a game object from primitive shapes, the learner places it with `spawn()`; endpoint `POST /api/forge`, schema, validator, Forge tab in the page, tests | `server/forge.py`, `server/forge_validate.py`, `shared/forge-schema.json`, `src.html` (Forge section), `tests/test_forge.py`, `tests/e2e_forge.py`, `docs/FORGE.md` |
 | Docs | `docs/`, `CLAUDE.md`, `PROGRESS.md` |
 
 ## Models
