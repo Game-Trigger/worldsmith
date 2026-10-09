@@ -1141,6 +1141,38 @@ textarea, select { border-radius: 0 !important; }
   .anvi-pin { grid-column: 2; }
 }
 @media (prefers-reduced-motion: reduce) { .node.open button, .anvi-pin .anvi { animation: none; } }
+
+/* lesson screen: forge frame */
+:root, :root[data-theme="light"], :root[data-theme="dark"] {
+  --syn-kw: #ff8a4c; --syn-str: #9fd36a; --syn-num: #f5b13d; --syn-com: #8a7f74; --syn-var: #8fc5ee; --syn-api: #ffd27a;
+}
+#lessonView .top { padding: 10px 12px; background: var(--panel); border: 3px solid var(--line); box-shadow: var(--hard); }
+#lessonView .top .brand { display: none; }
+#lessonView .step .dot { border-radius: 0; clip-path: var(--px); border-width: 3px; }
+#lessonView .step.done .dot { background: var(--grass); border-color: #000; color: #10200a; }
+#lessonView .step.current .dot { background: var(--fire); border-color: #000; color: #14110f; }
+#lessonView .link { height: 4px; background: repeating-linear-gradient(90deg, var(--iron-d) 0 6px, transparent 6px 10px); }
+#lessonView .link.done { background: repeating-linear-gradient(90deg, var(--grass) 0 6px, transparent 6px 10px); }
+#lessonView .preview { border: 3px solid #000; outline: 3px solid var(--line); outline-offset: 0; box-shadow: var(--hard); }
+#lessonView .preview .chips span, #lessonView .chips > * { border-radius: 0; border: 2px solid #000; }
+#lessonView .editor { border: 3px solid var(--line); box-shadow: var(--hard); }
+#lessonView .ed-bar { background: linear-gradient(180deg, #2a2420, #1f1a16); border-bottom: 3px solid #000; }
+#lessonView .file { border-radius: 0; background: #000; color: var(--fire); }
+#lessonView .ed-body { background: var(--code-bg); }
+#lessonView .CodeMirror { background: var(--code-bg); }
+#lessonView .CodeMirror-gutters { background: #0c0a09; border-right: 3px solid #000; }
+#lessonView .status { border-top: 3px solid #000; background: #0c0a09; font-family: var(--f-mono); }
+#lessonView .mission, #lessonView .log { border: 3px solid var(--line); box-shadow: var(--hard); }
+#lessonView .mission h2 { font-family: var(--f-display); font-size: 15px; line-height: 1.5; color: var(--fire); }
+#lessonView .goals li { border-radius: 0; border: 2px solid var(--line); }
+#lessonView .msgs .msg { position: relative; margin-left: 46px; border-radius: 0; border: 2px solid var(--line); box-shadow: 3px 3px 0 #000; }
+#lessonView .msgs .msg::before { content: ""; position: absolute; left: -46px; top: 0; width: 38px; height: 31px; background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 13%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%2214%22 y=%220%22 width=%221%22 height=%221%22 fill=%22%23f5b13d%22/%3E%3Crect x=%2212%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%23e0702b%22/%3E%3Crect x=%220%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%236b6f76%22/%3E%3Crect x=%221%22 y=%223%22 width=%2214%22 height=%223%22 fill=%22%236b6f76%22/%3E%3Crect x=%223%22 y=%223%22 width=%2211%22 height=%221%22 fill=%22%239aa0a8%22/%3E%3Crect x=%225%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%23fff%22/%3E%3Crect x=%229%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%23fff%22/%3E%3Crect x=%226%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%2314110f%22/%3E%3Crect x=%2210%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%2314110f%22/%3E%3Crect x=%227%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%233a3d42%22/%3E%3Crect x=%225%22 y=%226%22 width=%226%22 height=%223%22 fill=%22%233a3d42%22/%3E%3Crect x=%226%22 y=%226%22 width=%221%22 height=%223%22 fill=%22%234a4e55%22/%3E%3Crect x=%223%22 y=%229%22 width=%2210%22 height=%222%22 fill=%22%233a3d42%22/%3E%3Crect x=%222%22 y=%2211%22 width=%2212%22 height=%221%22 fill=%22%232a2c30%22/%3E%3C/svg%3E") no-repeat center / contain; image-rendering: pixelated; }
+#lessonView .msgs .msg::after { content: ""; position: absolute; left: -9px; top: 10px; width: 7px; height: 7px; background: inherit; border-left: 2px solid var(--line); border-bottom: 2px solid var(--line); transform: rotate(45deg); }
+#lessonView .msgs .msg.hint { border-color: var(--accent); }
+#lessonView .msgs .msg.success { border-color: var(--grass); }
+#lessonView .msgs .msg.error { border-color: var(--err); }
+#lessonView .tag b, #lessonView .xp { border-radius: 0; }
+#lessonView .pv-title { border-radius: 0; background: rgba(0, 0, 0, 0.6); border: 2px solid #000; }
 </style>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
