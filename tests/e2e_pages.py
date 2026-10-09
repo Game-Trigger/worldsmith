@@ -17,7 +17,8 @@ from playwright.sync_api import sync_playwright  # noqa: E402
 
 base = fz.base
 check, results = base.check, base.results
-PAGES = [("#/", "#homeView", "home"), ("#/journey", "#journeyView", "journey"), ("#/workshop", "#workshopView", "workshop")]
+PAGES = [("#/", "#homeView", "home"), ("#/journey", "#journeyView", "journey"), ("#/workshop", "#workshopView", "workshop"),
+         ("#/profile", "#profileView", "profile")]
 
 
 def go(page, url, route, sel):
@@ -63,6 +64,36 @@ def workshop(page, url):
     fz.SCRIPT["fail"] = False
 
 
+def profile(b, url):
+    ctx = b.new_context(viewport={"width": 1280, "height": 820}, locale="en-US")
+    page = ctx.new_page()
+    go(page, url, "#/profile", "#profileView")
+    check("profile: fresh browser shows zeros and an empty-badge message", page.inner_text("#pfXp") == "0" and page.is_visible("#pfNoBadge")
+          and page.locator("#pfBadgeList .badge.earned").count() == 0)
+    check("profile: says data stays in this browser", "stays in this browser" in page.inner_text("#profileView"))
+    # earn a badge for real: finish lesson 1 through the lesson screen
+    go(page, url, "#/lesson/first-tree", "#lessonView")
+    base.type_code(page, 'ground("#6a994e");\ntree(4, -6);\n')
+    page.keyboard.press("Control+Enter")
+    page.wait_for_selector("#btnNext", state="visible", timeout=8000)
+    page.click("[data-nav=profile]")
+    page.wait_for_selector("#profileView:not([hidden])")
+    check("profile: the finished lesson's badge is earned, others stay locked", page.locator("#pfBadgeList .badge.earned").count() == 1
+          and "Locked" in page.inner_text("#pfBadgeList") and page.inner_text("#pfXp") == "50" and page.inner_text("#pfStreak") == "1")
+    page.click("[data-pfengine=godot]")
+    check("profile: engine choice applies everywhere", page.input_value("#engineSel") == "godot" and page.get_attribute("[data-pfengine=godot]", "aria-checked") == "true")
+    page.click("#pfReset")
+    check("profile: reset asks first", page.is_visible("#confirm"))
+    page.click("#confirmNo")
+    check("profile: cancel keeps progress", page.inner_text("#pfXp") == "50")
+    page.click("#pfReset")
+    page.click("#confirmYes")
+    go(page, url, "#/profile", "#profileView")
+    check("profile: reset clears XP, badges and streak", page.inner_text("#pfXp") == "0" and page.inner_text("#pfStreak") == "0" and page.is_visible("#pfNoBadge"))
+    page.screenshot(path=os.path.join(base.SHOTS, "30_profile.png"), full_page=True)
+    ctx.close()
+
+
 def main():
     srv = base.serve_app()
     app.forge_service = forge.ForgeService(log_dir=os.path.join(base.ROOT, "tests", ".e2e_logs"))
@@ -75,6 +106,7 @@ def main():
         errors = []
         page.on("pageerror", lambda e: errors.append(str(e)))
         workshop(page, url)
+        profile(b, url)
 
         # top bar reaches every page, browser back walks back through them
         go(page, url, "#/", "#homeView")
@@ -115,7 +147,7 @@ def main():
             go(mob, url, route, sel)
             mob.wait_for_timeout(300)
             sw = mob.evaluate("document.documentElement.scrollWidth")
-            small = mob.evaluate("""[...document.querySelectorAll('.topnav a, .topnav button, .topnav select, #wsGo, #wsList button')]
+            small = mob.evaluate("""[...document.querySelectorAll('.topnav a, .topnav button, .topnav select, #wsGo, #wsList button, .pf button, .faq summary')]
                 .filter(e => e.offsetParent && e.getBoundingClientRect().height < 44).map(e => (e.id || e.textContent.trim()) + ':' + e.getBoundingClientRect().height.toFixed(0))""")
             check(f"390px {route}: no horizontal scroll, 44px targets", sw <= 390 and not small, f"scrollWidth={sw} small={small}")
             mob.screenshot(path=os.path.join(base.SHOTS, f"31_{name}_mobile.png"), full_page=True)

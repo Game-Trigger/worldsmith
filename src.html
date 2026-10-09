@@ -990,7 +990,8 @@ textarea, select { border-radius: 0 !important; }
 .tn-tools .seg button, .tn-tools .eng-sel { min-height: 44px; }
 @media (max-width: 720px) {
   .topnav { gap: 6px 8px; }
-  .tn-links { order: 3; flex-basis: 100%; }
+  .tn-links { order: 3; flex-basis: 100%; flex-wrap: wrap; overflow: visible; gap: 4px; }
+  .tn-links a { padding: 0 9px; font-size: 13px; }
   .tn-tools { margin-left: auto; }
   .tn-brand span { font-size: 11px; }
 }
@@ -1173,6 +1174,31 @@ textarea, select { border-radius: 0 !important; }
 #lessonView .msgs .msg.error { border-color: var(--err); }
 #lessonView .tag b, #lessonView .xp { border-radius: 0; }
 #lessonView .pv-title { border-radius: 0; background: rgba(0, 0, 0, 0.6); border: 2px solid #000; }
+
+/* profile */
+.pf { display: grid; gap: 18px; }
+.pf-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.stat { padding: 14px; background: var(--panel); border: 3px solid var(--line); box-shadow: var(--hard); display: grid; gap: 4px; }
+.stat b { font-family: var(--f-display); font-size: 20px; color: var(--fire); }
+.stat span { color: var(--muted); font-size: 13px; }
+.badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.badge { display: grid; grid-template-columns: 48px 1fr; gap: 4px 12px; align-items: center; padding: 12px; background: var(--panel); border: 3px solid var(--line); }
+.badge i { grid-row: span 2; width: 48px; height: 48px; clip-path: var(--px); background: var(--iron-d); display: grid; place-items: center; font-style: normal; font-family: var(--f-display); font-size: 14px; color: #9aa0a8; }
+.badge.earned { border-color: var(--fire); box-shadow: var(--hard); }
+.badge.earned i { background: linear-gradient(#ffd27a 0 0) 0 0 / 100% 6px no-repeat, var(--fire); color: #14110f; }
+.badge strong { font-size: 14px; }
+.badge span { font-size: 12px; color: var(--muted); }
+.pf-set { display: grid; gap: 12px; padding: 14px; background: var(--panel); border: 3px solid var(--line); box-shadow: var(--hard); }
+.pf-row { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.pf-label { min-width: 120px; font-weight: 700; }
+.pf-eng { display: flex; flex-wrap: wrap; gap: 8px; }
+.pf-eng button { min-height: 44px; padding: 0 12px; border: 3px solid var(--line); background: var(--panel-2); color: var(--text); font-weight: 700; cursor: pointer; }
+.pf-eng button[aria-checked="true"] { border-color: var(--fire); background: var(--accent-soft); }
+.pf .seg button { min-height: 44px; padding: 0 14px; }
+.pf-data { padding: 14px; background: var(--panel); border: 3px solid var(--line); }
+.pf-data p { margin: 0; }
+#pfReset { border-color: var(--err); color: var(--err); min-height: 44px; }
+@media (max-width: 720px) { .pf-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1185,6 +1211,7 @@ textarea, select { border-radius: 0 !important; }
     <a href="#/" data-nav="home" data-i="navHome"></a>
     <a href="#/journey" data-nav="journey" data-i="navJourney"></a>
     <a href="#/workshop" data-nav="workshop" data-i="navWorkshop"></a>
+    <a href="#/profile" data-nav="profile" data-i="navProfile"></a>
   </div>
   <div class="tn-tools">
     <select class="eng-sel" id="engineSel" aria-label="Engine style"></select>
@@ -1306,6 +1333,24 @@ textarea, select { border-radius: 0 !important; }
       <ul class="ws-list" id="wsList"></ul>
     </div>
   </div>
+</section>
+
+<section class="view pf" id="profileView" aria-labelledby="pfTitle" hidden>
+  <header class="ws-head"><svg class="anvi" viewBox="0 0 16 13" shape-rendering="crispEdges" role="img" aria-label="Anvi"><rect x="14" y="0" width="1" height="1" fill="#f5b13d"/><rect x="12" y="1" width="1" height="1" fill="#e0702b"/><rect x="0" y="4" width="2" height="1" fill="#6b6f76"/><rect x="1" y="3" width="14" height="3" fill="#6b6f76"/><rect x="3" y="3" width="11" height="1" fill="#9aa0a8"/><rect x="5" y="4" width="2" height="1" fill="#fff"/><rect x="9" y="4" width="2" height="1" fill="#fff"/><rect x="6" y="4" width="1" height="1" fill="#14110f"/><rect x="10" y="4" width="1" height="1" fill="#14110f"/><rect x="7" y="5" width="2" height="1" fill="#3a3d42"/><rect x="5" y="6" width="6" height="3" fill="#3a3d42"/><rect x="6" y="6" width="1" height="3" fill="#4a4e55"/><rect x="3" y="9" width="10" height="2" fill="#3a3d42"/><rect x="2" y="11" width="12" height="1" fill="#2a2c30"/></svg><div><p class="eyebrow" data-i="pfEyebrow"></p><h1 id="pfTitle" data-i="pfTitle"></h1><p class="sub" data-i="pfSub"></p></div></header>
+  <div class="pf-stats">
+    <div class="stat"><b id="pfXp"></b><span data-i="pfXpL"></span></div>
+    <div class="stat"><b id="pfStreak"></b><span data-i="pfStreakL"></span></div>
+    <div class="stat"><b id="pfDone"></b><span data-i="pfDoneL"></span></div>
+    <div class="stat"><b id="pfModels"></b><span data-i="pfModelsL"></span></div>
+  </div>
+  <section class="home-band" aria-labelledby="pfBadgesT"><h2 id="pfBadgesT" data-i="pfBadges"></h2><p class="empty-note" id="pfNoBadge" data-i="pfNoBadge"></p><ul class="badges" id="pfBadgeList"></ul></section>
+  <section class="home-band" aria-labelledby="pfSetT"><h2 id="pfSetT" data-i="pfSettings"></h2>
+    <div class="pf-set">
+      <div class="pf-row"><span class="pf-label" data-i="pfEngine"></span><div class="pf-eng" id="pfEngine" role="radiogroup" aria-label="Engine style"></div></div>
+      <div class="pf-row"><span class="pf-label" data-i="pfLang"></span><div class="seg" role="group" aria-label="Language"><button type="button" data-lang="tr" aria-pressed="false">Türkçe</button><button type="button" data-lang="en" aria-pressed="false">English</button></div></div>
+    </div>
+  </section>
+  <section class="home-band pf-data" aria-labelledby="pfDataT"><h2 id="pfDataT" data-i="pfData"></h2><p data-i="pfDataBody"></p><p class="note-small" data-i="pfDataAi"></p><div><button type="button" class="btn" id="pfReset" data-i="pfReset"></button></div></section>
 </section>
 
 <div class="app" id="lessonView" hidden>
@@ -1631,6 +1676,14 @@ const UI = {
 const UI_BRAND = {
   tr: {
     navHome: 'Ana sayfa', navJourney: 'Yol haritası', navWorkshop: 'Atölye',
+    navProfile: 'Profil', pfEyebrow: 'PROFİL', pfTitle: 'Demirci defterin', pfSub: 'Burada yalnızca bu tarayıcıda gerçekten yaptıkların görünür.',
+    pfXpL: 'XP', pfStreakL: 'gün seri', pfDoneL: 'bölüm tamamlandı', pfModelsL: 'Atölye modeli',
+    pfBadges: 'Rozetler', pfNoBadge: 'Henüz rozet yok. İlk bölümü bitirince ilk rozetin burada parlar.',
+    pfBadgeFor: (n) => `${n} bölümünü bitir`, pfBadgeUnit: 'Çayır ustası', pfBadgeUnitFor: 'Ünite 1\'in dört bölümünü de bitir', pfEarned: 'Kazanıldı', pfLocked: 'Kilitli',
+    pfSettings: 'Ayarlar', pfEngine: 'Motor tarzı', pfLang: 'Dil',
+    pfData: 'Verilerin', pfDataBody: 'Verilerim sadece bu tarayıcıda: ilerleme, XP, seri günleri, dil, motor tarzı ve Atölye modellerin burada (localStorage) saklanır. Hesap yok, sunucuda profilin yok.',
+    pfDataAi: 'AI modunda kodun ya da tarifin cevap üretmek için dil modeline gönderilir; sunucu kodu saklamaz.',
+    pfReset: 'İlerlemeyi sıfırla',
     biomes: ['Çayır', 'Taş Ocağı', 'Mağara'], streak: (n) => n ? `${n} gün seri` : 'Seri yok: bugün bir bölüm bitir',
     homeEyebrow: 'TARAYICIDA OYUN GELİŞTİRME', heroTag: 'Canlı three.js sahnesi · senin tarayıcında',
     probTitle: 'Sorun', probBody: 'Herkes tek satır prompt ile oyun yaptırıyor ama kimse öğrenmiyor. Gerçekten öğrenmek isteyen genç ise Unity ya da Unreal\'in donanım ihtiyacında ve öğrenme eğrisinde pes ediyor.',
@@ -1671,6 +1724,14 @@ const UI_BRAND = {
   },
   en: {
     navHome: 'Home', navJourney: 'Roadmap', navWorkshop: 'Workshop',
+    navProfile: 'Profile', pfEyebrow: 'PROFILE', pfTitle: 'Your smith\'s ledger', pfSub: 'Only what you really did in this browser shows up here.',
+    pfXpL: 'XP', pfStreakL: 'day streak', pfDoneL: 'lessons completed', pfModelsL: 'Workshop models',
+    pfBadges: 'Badges', pfNoBadge: 'No badges yet. Finish the first lesson and your first badge lights up here.',
+    pfBadgeFor: (n) => `Finish ${n}`, pfBadgeUnit: 'Meadow master', pfBadgeUnitFor: 'Finish all four lessons of Unit 1', pfEarned: 'Earned', pfLocked: 'Locked',
+    pfSettings: 'Settings', pfEngine: 'Engine style', pfLang: 'Language',
+    pfData: 'Your data', pfDataBody: 'My data stays in this browser only: progress, XP, streak days, language, engine style and your Workshop models are kept here (localStorage). No account, no profile on the server.',
+    pfDataAi: 'In AI mode your code or description is sent to a language model to produce an answer; the server does not store code.',
+    pfReset: 'Reset progress',
     biomes: ['Meadow', 'Quarry', 'Cave'], streak: (n) => n ? `${n}-day streak` : 'No streak yet: finish a lesson today',
     homeEyebrow: 'GAME DEVELOPMENT IN THE BROWSER', heroTag: 'Live three.js scene · in your browser',
     probTitle: 'The problem', probBody: 'Everyone gets a game made with a one-line prompt, but nobody learns anything. The young person who really wants to learn gives up on the hardware and the learning curve of Unity or Unreal.',
@@ -3106,7 +3167,7 @@ $('#msgs').addEventListener('click', (e) => {
 });
 $('#btnNext').addEventListener('click', () => goLesson(state.cur + 1, true));   // the mission is passed, moving on is expected
 $('#btnExample').addEventListener('click', () => ask(tt().cExample, () => { clearErr(); cm.setValue(pick(EXAMPLE)); state.dirty = false; run(false); }));
-$('#btnWipe').addEventListener('click', () => ask(tt().cWipe, () => { state.done = []; state.xp = 0; persist(); loadMission(0); renderStatic(); location.hash = '#/journey'; }));
+$('#btnWipe').addEventListener('click', () => ask(tt().cWipe, () => { state.done = []; state.xp = 0; doneDays = []; doneSeen = 0; try { localStorage.removeItem(DAYS_KEY); } catch (e) { /* storage unavailable */ } persist(); loadMission(0); renderStatic(); location.hash = '#/journey'; }));
 $('#confirmYes').addEventListener('click', () => { const f = confirmYes; closeAsk(); if (f) f(); });
 $('#confirmNo').addEventListener('click', closeAsk);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#confirm').hidden) closeAsk(); });
@@ -3129,7 +3190,7 @@ function setLang(l) {
    ===================================================================== */
 const UNIT_LESSONS = [[0, 1, 2, 3], [], []];   // Level 1: today's four missions are Unit 1; Units 2 and 3 have no content yet
 const lockedIdx = (i) => !state.done.includes(i) && i > firstOpen();
-const views = { home: $('#homeView'), journey: $('#journeyView'), lesson: $('#lessonView'), workshop: $('#workshopView') };
+const views = { home: $('#homeView'), journey: $('#journeyView'), lesson: $('#lessonView'), workshop: $('#workshopView'), profile: $('#profileView') };
 let lessonReady = false;
 function showView(name) {
   for (const [k, el] of Object.entries(views)) el.hidden = k !== name;
@@ -3200,6 +3261,7 @@ function renderEngines() {
 function renderShell() {
   renderEngines();
   renderWorkshop();
+  if (!views.profile.hidden) renderProfile();
   document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
   renderHome(); renderJourney();
 }
@@ -3225,6 +3287,7 @@ function route() {
   }
   if (h === '#/journey') { renderJourney(); showView('journey'); return; }
   if (h === '#/workshop') { flash(''); renderWorkshop(); showView('workshop'); return; }
+  if (h === '#/profile') { flash(''); renderProfile(); showView('profile'); return; }
   flash('');
   renderHome();
   showView('home');
@@ -3455,6 +3518,24 @@ function heroLeave() {
   if (hero.sparks) hero.sparks.stop();
 }
 window.addEventListener('resize', () => { if (hero.stage && !views.home.hidden) { hero.stage.fit(); if (hero.sparks) hero.sparks.fit(); } });
+
+
+/* Profile (#/profile): only values this browser really holds. */
+function renderProfile() {
+  const T = tt();
+  $('#pfXp').textContent = String(state.xp);
+  $('#pfStreak').textContent = String(streakDays());
+  $('#pfDone').textContent = `${state.done.length} / ${MISSIONS.length}`;
+  $('#pfModels').textContent = String(Object.keys(fg.models).length);
+  const badges = MISSIONS.map((m, i) => ({ name: pick(m.name), how: T.pfBadgeFor(pick(m.name)), earned: state.done.includes(i), mark: String(i + 1) }));
+  badges.push({ name: T.pfBadgeUnit, how: T.pfBadgeUnitFor, earned: MISSIONS.every((m, i) => state.done.includes(i)), mark: '★' });
+  $('#pfNoBadge').hidden = badges.some((b) => b.earned);
+  $('#pfBadgeList').innerHTML = badges.map((b) => `<li class="badge${b.earned ? ' earned' : ''}"><i aria-hidden="true">${b.earned ? b.mark : '?'}</i><strong>${esc(b.name)}</strong>`
+    + `<span>${esc(b.earned ? T.pfEarned : T.pfLocked + ' · ' + b.how)}</span></li>`).join('');
+  $('#pfEngine').innerHTML = Object.entries(ENGINES).map(([id, E]) => `<button type="button" role="radio" data-pfengine="${id}" aria-checked="${id === state.engine}">${esc(E.name)}</button>`).join('');
+}
+$('#pfEngine').addEventListener('click', (e) => { const b = e.target.closest('[data-pfengine]'); if (b) { setEngine(b.dataset.pfengine); renderProfile(); } });
+$('#pfReset').addEventListener('click', () => $('#btnWipe').click());   // same confirm and reset as the lesson screen
 
 /* boot */
 renderStatic();
