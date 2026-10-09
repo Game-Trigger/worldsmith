@@ -187,6 +187,29 @@ class ServiceTests(unittest.TestCase):
         done = req(stage="challenge", goals=[{"label": "g", "done": True, "now": ""}])
         self.assertEqual(self.svc.handle(done)[0], 503)
 
+    def test_socratic_diagnose_without_question_is_retried(self):
+        providers.mock_queue(reply(stage="diagnose", verdict=None, message="Change the 3 in your loop to a bigger number."),
+                             reply(stage="diagnose", verdict=None, message="Your loop stops at i < 3. How many trees does that make?"))
+        st, body = self.svc.handle(req(stage="diagnose"))
+        self.assertEqual(st, 200)
+        self.assertIn("?", body["message"])
+        self.assertEqual(self.log_rows()[-1]["rejected"], ["socratic"])
+
+    def test_socratic_teach_without_question_twice_falls_back(self):
+        bad = reply(stage="teach", verdict=None, hint="Look at the loop condition.", message="Look at line 1.")
+        providers.mock_queue(bad, bad)
+        st, body = self.svc.handle(req(stage="teach"))
+        self.assertEqual(st, 503)
+        self.assertIn("Sokratik", body["error"]["reason"])
+
+    def test_socratic_gate_skips_evaluate_and_retry_note_says_ask(self):
+        providers.mock_queue(reply())  # evaluate, no question mark: still fine
+        self.assertEqual(self.svc.handle(req())[0], 200)
+        obj = json.loads(reply(stage="teach", hint="h", verdict=None, message="Do this."))
+        good, why = coach.check_reply(obj, coach.clean_request(req(stage="teach"), LESSONS), LESSONS["loop-forest"], False, SCHEMA)
+        self.assertIsNone(good)
+        self.assertIn("bir soru sor", why)
+
     def test_quota_does_not_retry(self):
         providers.mock_queue(providers.ProviderError("quota", "HTTP 429"), reply())
         st, body = self.svc.handle(req())

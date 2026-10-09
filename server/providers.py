@@ -48,7 +48,7 @@ def gemini(system, user, timeout):
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not key:
         raise ProviderError("config", "GEMINI_API_KEY is empty")
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip()
+    model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite").strip()
     gen = {"responseMimeType": "application/json", "temperature": 0.4, "maxOutputTokens": 900}
     budget = os.environ.get("GEMINI_THINKING_BUDGET", "").strip()
     if budget.lstrip("-").isdigit():
