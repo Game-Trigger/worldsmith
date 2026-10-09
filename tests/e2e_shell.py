@@ -154,7 +154,7 @@ def main():
             mob.wait_for_timeout(300)
             sw = mob.evaluate("document.documentElement.scrollWidth")
             small = mob.evaluate("""[...document.querySelectorAll('#homeGo,#homeMap,.engine,.node button,#jHome,#toJourney,#engineSel,[data-lang]')]
-                .filter(e => e.offsetParent && e.getBoundingClientRect().height < 44).map(e => e.id || e.className || e.textContent)""")
+                .filter(e => e.offsetParent && e.getBoundingClientRect().height < 44).map(e => (e.id || e.className || e.textContent) + ':' + e.getBoundingClientRect().height.toFixed(1))""")
             check(f"390px {route}: no horizontal scroll, 44px targets", sw <= 390 and not small, f"scrollWidth={sw} small={small}")
             if route == "#/journey":
                 mob.screenshot(path=os.path.join(shots, "16_roadmap_mobile.png"), full_page=True)
