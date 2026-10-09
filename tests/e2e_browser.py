@@ -44,7 +44,7 @@ def scripted(system, user, timeout):
         r["missing_concept"] = None if met else "calls need concrete numbers"
         r["message"] = "Your tree stands on the map. Try changing the numbers to move it." if met else "The tree line is still a comment, so nothing runs yet."
     elif stage == "teach":
-        r["message"] = "Here is a nudge."
+        r["message"] = "Here is a nudge. Which line still starts with //?"
         r["hint"] = "Look at the comment line: what has to change so it becomes a real call?"
     elif stage == "showcase":
         r["verdict"] = "pass"
