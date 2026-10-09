@@ -154,6 +154,15 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
 .flash { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
 .flash[hidden] { display: none; }
 .lesson-back { margin-right: 2px; }
+.engines { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.engine { text-align: left; display: grid; grid-template-columns: 44px 1fr; gap: 4px 12px; align-items: center; padding: 14px; min-height: 76px; border-radius: 12px; border: 2px solid var(--line); background: var(--panel); cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
+.engine:hover { transform: translateY(-1px); }
+.engine[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.engine svg { grid-row: span 2; width: 44px; height: 44px; }
+.engine strong { font-size: 15px; }
+.engine span { font-size: 12.5px; color: var(--muted); }
+.eng-sel { min-height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 0 8px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.pv-title { position: absolute; right: 10px; top: 10px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.35); color: #fff; pointer-events: none; }
 
 /* ---------- header ---------- */
 .top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -366,6 +375,7 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
   .btn.small { min-height: 44px; }
   .step { min-height: 44px; justify-content: center; }
   .ed-tabs button { min-height: 44px; }
+  .eng-sel { min-height: 44px; }
   .fg-item button { min-height: 44px; min-width: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -391,7 +401,11 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
       <button type="button" class="btn" id="homeMap" data-i="homeMap"></button>
     </div>
   </div>
-  <div class="home-sec" id="engineSec"></div>
+  <div class="home-sec">
+    <h2 data-i="engineTitle"></h2>
+    <div class="engines" id="engineCards" role="radiogroup" aria-label="Engine style"></div>
+    <p class="note-small" data-i="engineNote" style="margin-top:8px"></p>
+  </div>
 </section>
 
 <section class="view" id="journeyView" aria-labelledby="jTitle" hidden>
@@ -421,6 +435,7 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
       <ol class="steps" id="steps" aria-label="Path"></ol>
     </div>
     <div class="tools">
+      <select class="eng-sel" id="engineSel" aria-label="Engine style"></select>
       <span class="xp" id="xp" aria-live="polite">0 XP</span>
       <div class="seg" role="group" aria-label="Language">
         <button type="button" id="langTr" aria-pressed="false">TR</button>
@@ -432,6 +447,7 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
   <section class="stage">
     <div class="panel preview" id="preview">
       <canvas id="scene" role="img" aria-label="3D preview"></canvas>
+      <span class="pv-title" id="pvTitle"></span>
       <div class="chips" id="chips"></div>
       <div class="empty" id="empty" hidden><div><strong data-i="emptyTitle"></strong><span data-i="emptyBody"></span></div></div>
       <div class="glerr" id="glerr" hidden></div>
@@ -445,7 +461,7 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
           <button type="button" role="tab" id="tabPrompt" aria-controls="pm" aria-selected="false" data-i="tabPrompt"></button>
           <button type="button" role="tab" id="tabForge" aria-controls="fg" aria-selected="false" data-i="tabForge"></button>
         </div>
-        <span class="file">world.js</span>
+        <span class="file" id="edFile">world.js</span>
         <span class="sp"></span>
         <button type="button" class="btn small" id="btnReset" data-i="reset"></button>
         <button type="button" class="btn primary" id="btnRun">
@@ -590,6 +606,9 @@ const UI = {
     cTask: 'Editördeki kod, koçun görev iskeleti ile değiştirilecek. Devam edilsin mi?',
     verdictPass: 'Geçti', verdictPartial: 'Kısmen', verdictFail: 'Henüz değil', concept: 'Eksik kavram',
     homePromise: 'Kod yaz, dünyanı kur, AI koçla öğren.',
+    engineTitle: 'Motor tarzını seç', engineNote: 'Motor adları sadece tarz referansıdır, bu motorlarla bağlı değiliz. Görevler, komutlar ve kod her tarzda aynıdır; değişen yalnızca görünüm.',
+    engineDesc: { unity: 'Parlak, düz renkler, keskin gölge', unreal: 'Koyu sinematik ışık, hafif sis, yumuşak gölge', godot: 'Mavimsi tonlar, sade ve düz stil' },
+    hintIn: (e) => `${e} ipucu`,
     homeSub: 'Güçlü bilgisayar ya da oyun motoru kurulumu gerekmez. Tarayıcıda küçük programlar yazarsın, 3D sahnen anında değişir; koç kodunu okuyup bir sonraki adımı sorar.',
     homeStart: 'Başla', homeContinue: (n) => `Devam et · ${n}`, homeMap: 'Yol haritası', toHome: 'Giriş', toJourney: 'Yol haritası',
     levelTitle: 'Seviye 1 · Temeller', levelCount: (d, t, xp) => `${d} / ${t} bölüm · ${xp} XP`,
@@ -669,6 +688,9 @@ const UI = {
     cTask: "The editor will be replaced with the coach's task skeleton. Continue?",
     verdictPass: 'Passed', verdictPartial: 'Partly there', verdictFail: 'Not yet', concept: 'Missing concept',
     homePromise: 'Write code, build your world, learn with an AI coach.',
+    engineTitle: 'Pick an engine style', engineNote: 'Engine names are only a style reference; we are not affiliated with these engines. Missions, commands and code are the same in every style; only the look changes.',
+    engineDesc: { unity: 'Bright flat colours, crisp shadows', unreal: 'Dark cinematic light, soft haze, soft shadows', godot: 'Bluish tones, plain flat style' },
+    hintIn: (e) => `${e} hint`,
     homeSub: 'No powerful computer or engine install needed. You write small programs in the browser, your 3D scene changes at once, and the coach reads your code and asks about the next step.',
     homeStart: 'Start', homeContinue: (n) => `Continue · ${n}`, homeMap: 'Roadmap', toHome: 'Home', toJourney: 'Roadmap',
     levelTitle: 'Level 1 · Foundations', levelCount: (d, t, xp) => `${d} / ${t} lessons · ${xp} XP`,
@@ -741,11 +763,12 @@ const state = {
   xp: Number.isFinite(saved.xp) ? saved.xp : 0,
   cur: 0, hints: 0, dirty: false, running: false, last: null,
   ai: saved.ai !== false,        // the learner's choice: AI coach or rules
+  engine: ['unity', 'unreal', 'godot'].includes(saved.engine) ? saved.engine : 'unity',   // look only, see ENGINES
   server: 'checking',            // checking | ready | noserver | nokey (what /api/health said)
   req: 0, busy: false, chat: [], task: null, turn: null,
 };
 const persist = () => {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify({ lang: state.lang, done: state.done, xp: state.xp, ai: state.ai })); } catch (e) { /* storage unavailable */ }
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ lang: state.lang, done: state.done, xp: state.xp, ai: state.ai, engine: state.engine })); } catch (e) { /* storage unavailable */ }
 };
 const tt = () => UI[state.lang];
 const pick = (o) => (o && typeof o === 'object' && 'tr' in o ? o[state.lang] : o);
@@ -1193,7 +1216,7 @@ function fgSave() { try { localStorage.setItem(FG_KEY, JSON.stringify(Object.val
 if (gl) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;   // softness comes from shadow.radius, set per engine style
   sunLight.castShadow = true;
   sunLight.shadow.mapSize.set(2048, 2048);
   const sc = sunLight.shadow.camera; sc.left = -36; sc.right = 36; sc.top = 36; sc.bottom = -36; sc.near = 1; sc.far = 200;
@@ -1278,28 +1301,74 @@ slabSoil.position.y = -2.7; slabSoil.receiveShadow = true;
 if (gl) scene.add(slabTop, slabSoil);
 
 const SKY = [[0, '#e0884a'], [10, '#eba56b'], [30, '#a9cfe0'], [60, '#86c5e8'], [90, '#7dbfe6']];
+/* Engine styles are a skin only: sky, ground tint, light, shadow softness, base haze, tone mapping and labels.
+   Missions, commands, goal checks, XP, coach and code never depend on them. Our own icons, no brand marks. */
+const ENGINES = {
+  unity: {
+    name: 'Unity Lite', sky: SKY, tint: null, tintK: 0, sun: 1.0, hemi: 1.05, radius: 1, haze: 0, tone: 'none', exposure: 1,
+    labels: { pv: 'Scene', file: 'Assets/Scripts/World.js' },
+    icon: '<svg viewBox="0 0 44 44" aria-hidden="true"><rect x="2" y="2" width="40" height="40" rx="10" fill="#3a8fd8"/><path d="M22 9 33 15.5v13L22 35 11 28.5v-13z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><path d="M22 22 33 15.5M22 22v13M22 22 11 15.5" stroke="#fff" stroke-width="2" opacity="0.8"/></svg>',
+  },
+  unreal: {
+    name: 'Unreal Lite', sky: [[0, '#b2502b'], [10, '#b8693f'], [30, '#3d5a75'], [60, '#2e4a66'], [90, '#284561']], tint: '#1a2318', tintK: 0.3,
+    sun: 1.45, hemi: 0.55, radius: 5, haze: 0.35, tone: 'aces', exposure: 1.15,
+    labels: { pv: 'Viewport', file: 'Content/Scripts/World.js' },
+    icon: '<svg viewBox="0 0 44 44" aria-hidden="true"><rect x="2" y="2" width="40" height="40" rx="10" fill="#1d2026"/><circle cx="22" cy="22" r="12" fill="none" stroke="#e9e3d4" stroke-width="2.4"/><path d="M16 27c4-1 6-5 6-11 3 4 4 8 4 11" fill="none" stroke="#e3a23a" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  },
+  godot: {
+    name: 'Godot Lite', sky: [[0, '#d98a6a'], [10, '#d9a080'], [30, '#9ec3e6'], [60, '#7fb0dc'], [90, '#6fa6d8']], tint: '#3f7fb8', tintK: 0.14,
+    sun: 0.95, hemi: 1.3, radius: 2, haze: 0, tone: 'reinhard', exposure: 1.6,
+    labels: { pv: '3D', file: 'res://world.js' },
+    icon: '<svg viewBox="0 0 44 44" aria-hidden="true"><rect x="2" y="2" width="40" height="40" rx="10" fill="#478cbf"/><rect x="11" y="15" width="22" height="17" rx="6" fill="#fff"/><circle cx="17.5" cy="23" r="3" fill="#478cbf"/><circle cx="26.5" cy="23" r="3" fill="#478cbf"/><path d="M15 15l-2-4M29 15l2-4" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  },
+};
+const eng = () => ENGINES[state.engine] || ENGINES.unity;
+let lastScene = null;   // the last rebuild's input, so a style change redraws the same world without running code again
+function applyEngine() {
+  const E = eng();
+  if (gl) {
+    renderer.toneMapping = { none: THREE.NoToneMapping, aces: THREE.ACESFilmicToneMapping, reinhard: THREE.ReinhardToneMapping }[E.tone];
+    renderer.toneMappingExposure = E.exposure;
+    sunLight.shadow.radius = E.radius;
+    scene.traverse((o) => { if (o.material) o.material.needsUpdate = true; });
+    for (const m of matCache.values()) m.needsUpdate = true;
+    if (lastScene) rebuild(...lastScene);
+  }
+  $('#pvTitle').textContent = E.name + ' · ' + E.labels.pv;
+  $('#edFile').textContent = E.labels.file;
+  $('#engineSel').value = state.engine;
+  document.querySelectorAll('#engineCards [data-engine]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.engine === state.engine)));
+}
+function setEngine(id) {
+  if (!ENGINES[id] || id === state.engine) return;
+  state.engine = id;
+  persist();
+  applyEngine();
+}
 function skyColor(e) {
-  for (let i = 1; i < SKY.length; i++) {
-    if (e <= SKY[i][0]) {
-      const a = SKY[i - 1], b = SKY[i];
+  const sky = eng().sky;
+  for (let i = 1; i < sky.length; i++) {
+    if (e <= sky[i][0]) {
+      const a = sky[i - 1], b = sky[i];
       return new THREE.Color(a[1]).lerp(new THREE.Color(b[1]), (e - a[0]) / (b[0] - a[0]));
     }
   }
-  return new THREE.Color(SKY[SKY.length - 1][1]);
+  return new THREE.Color(sky[sky.length - 1][1]);
 }
 let fogAmt = 0;
 function setAtmosphere(e, fogA) {
   const rad = (e * Math.PI) / 180, az = 0.7;
   sunLight.position.set(Math.cos(rad) * Math.sin(az) * 70, Math.max(Math.sin(rad), 0.04) * 70, Math.cos(rad) * Math.cos(az) * 70);
   const k = Math.sin(rad);
-  sunLight.intensity = 0.3 + 0.62 * k;
+  const E = eng();
+  sunLight.intensity = (0.3 + 0.62 * k) * E.sun;
   sunLight.color.set('#ffa25a').lerp(new THREE.Color('#fff3df'), clamp(e / 45, 0, 1));
-  hemi.intensity = 0.38 + 0.32 * k;
+  hemi.intensity = (0.38 + 0.32 * k) * E.hemi;
   const sky = skyColor(e);
   scene.background = sky;
   hemi.color.copy(sky).lerp(new THREE.Color('#ffffff'), 0.35);
-  fogAmt = fogA;
-  scene.fog = fogA > 0 ? new THREE.Fog(sky.clone(), 50, 150) : null;
+  fogAmt = Math.max(fogA, E.haze);
+  scene.fog = fogA > 0 ? new THREE.Fog(sky.clone(), 50, 150) : E.haze > 0 ? new THREE.Fog(sky.clone(), 70, 190) : null;
 }
 
 let reduceMotion = false;
@@ -1308,7 +1377,9 @@ try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 function rebuild(cmds, groundRgb, sunH, fogA) {
   while (world.children.length) world.remove(world.children[0]);
   popList.length = 0;
+  lastScene = [cmds, groundRgb, sunH, fogA];
   slabTop.material.color.setRGB(groundRgb[0] / 255, groundRgb[1] / 255, groundRgb[2] / 255);
+  if (eng().tint) slabTop.material.color.lerp(new THREE.Color(eng().tint), eng().tintK);
   setAtmosphere(sunH, fogA);
   const now = performance.now();
   let i = 0;
@@ -2007,7 +2078,7 @@ $('#btnReset').addEventListener('click', () => ask(tt().cReset, () => { clearErr
 $('#btnHint').addEventListener('click', () => {
   const m = MISSIONS[state.cur];
   if (state.hints >= 3 || state.busy) return;
-  const fb = { kind: 'hint', text: pick(m.hints[state.hints]) };
+  const fb = { kind: 'hint', text: `**${tt().hintIn(eng().name)}:** ` + pick(m.hints[state.hints]) };
   if (aiOn()) coachTurn('teach', fb, { hints: state.hints });   // levels used so far; a retry asks for the same level
   else addMsg('hint', fb.text);
   state.hints++;
@@ -2106,7 +2177,15 @@ function renderJourney() {
     return `<section class="unit">${head}${all ? `<span class="pill ok">${esc(T.unitDone)}</span>` : ''}</div><p>${esc(T.unitDesc[u])}</p><ol class="nodes">${nodes}</ol></section>`;
   }).join('');
 }
+function renderEngines() {
+  const T = tt();
+  $('#engineCards').innerHTML = Object.entries(ENGINES).map(([id, E]) =>
+    `<button type="button" class="engine" role="radio" data-engine="${id}" aria-checked="${id === state.engine}">${E.icon}<strong>${esc(E.name)}</strong><span>${esc(T.engineDesc[id])}</span></button>`).join('');
+  $('#engineSel').innerHTML = Object.entries(ENGINES).map(([id, E]) => `<option value="${id}">${esc(E.name)}</option>`).join('');
+  $('#engineSel').value = state.engine;
+}
 function renderShell() {
+  renderEngines();
   document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
   renderHome(); renderJourney();
 }
@@ -2134,6 +2213,8 @@ function route() {
   showView('home');
 }
 $('#homeGo').addEventListener('click', () => goLesson(firstOpen()));
+$('#engineCards').addEventListener('click', (e) => { const b = e.target.closest('[data-engine]'); if (b) setEngine(b.dataset.engine); });
+$('#engineSel').addEventListener('change', (e) => setEngine(e.target.value));
 $('#homeMap').addEventListener('click', () => { location.hash = '#/journey'; });
 $('#jHome').addEventListener('click', () => { location.hash = '#/'; });
 $('#toJourney').addEventListener('click', () => { location.hash = '#/journey'; });
@@ -2158,6 +2239,7 @@ $('#langEn').addEventListener('click', () => setLang('en'));
 /* boot */
 renderStatic();
 renderShell();
+applyEngine();
 setStatus('', tt().idle);
 route();
 probeServer();

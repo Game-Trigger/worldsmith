@@ -21,6 +21,10 @@ Everything used to build Worldsmith. Update it in the same commit that adds anyt
 | AI Forge: the model builds a game object from primitive shapes, the learner places it with `spawn()`; endpoint `POST /api/forge`, schema, validator, Forge tab in the page, tests | `server/forge.py`, `server/forge_validate.py`, `shared/forge-schema.json`, `src.html` (Forge section), `tests/test_forge.py`, `tests/e2e_forge.py`, `docs/FORGE.md` |
 | Docs | `docs/`, `CLAUDE.md`, `PROGRESS.md` |
 
+## Engine style names
+
+The lesson screen offers three look-only styles named "Unity Lite", "Unreal Lite" and "Godot Lite". The names are only a style reference; Worldsmith is not affiliated with or endorsed by Unity Technologies, Epic Games or the Godot Foundation. No official logos, trademarks or brand images are used: the icons are simple shapes drawn by us in `src.html`. The page says the same on the home screen. The styles change only the scene look (sky, light, shadow softness, haze, tone mapping) and editor labels; missions, commands, goal checks, XP and the coach are identical in all three.
+
 ## Models
 
 | Model | Used for | Notes |
