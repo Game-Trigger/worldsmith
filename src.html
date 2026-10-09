@@ -167,6 +167,29 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
 .btn.small { min-height: 32px; padding: 4px 10px; font-size: 13px; }
 .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 .ed-body { flex: 1; min-height: 0; position: relative; background: var(--code-bg); }
+.ed-body[hidden] { display: none; }
+.ed-tabs button { min-height: 36px; }
+.ed-tabs button[aria-selected="true"] { background: var(--panel-2); color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); }
+.pm { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: var(--code-bg); }
+.pm[hidden] { display: none; }
+.pm-off { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); font-size: 13px; }
+.pm-off[hidden] { display: none; }
+.pm label { font-size: 12.5px; color: var(--muted); }
+.pm textarea { width: 100%; box-sizing: border-box; min-height: 76px; resize: vertical; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--text); font: 14px/1.45 var(--f-body); }
+.pm textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.pm textarea:disabled { opacity: 0.55; cursor: not-allowed; }
+.pm-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pm-row .sp { flex: 1; }
+.pm-count, .pm-cmds { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pm-status { font-size: 13px; color: var(--muted); min-height: 1.4em; overflow-wrap: anywhere; }
+.pm-status.err { color: var(--err); }
+.pm-status.ok { color: var(--ok); }
+.pm-status.busy::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 7px; border-radius: 50%; border: 2px solid var(--accent); border-right-color: transparent; animation: pmspin 0.8s linear infinite; vertical-align: -1px; }
+@keyframes pmspin { to { transform: rotate(360deg); } }
+.pm-result { padding: 9px 11px; border-radius: 8px; background: var(--ok-soft); font-size: 13.5px; }
+.pm-result[hidden] { display: none; }
+.pm-result p { margin: 0 0 6px; }
+.pm-result .tag { margin-top: 6px; font-size: 11.5px; color: var(--muted); }
 .ed-body .CodeMirror { position: absolute; inset: 0; height: 100%; }
 .status { display: flex; gap: 8px; align-items: baseline; padding: 7px 12px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); min-height: 34px; font-variant-numeric: tabular-nums; }
 .status span { min-width: 0; overflow-wrap: anywhere; }
@@ -271,6 +294,7 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
   .btn, .seg button, .linkbtn { min-height: 44px; }
   .btn.small { min-height: 44px; }
   .step { min-height: 44px; justify-content: center; }
+  .ed-tabs button { min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
@@ -310,6 +334,10 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
 
     <div class="panel editor" id="editorPanel">
       <div class="ed-bar">
+        <div class="seg ed-tabs" role="tablist" aria-label="Editor mode">
+          <button type="button" role="tab" id="tabCode" aria-controls="edBody" aria-selected="true" data-i="tabCode"></button>
+          <button type="button" role="tab" id="tabPrompt" aria-controls="pm" aria-selected="false" data-i="tabPrompt"></button>
+        </div>
         <span class="file">world.js</span>
         <span class="sp"></span>
         <button type="button" class="btn small" id="btnReset" data-i="reset"></button>
@@ -318,7 +346,25 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
           <span data-i="run"></span><kbd>Ctrl+Enter</kbd>
         </button>
       </div>
-      <div class="ed-body" id="edBody"></div>
+      <div class="ed-body" id="edBody" role="tabpanel" aria-labelledby="tabCode"></div>
+      <div class="pm" id="pm" role="tabpanel" aria-labelledby="tabPrompt" hidden>
+        <p class="pm-off" id="pmOff" role="note" hidden></p>
+        <label for="pmText" data-i="pmLabel"></label>
+        <textarea id="pmText" maxlength="400" rows="3" autocomplete="off" spellcheck="true"></textarea>
+        <div class="pm-row">
+          <span class="pm-count" id="pmCount">0 / 400</span>
+          <span class="pm-cmds" id="pmCmds"></span>
+          <span class="sp"></span>
+          <button type="button" class="btn small" id="pmUndo" hidden data-i="pmUndo"></button>
+          <button type="button" class="btn primary" id="pmGo"><span data-i="pmGo"></span><kbd>Ctrl+Enter</kbd></button>
+        </div>
+        <div class="pm-status" id="pmStatus" role="status" aria-live="polite"></div>
+        <div class="pm-result" id="pmResult" hidden>
+          <p id="pmExplain"></p>
+          <button type="button" class="btn small" id="pmShowCode" data-i="pmShowCode"></button>
+          <div class="tag" id="pmTag"></div>
+        </div>
+      </div>
       <div class="status" id="status" role="status"></div>
     </div>
   </section>
@@ -414,6 +460,23 @@ const UI = {
     taskGoal: 'Hedef', taskCrit: 'Ölçütler',
     cTask: 'Editördeki kod, koçun görev iskeleti ile değiştirilecek. Devam edilsin mi?',
     verdictPass: 'Geçti', verdictPartial: 'Kısmen', verdictFail: 'Henüz değil', concept: 'Eksik kavram',
+    tabCode: 'Kod', tabPrompt: 'Prompt', pmLabel: 'Sahnede ne görmek istediğini yaz. AI bunu koda çevirir, kod editörde görünür.',
+    pmPlaceholder: 'Örnek: Ortada boş bir alan kalsın, çevresine çember şeklinde 12 ağaç dik ve araya birkaç kaya koy.',
+    pmGo: 'Modelle', pmUndo: 'Geri al', pmShowCode: 'Üretilen kodu gör', pmCmds: (l) => `Açık komutlar: ${l}`,
+    pmBusy: 'Model kod yazıyor…', pmFixing: 'Kod sahnede hata verdi, model düzeltiyor…',
+    pmDone: (n) => `Sahne güncellendi · ${n} satır kod editöre yazıldı.`, pmUndone: 'Önceki kod ve sahne geri yüklendi.',
+    pmEmpty: 'Önce ne istediğini yaz, örneğin "nehir kenarında beş ev".',
+    pmTimeout: 'Model 13 saniye içinde yanıt vermedi. Tekrar dene ya da isteğini kısalt.',
+    pmOffline: 'Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.',
+    pmRate: (s) => `Çok fazla istek gönderildi. ${s} saniye sonra tekrar dene.`,
+    pmBad: (r) => `Model geçerli bir sahne kodu yazamadı (${r}). İsteğini daha basit yazıp tekrar dene.`,
+    pmRunFail: (m) => `Üretilen kod iki denemede de çalışmadı (${m}). Editöre yazılmadı; isteğini değiştirip tekrar dene.`,
+    pmOffChecking: 'Sunucu aranıyor… Prompt modu sunucu hazır olunca açılır.',
+    pmOffNoServer: 'Prompt modu kapalı: bu sayfa AI sunucusu olmadan açıldı, isteğini koda çevirecek model yok. Kod sekmesinde devam edebilirsin.',
+    pmOffNoKey: 'Prompt modu kapalı: sunucuda dil modeli için API anahtarı tanımlı değil. Kod sekmesinde devam edebilirsin.',
+    pmOffRules: "Prompt modu kapalı çünkü Kural modundasın (hiçbir şey gönderilmez). Açmak için koç başlığından AI'yı seç.",
+    cModel: 'Editördeki kendi değişikliklerinin yerine modelin kodu yazılacak (Geri al ile dönebilirsin). Devam edilsin mi?',
+    pmTag: (m) => `AI tarafından yazıldı · ${m}`,
   },
   en: {
     path: 'Environment design path', mission: (n, t) => `Mission ${n} of ${t}`, goals: 'Goals', coach: 'Coach',
@@ -442,6 +505,23 @@ const UI = {
     taskGoal: 'Goal', taskCrit: 'Success criteria',
     cTask: "The editor will be replaced with the coach's task skeleton. Continue?",
     verdictPass: 'Passed', verdictPartial: 'Partly there', verdictFail: 'Not yet', concept: 'Missing concept',
+    tabCode: 'Code', tabPrompt: 'Prompt', pmLabel: 'Describe what you want to see. The AI turns it into code, and the code shows up in the editor.',
+    pmPlaceholder: 'Example: Leave a clearing in the middle, plant 12 trees in a circle around it and scatter a few rocks between them.',
+    pmGo: 'Build it', pmUndo: 'Undo', pmShowCode: 'Show the generated code', pmCmds: (l) => `Unlocked: ${l}`,
+    pmBusy: 'The model is writing code…', pmFixing: 'The code failed in the scene, the model is fixing it…',
+    pmDone: (n) => `Scene updated · ${n} ${n === 1 ? 'line' : 'lines'} of code written to the editor.`, pmUndone: 'Your previous code and scene are back.',
+    pmEmpty: 'Write what you want first, for example "five houses by a river".',
+    pmTimeout: 'The model did not answer within 13 seconds. Try again or make your request shorter.',
+    pmOffline: 'The server could not be reached. Check your connection and try again.',
+    pmRate: (s) => `Too many requests. Try again in ${s} seconds.`,
+    pmBad: (r) => `The model could not write valid scene code (${r}). Try a simpler request.`,
+    pmRunFail: (m) => `The generated code failed twice (${m}). Nothing was written to the editor; change your request and try again.`,
+    pmOffChecking: 'Looking for the server… Prompt mode opens once it is ready.',
+    pmOffNoServer: 'Prompt mode is off: this page was opened without the AI server, so there is no model to turn your request into code. You can keep going in the Code tab.',
+    pmOffNoKey: 'Prompt mode is off: the server has no API key for a language model. You can keep going in the Code tab.',
+    pmOffRules: 'Prompt mode is off because you chose Rules (nothing is sent). Pick AI in the coach header to turn it on.',
+    cModel: "The model's code will replace your own edits in the editor (Undo brings them back). Continue?",
+    pmTag: (m) => `Written by AI · ${m}`,
   },
 };
 
@@ -1063,12 +1143,19 @@ cm.on('focus', () => {
 /* =====================================================================
    Analysis and run
    ===================================================================== */
+let colorCtx = null;
 function parseColor(str) {
   const s = new Option().style;
   s.color = str;
   if (!s.color) return null;
-  const m = /rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(s.color);
-  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+  let m = /rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(s.color);
+  if (m) return [Number(m[1]), Number(m[2]), Number(m[3])];
+  // named colours ("green") stay names in style.color; a canvas turns them into #rrggbb
+  try { colorCtx = colorCtx || document.createElement('canvas').getContext('2d'); } catch (e) { return null; }
+  if (!colorCtx) return null;
+  colorCtx.fillStyle = '#000000'; colorCtx.fillStyle = s.color;
+  m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(colorCtx.fillStyle);
+  return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : null;
 }
 function analyse(code, cmds) {
   const stripped = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
@@ -1266,6 +1353,7 @@ function renderServer() {
   $('#modeRules').textContent = T.modeRules;
   $('#modeRules').setAttribute('aria-pressed', String(!useAi));
   $('#aiNote').textContent = useAi ? T.noteSend : T.noteRules;
+  renderPrompt();
 }
 async function probeServer() {
   const ctl = new AbortController();
@@ -1360,6 +1448,7 @@ function closeAsk() { $('#confirm').hidden = true; confirmYes = null; }
 
 function loadMission(i, silentIntro) {
   state.cur = i; state.hints = 0; state.last = null;
+  pm.req++; pm.busy = false; pm.undo = null; pmStatus('', ''); $('#pmResult').hidden = true;
   state.req++; state.busy = false; state.chat = []; state.task = null; state.turn = null;   // drop any coach answer still in flight
   clearErr();
   cm.setValue(pick(MISSIONS[i].starter));
@@ -1370,6 +1459,126 @@ function loadMission(i, silentIntro) {
   addMsg('info', pick(MISSIONS[i].intro));
   run(true);
 }
+
+
+/* =====================================================================
+   Prompt mode: the learner describes a scene, the model writes the code.
+   The code is written into the editor and run with run(), so the page's goal checks still decide.
+   ===================================================================== */
+const UNLOCKS = [['ground', 'tree', 'rock'], ['random'], ['sun', 'fog'], ['house']];   // what each mission adds
+const MODEL_TIMEOUT = 13000;   // the server gives up at 12 s
+const pm = { tab: 'code', busy: false, req: 0, undo: null };
+const unlocked = () => {
+  const out = [];
+  UNLOCKS.forEach((cmds, i) => { if (i <= state.cur || state.done.includes(i)) out.push(...cmds); });
+  return API_NAMES.filter((n) => out.includes(n));
+};
+function pmStatus(kind, text) {
+  const el = $('#pmStatus');
+  el.className = 'pm-status' + (kind ? ' ' + kind : '');
+  el.textContent = text;
+}
+function renderPrompt() {
+  const T = tt(), ready = aiOn();
+  const off = ready ? '' : !state.ai && state.server === 'ready' ? T.pmOffRules
+    : { checking: T.pmOffChecking, nokey: T.pmOffNoKey, noserver: T.pmOffNoServer }[state.server] || T.pmOffNoServer;
+  $('#pmOff').hidden = ready;
+  $('#pmOff').textContent = off;
+  $('#pmText').disabled = !ready || pm.busy;
+  $('#pmText').placeholder = T.pmPlaceholder;
+  $('#pmGo').disabled = !ready || pm.busy;
+  $('#pmCmds').textContent = T.pmCmds(unlocked().join(', '));
+  $('#pmUndo').hidden = !pm.undo;
+  $('#pmUndo').disabled = pm.busy;
+  $('#tabCode').setAttribute('aria-selected', String(pm.tab === 'code'));
+  $('#tabPrompt').setAttribute('aria-selected', String(pm.tab === 'prompt'));
+  $('#edBody').hidden = pm.tab !== 'code';
+  $('#pm').hidden = pm.tab !== 'prompt';
+}
+function setTab(t) {
+  pm.tab = t;
+  renderPrompt();
+  if (t === 'code') { cm.refresh(); cm.focus(); } else if (!$('#pmText').disabled) $('#pmText').focus();
+}
+async function askModel(body) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), MODEL_TIMEOUT);
+  try {
+    const r = await fetch('/api/model', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
+    let data = null;
+    try { data = await r.json(); } catch (e) { data = null; }
+    if (r.ok && data && data.source === 'llm' && typeof data.code === 'string') return { ok: true, reply: data };
+    const err = (data && data.error) || {};
+    if (r.status === 429) return { ok: false, text: tt().pmRate(err.retry_after || 60) };
+    return { ok: false, text: tt().pmBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
+  } catch (e) {
+    return { ok: false, text: e && e.name === 'AbortError' ? tt().pmTimeout : tt().pmOffline };
+  } finally { clearTimeout(timer); }
+}
+async function modelIt() {
+  const T = tt(), prompt = $('#pmText').value.trim();
+  if (pm.busy || !aiOn()) return;
+  if (!prompt) { pmStatus('err', T.pmEmpty); $('#pmText').focus(); return; }
+  const id = ++pm.req, mission = state.cur;
+  pm.busy = true; $('#pmResult').hidden = true; pmStatus('busy', T.pmBusy); renderPrompt();
+  const body = { lesson_id: LESSON_IDS[mission], lang: state.lang, prompt: prompt.slice(0, 400), current_code: cm.getValue().slice(0, 6000),
+                 unlocked: unlocked(), error: null, attempt: 1 };
+  let res = await askModel(body), runErr = null;
+  // A reply only reaches the editor after it ran cleanly in the worker; one failed run goes back to the model with the error.
+  if (res.ok && id === pm.req) {
+    let ran = await execute(res.reply.code);
+    if (!ran.ok && id === pm.req) {
+      pmStatus('busy', T.pmFixing);
+      runErr = { line: ran.line || null, message: explain(ran.info) };
+      res = await askModel(Object.assign({}, body, { error: runErr, attempt: 2 }));
+      if (res.ok) {
+        ran = await execute(res.reply.code);
+        runErr = ran.ok ? null : { line: ran.line || null, message: explain(ran.info) };
+      }
+    }
+  }
+  if (id !== pm.req || mission !== state.cur) return;   // the mission changed while the model was writing
+  pm.busy = false;
+  if (!res.ok || runErr) {
+    pmStatus('err', res.ok ? T.pmRunFail((runErr.line ? T.line(runErr.line) + ': ' : '') + runErr.message) : res.text);
+    renderPrompt();
+    return;
+  }
+  pm.undo = { code: cm.getValue(), dirty: state.dirty };
+  clearErr();
+  cm.setValue(res.reply.code);
+  state.dirty = false;   // the model's code is not the learner's own edit
+  const lines = res.reply.code.split('\n').length;
+  $('#pmExplain').textContent = res.reply.explanation;
+  $('#pmTag').textContent = T.pmTag(res.reply.model || 'AI');
+  $('#pmResult').hidden = false;
+  pmStatus('ok', T.pmDone(lines));
+  renderPrompt();
+  run(false);
+}
+$('#tabCode').addEventListener('click', () => setTab('code'));
+$('#tabPrompt').addEventListener('click', () => setTab('prompt'));
+$('#pmText').addEventListener('input', () => { $('#pmCount').textContent = `${$('#pmText').value.length} / 400`; });
+$('#pmText').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('#pmGo').click(); } });
+$('#pmText').addEventListener('focus', () => setTimeout(() => { try { $('#pmText').scrollIntoView({ block: 'nearest' }); } catch (e) { /* old browser */ } }, 300));
+$('#pmGo').addEventListener('click', () => {
+  if (pm.busy || !aiOn()) return;
+  if (!$('#pmText').value.trim()) { pmStatus('err', tt().pmEmpty); $('#pmText').focus(); return; }
+  if (state.dirty) ask(tt().cModel, modelIt); else modelIt();
+});
+$('#pmUndo').addEventListener('click', () => {
+  if (!pm.undo || pm.busy) return;
+  const u = pm.undo;
+  pm.undo = null;
+  clearErr();
+  cm.setValue(u.code);
+  state.dirty = u.dirty;
+  $('#pmResult').hidden = true;
+  pmStatus('ok', tt().pmUndone);
+  renderPrompt();
+  run(true);
+});
+$('#pmShowCode').addEventListener('click', () => setTab('code'));
 
 $('#btnRun').addEventListener('click', () => run(false));
 $('#btnReset').addEventListener('click', () => ask(tt().cReset, () => { clearErr(); cm.setValue(pick(MISSIONS[state.cur].starter)); state.dirty = false; run(true); }));

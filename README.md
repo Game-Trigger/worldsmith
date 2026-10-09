@@ -24,3 +24,5 @@ Open http://localhost:8765. For the AI coach copy `.env.example` to `.env` and a
 ## AI coach
 
 `server/` builds a prompt from the learner's code, the scene summary and the lesson goals, asks the model, and only passes on replies that match `shared/coach-schema.json`, do not reveal the solution and agree with the page's own goal check. On any failure the page shows its rule-based feedback and says so. See `shared/api-contract.md`, `docs/TESTING.md`, `docs/DISCLOSURE.md`.
+
+**Prompt mode.** The editor has a Code | Prompt tab. In Prompt the learner writes what they want ("twelve trees in a circle"), `POST /api/model` turns it into code using only the commands they have unlocked, the page runs it in the worker, writes it into the editor and rebuilds the scene, so the learner learns by reading the generated code. Undo restores the previous code. Without the server the tab is off and says why.
