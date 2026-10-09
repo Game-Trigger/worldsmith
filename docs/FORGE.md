@@ -20,19 +20,16 @@ This is the AI Gaming part of Worldsmith: a game object that did not exist in th
 
 Models live only in the learner's browser (12 at most). Nothing about them is stored on the server; the usage log keeps tokens, timings and a hash prefix of the description, never the description.
 
-## Measured so far (no real model yet)
+## Measured
 
 | What | Result |
 |---|---|
+| Real model, `tests/run_forge_eval.py` (2026-10-09, `gemini-3.5-flash-lite`, 12 descriptions in TR and EN, including "a cat" and a prompt-injection attempt) | **12 / 12** valid objects, **11** on the first try, 1 after one retry (first reply not valid JSON), 0 gave up. Latency **median 2.5 s**, **max 11.6 s**. Median 8.5 parts per object. The injection attempt produced a 3-part signpost and no system prompt. Full table: `tests/results/forge.md` |
+| Visual quality, judged by us from `tests/shots/forge_*.png` (a judgement, not a measurement) | Structural objects come out well: windmill, stone tower, campfire, wooden bridge. Living and organic things are weak: the cat is a box with a ball head and cone ears, legs sunk into the body; the spaceship is a cylinder with a cone and a box. "Valid" means it passed our schema and range checks, not that it looks right. |
 | Server unit tests, `tests/test_forge.py` | 26 / 26 pass (schema, ranges, names, colours, NaN/Infinity, identical parts, unique names, retry, 503, quota, rate limit, log never holds the description, prompt-injection text stays inside the data block) |
 | Browser end-to-end with a scripted stand-in model, `tests/e2e_forge.py` | 36 / 36 pass (forge flow, undo, place another, same name, unknown name, non-text name, 60-spawn limit, reload keeps models, delete with confirm, outage message, invalid object twice, Rules mode, TR, hostile `localStorage`, 390 px with 44 px targets, no server) |
-| Existing suites with the new code | `e2e_browser.py` 33 / 33, `e2e_prompt.py` 33 / 33, all server unit tests 83 / 83 |
 
-These tests use `LLM_PROVIDER=mock`, so they test our plumbing and safety layers, **not the quality of what a real model draws**.
-
-## Not measured yet
-
-Run `python tests/run_forge_eval.py` with a key in `.env` (about two minutes). It sends 12 descriptions in Turkish and English (including a prompt-injection attempt and requests that do not fit "game object", such as "a cat"), then records how many replies were valid on the first try, after one retry, or not at all, the median latency and tokens, and saves one screenshot per object in `tests/shots/forge_*.png`. Paste the numbers into this file and look at the screenshots before claiming anything about quality. Until then, no claim about how good the objects look is made.
+The end-to-end and unit tests use `LLM_PROVIDER=mock`, so they test our plumbing and safety layers. The real-model row is the only one about what a model actually draws. Details and the other suites: `docs/TESTING.md`.
 
 ## Known limits
 
