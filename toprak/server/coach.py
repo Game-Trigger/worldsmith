@@ -39,6 +39,9 @@ Hard rules:
 7. Reply with ONE JSON object and nothing else (no markdown fences) using exactly these keys:
    stage (echo the requested stage), missing_concept (string or null), message (string), task (object or null: title, goal, starter_code, success_criteria[1..5]), hint (string or null), verdict ("pass" | "partial" | "fail" | null), reveals_solution (always false).
    Do not add other keys.
+8. Be Socratic. In the diagnose and teach stages `message` must contain at least one real question (ending in "?") that makes the learner look at their own code. A reply without a question is rejected.
+   Bad (tells, no question): "Change the 3 in your loop to 12."
+   Good (asks, points at their line): "Your loop on line 1 stops at i < 3. How many trees does that make, and how many does the goal ask for?"
 
 Stage playbook:
 - diagnose: name the gap in the learner's code. task = null, hint = null, verdict = null.
@@ -52,6 +55,12 @@ Concept this lesson teaches: {concept}
 Typical gaps: {gaps}
 """
 
+SPAWN_REF = ("spawn(name, x, z, size?) also exists: it places a custom model the learner built in the Forge tab, "
+             "for example spawn(\"windmill\", 3, -2). name is text in quotes and must be one of the learner's own models; "
+             "an unknown name is an error that lists their models. At most 60 spawn calls per run.")
+SOCRATIC_STAGES = ("diagnose", "teach")
+SOCRATIC_REASON = "socratic: Sokratik değil: çözümü söyleme, bir soru sor (not Socratic: do not tell the answer, ask a question)"
+
 LANG_NAME = {"tr": "Turkish", "en": "English"}
 
 
@@ -62,7 +71,10 @@ def load_lessons(path=None):
     path = path or os.path.join(ROOT, "content", "lessons.json")
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
-    return data["api_reference"], {l["id"]: l for l in data["lessons"]}
+    api_ref = data["api_reference"]
+    if "spawn(" not in api_ref:  # content/ is owned by another team member; add the Forge command here until it lists it
+        api_ref += " " + SPAWN_REF
+    return api_ref, {l["id"]: l for l in data["lessons"]}
 
 
 def public_lesson(lesson):
@@ -188,6 +200,8 @@ def check_reply(obj, req, lesson, goals_met, schema):
         return None, "challenge stage needs a task"
     if req["stage"] == "teach" and not obj["hint"]:
         return None, "teach stage needs a hint"
+    if req["stage"] in SOCRATIC_STAGES and "?" not in obj["message"]:
+        return None, SOCRATIC_REASON
 
     if not goals_met:
         why = leak.find_leak(obj, lesson, req["code"])
@@ -215,7 +229,7 @@ class CoachService:
 
     @staticmethod
     def _rate_limit():
-        return int(os.environ.get("RATE_LIMIT_PER_MIN", "20"))
+        return int(os.environ.get("RATE_LIMIT_PER_MIN", "10"))
 
     def _rate_ok(self, ip):
         now = time.monotonic()

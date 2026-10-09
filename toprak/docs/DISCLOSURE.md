@@ -18,13 +18,18 @@ Everything used to build Worldsmith. Update it in the same commit that adds anyt
 | Lesson content for the coach (goals, typical gaps, reference solutions for the leak gate) | `content/lessons.json` |
 | AI coach client in the page: AI/Rules toggle, server probe, fallback with a visible tag, showcase, follow-up task | `src.html` (the coach client section) |
 | Tests, 30-case evaluation set, harness | `tests/` |
+| AI Forge: the model builds a game object from primitive shapes, the learner places it with `spawn()`; endpoint `POST /api/forge`, schema, validator, Forge tab in the page, tests | `server/forge.py`, `server/forge_validate.py`, `shared/forge-schema.json`, `src.html` (Forge section), `tests/test_forge.py`, `tests/e2e_forge.py`, `docs/FORGE.md` |
 | Docs | `docs/`, `CLAUDE.md`, `PROGRESS.md` |
+
+## Engine style names
+
+The lesson screen offers three look-only styles named "Unity Lite", "Unreal Lite" and "Godot Lite". The names are only a style reference; Worldsmith is not affiliated with or endorsed by Unity Technologies, Epic Games or the Godot Foundation. No official logos, trademarks or brand images are used: the icons are simple shapes drawn by us in `src.html`. The page says the same on the home screen. The styles change only the scene look (sky, light, shadow softness, haze, tone mapping) and editor labels; missions, commands, goal checks, XP and the coach are identical in all three.
 
 ## Models
 
 | Model | Used for | Notes |
 |---|---|---|
-| Google Gemini (Flash family, id set in `GEMINI_MODEL`) | The AI coach at runtime, default provider | Free-tier API key from Google AI Studio. Default id in code is `gemini-2.5-flash`; **not verified against the live API yet**. Free-tier inputs may be used by Google to improve its products. |
+| Google Gemini `gemini-3.5-flash-lite` (default; can be changed with `GEMINI_MODEL`) | At runtime, default provider: the AI coach, Prompt mode (`/api/model`) and AI Forge (`/api/forge`) | Free-tier API key from Google AI Studio (15 requests per minute per model). Verified against the live API on 2026-10-09 (see `docs/TESTING.md`); `gemini-2.5-flash` was tried first and returned HTTP 429. Free-tier inputs may be used by Google to improve its products. |
 | Anthropic Claude (id set in `ANTHROPIC_MODEL`) | Optional alternative coach provider behind the same adapter | Needs a separately billed API key. Not used unless `LLM_PROVIDER=claude`. |
 | Claude (chat and Claude Code) | Development assistant: wrote and edited code and docs under the team's direction | Not part of the shipped product. |
 
@@ -46,4 +51,8 @@ Everything used to build Worldsmith. Update it in the same commit that adds anyt
 | CodeMirror | 5.65.16 | MIT |
 | Python standard library (server) | 3.10+ | PSF |
 | Playwright (tests only, not shipped) | latest at install | Apache-2.0 |
-| Bricolage Grotesque, IBM Plex Sans, JetBrains Mono | via Google Fonts | SIL Open Font License |
+| Press Start 2P, Inter, JetBrains Mono | via Google Fonts (`@import` in the page) | SIL Open Font License |
+| Logo block icon and the "Anvi" mascot | drawn by us as inline pixel SVG in `src.html` | ours |
+| Docker base image `python:3.11-slim` (runtime) | 3.11 | PSF + Debian packages under their own licenses |
+| Docker base image `node:20-slim` (build stage only, not in the final image) | 20 | MIT + Debian packages |
+| Render (hosting, free plan, via `render.yaml`) | service | Render terms of service |

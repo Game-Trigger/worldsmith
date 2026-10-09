@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "worldsmith/model-schema.json",
+  "title": "ModelResponse",
+  "description": "Prompt mode: the learner describes a scene in words, the model writes scene code for the engine API. The server validates every reply against this file and server/model_validate.py before the page sees it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "explanation", "uses", "source"],
+  "properties": {
+    "code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1500,
+      "description": "JavaScript that only calls the engine commands unlocked for this learner. Runs in the page's Web Worker sandbox."
+    },
+    "explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "What the code does, in the learner's language, so they learn by reading it."
+    },
+    "uses": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 7,
+      "items": { "type": "string", "enum": ["ground", "tree", "rock", "house", "sun", "fog", "random"] },
+      "description": "The engine commands the code calls. The server checks this against the code."
+    },
+    "source": { "type": "string", "enum": ["llm"] },
+    "model": {
+      "type": ["string", "null"],
+      "maxLength": 80,
+      "description": "Model id that produced the reply, set by the server."
+    }
+  }
+}

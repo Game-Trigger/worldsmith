@@ -27,6 +27,14 @@ sys.path.insert(0, os.path.join(ROOT, "server"))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
 
+def enter_lesson(page):
+    """/ opens the home screen; Start (or Continue) leads to the first open lesson, like a learner would."""
+    page.wait_for_selector("#homeGo, #lessonView:not([hidden])", timeout=10000)
+    if page.is_visible("#homeView"):
+        page.click("#homeGo")
+    page.wait_for_selector("#lessonView:not([hidden])", timeout=10000)
+
+
 def load_cases():
     with open(os.path.join(HERE, "eval_cases.json"), encoding="utf-8") as f:
         return json.load(f)["cases"]
@@ -75,6 +83,7 @@ def run_case(browser, url, case, ai, lessons, leak):
     ctx.add_init_script(f"try{{localStorage.setItem('worldsmith.v1', {json.dumps(state)})}}catch(e){{}}")
     page = ctx.new_page()
     page.goto(url)
+    enter_lesson(page)
     if ai:
         page.wait_for_function("document.querySelector('#srv').textContent.includes('ready')", timeout=10000)
     page.evaluate("c => document.querySelector('.CodeMirror').CodeMirror.setValue(c)", case["code"])
@@ -91,8 +100,9 @@ def run_case(browser, url, case, ai, lessons, leak):
     status = page.inner_text("#status")
     status_err = "err" in (page.get_attribute("#status", "class") or "")
     outcome = "pass" if "success" in cls else "error" if status_err else "miss"
-    tag = msg.locator(".tag b").first.inner_text() if msg.locator(".tag b").count() else ""
-    source = "llm" if tag.startswith("AI coach") else "rules"
+    # the AI tag is the last .tag; an earlier one can be "Missing concept: ..."
+    tags = [t.strip() for t in msg.locator(".tag b").all_inner_texts()]
+    source = "llm" if any(t.startswith("AI coach") for t in tags) else "rules"
     if ai and "Rule-based coach" in text:
         source = "rules"
 
@@ -115,7 +125,8 @@ def run_case(browser, url, case, ai, lessons, leak):
             wait_settled(page, ai)
             h = page.locator("#msgs .msg").last.inner_text()
             why = leak.find_leak({"message": h}, lesson, case["code"])
-            row["hints"].append({"level": level + 1, "text": h, "leaks": bool(why), "why": why})
+            hsrc = "rules" if "Rule-based coach" in h else "llm" if "AI coach" in h else "rules"
+            row["hints"].append({"level": level + 1, "text": h, "leaks": bool(why), "why": why, "source": hsrc})
     ctx.close()
     return row
 
@@ -137,6 +148,10 @@ def summarize(rows, mode, extra):
         "hint_leaks_level3": sum(1 for h in hints if h["level"] == 3 and h["leaks"]),
         "hints_level3": sum(1 for h in hints if h["level"] == 3),
         "ai_replies": sum(1 for r in rows if r["source"] == "llm"),
+        "ai_hints": sum(1 for h in hints if h.get("source") == "llm") if mode == "ai" else None,
+        "ai_hint_leaks": sum(1 for h in hints if h.get("source") == "llm" and h["leaks"]) if mode == "ai" else None,
+        "ai_gap_found": (f"{sum(1 for r in nonpass if r['source'] == 'llm' and r.get('gap_found'))}/"
+                         f"{sum(1 for r in nonpass if r['source'] == 'llm')}") if mode == "ai" else None,
         "fallbacks": sum(1 for r in rows if r["source"] == "rules") if mode == "ai" else None,
         "median_seconds": statistics.median(r["seconds"] for r in rows),
     }

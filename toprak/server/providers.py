@@ -3,8 +3,11 @@
 Swap the model by changing LLM_PROVIDER in .env (gemini | claude | mock).
 Standard library only (urllib), so the server needs no pip install.
 """
+import collections
 import json
 import os
+import threading
+import time
 import urllib.error
 import urllib.request
 
@@ -48,7 +51,7 @@ def gemini(system, user, timeout):
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not key:
         raise ProviderError("config", "GEMINI_API_KEY is empty")
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip()
+    model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite").strip()
     gen = {"responseMimeType": "application/json", "temperature": 0.4, "maxOutputTokens": 900}
     budget = os.environ.get("GEMINI_THINKING_BUDGET", "").strip()
     if budget.lstrip("-").isdigit():
@@ -116,9 +119,29 @@ def mock(system, user, timeout):
 PROVIDERS = {"gemini": gemini, "claude": claude, "mock": mock}
 
 
+# One window for the whole server (coach, Prompt and Forge, every visitor): the Gemini free tier allows
+# 15 calls per minute per model, so we stop at LLM_MAX_PER_MIN and answer "quota" ourselves instead of
+# sending a call that Google would refuse. The page then shows "quota used up, try again in 1 minute".
+_calls = collections.deque()
+_calls_lock = threading.Lock()
+
+
+def _take_call_slot():
+    limit = int(os.environ.get("LLM_MAX_PER_MIN", "14"))
+    now = time.monotonic()
+    with _calls_lock:
+        while _calls and now - _calls[0] > 60:
+            _calls.popleft()
+        if len(_calls) >= limit:
+            raise ProviderError("quota", f"local limit: {limit} model calls per minute reached, wait {int(60 - (now - _calls[0])) + 1} s")
+        _calls.append(now)
+
+
 def complete(system, user, timeout):
     name = os.environ.get("LLM_PROVIDER", "gemini").strip().lower()
     fn = PROVIDERS.get(name)
     if fn is None:
         raise ProviderError("config", f"unknown LLM_PROVIDER '{name}' (use gemini, claude or mock)")
+    if name != "mock":
+        _take_call_slot()
     return fn(system, user, timeout)

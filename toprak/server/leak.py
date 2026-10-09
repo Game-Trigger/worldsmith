@@ -39,6 +39,9 @@ def _remove_learner_lines(text, learner_code):
         line = line.strip()
         if len(line) >= 6 and not line.startswith("//"):
             text = text.replace(line, " ")
+            bare = line.rstrip(";").strip()   # quoted without its semicolon, e.g. "your sun(80) is high"
+            if len(bare) >= 5:
+                text = text.replace(bare, " ")
     return text
 
 

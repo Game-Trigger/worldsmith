@@ -15,6 +15,8 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 import coach  # noqa: E402
+import forge  # noqa: E402
+import model  # noqa: E402
 import providers  # noqa: E402
 
 DIST = os.path.join(ROOT, "dist")
@@ -38,6 +40,8 @@ def load_env():
 
 
 service = None
+model_service = None
+forge_service = None
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -87,7 +91,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
-        if path != "/api/coach":
+        if path not in ("/api/coach", "/api/model", "/api/forge"):
             return self._send(404, {"error": {"code": "not_found", "message": "Nothing here."}})
         try:
             n = int(self.headers.get("Content-Length", "0"))
@@ -100,15 +104,22 @@ class Handler(BaseHTTPRequestHandler):
             payload = json.loads(self.rfile.read(n).decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):
             return self._send(400, {"error": {"code": "bad_request", "message": "Body is not valid JSON."}})
-        status, body = service.handle(payload, self._ip())
+        if path == "/api/model":
+            status, body = model_service.handle_model(payload, self._ip())
+        elif path == "/api/forge":
+            status, body = forge_service.handle_forge(payload, self._ip())
+        else:
+            status, body = service.handle(payload, self._ip())
         extra = {"Retry-After": str(body["error"]["retry_after"])} if status == 429 else None
         self._send(status, body, extra=extra)
 
 
 def main():
-    global service
+    global service, model_service, forge_service
     load_env()
     service = coach.CoachService()
+    model_service = model.ModelService()
+    forge_service = forge.ForgeService()
     port = int(os.environ.get("PORT", "8765"))
     host = os.environ.get("HOST", "127.0.0.1")
     srv = ThreadingHTTPServer((host, port), Handler)

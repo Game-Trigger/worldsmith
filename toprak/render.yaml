@@ -1,0 +1,22 @@
+# Render blueprint: New > Blueprint > pick this repo. Free plan, built from the Dockerfile.
+# GEMINI_API_KEY is entered in the Render dashboard (sync: false); it is never stored in this repo.
+services:
+  - type: web
+    name: worldsmith
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: false
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: RATE_LIMIT_PER_MIN
+        value: "10"
+      # Render sits behind a proxy: without this every visitor shares one rate-limit bucket
+      - key: TRUST_PROXY
+        value: "1"

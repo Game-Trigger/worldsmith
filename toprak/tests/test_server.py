@@ -71,6 +71,34 @@ class SchemaTests(unittest.TestCase):
         self.assertTrue(validate.validate(dict(self.ok, task=dict(task, extra=1)), SCHEMA))
 
 
+class GlobalModelLimitTests(unittest.TestCase):
+    def test_server_wide_limit_answers_quota_without_calling_the_provider(self):
+        calls = []
+        providers.PROVIDERS["fake"] = lambda s, u, t: calls.append(1) or providers.Reply("{}", "fake")
+        os.environ["LLM_PROVIDER"], os.environ["LLM_MAX_PER_MIN"] = "fake", "3"
+        providers._calls.clear()
+        try:
+            for _ in range(3):
+                providers.complete("s", "u", 5)
+            with self.assertRaises(providers.ProviderError) as e:
+                providers.complete("s", "u", 5)
+            self.assertEqual((e.exception.kind, len(calls)), ("quota", 3))
+        finally:
+            os.environ["LLM_PROVIDER"] = "mock"
+            os.environ.pop("LLM_MAX_PER_MIN", None)
+            providers._calls.clear()
+            del providers.PROVIDERS["fake"]
+
+
+class ApiReferenceTests(unittest.TestCase):
+    def test_coach_prompt_knows_spawn(self):
+        api_ref, lessons = coach.load_lessons()
+        self.assertIn("spawn(name, x, z, size?)", api_ref)
+        system, _, _ = coach.build_prompts(coach.clean_request(req(), lessons), lessons["loop-forest"], api_ref)
+        self.assertIn("spawn(", system)
+        self.assertEqual(api_ref.count("spawn(name"), 1)
+
+
 class LeakTests(unittest.TestCase):
     def leaks(self, lesson_id, message, code="", **kw):
         return leak.find_leak(dict(message=message, **kw), LESSONS[lesson_id], code)
@@ -84,6 +112,10 @@ class LeakTests(unittest.TestCase):
     def test_quoting_learners_own_line_is_fine(self):
         code = "tree(4, -6);"
         self.assertIsNone(self.leaks("first-tree", "Your line `tree(4, -6);` is fine, now run it.", code))
+
+    def test_learners_line_quoted_without_semicolon_is_fine(self):
+        self.assertIsNone(self.leaks("sunset", "Your sun(80) is high in the sky. What height feels like evening?", code="sun(80);"))
+        self.assertIsNotNone(self.leaks("sunset", "Try sun(10) instead.", code="sun(80);"))
 
     def test_loop_with_target_count_leaks(self):
         self.assertIsNotNone(self.leaks("loop-forest", "Use for (let i = 0; i < 12; i++) { tree(random(-15, 15), random(-15, 15)); }"))
@@ -186,6 +218,36 @@ class ServiceTests(unittest.TestCase):
         providers.mock_queue(reply(stage="challenge", verdict="pass"), reply(stage="challenge", verdict="pass"))
         done = req(stage="challenge", goals=[{"label": "g", "done": True, "now": ""}])
         self.assertEqual(self.svc.handle(done)[0], 503)
+
+    def test_socratic_diagnose_without_question_is_retried(self):
+        providers.mock_queue(reply(stage="diagnose", verdict=None, message="Change the 3 in your loop to a bigger number."),
+                             reply(stage="diagnose", verdict=None, message="Your loop stops at i < 3. How many trees does that make?"))
+        st, body = self.svc.handle(req(stage="diagnose"))
+        self.assertEqual(st, 200)
+        self.assertIn("?", body["message"])
+        self.assertEqual(self.log_rows()[-1]["rejected"], ["socratic"])
+
+    def test_socratic_teach_without_question_twice_falls_back(self):
+        bad = reply(stage="teach", verdict=None, hint="Look at the loop condition.", message="Look at line 1.")
+        providers.mock_queue(bad, bad)
+        st, body = self.svc.handle(req(stage="teach"))
+        self.assertEqual(st, 503)
+        self.assertIn("Sokratik", body["error"]["reason"])
+
+    def test_socratic_gate_skips_evaluate_and_retry_note_says_ask(self):
+        providers.mock_queue(reply())  # evaluate, no question mark: still fine
+        self.assertEqual(self.svc.handle(req())[0], 200)
+        obj = json.loads(reply(stage="teach", hint="h", verdict=None, message="Do this."))
+        good, why = coach.check_reply(obj, coach.clean_request(req(stage="teach"), LESSONS), LESSONS["loop-forest"], False, SCHEMA)
+        self.assertIsNone(good)
+        self.assertIn("bir soru sor", why)
+
+    def test_rate_limit_default_is_10(self):
+        os.environ.pop("RATE_LIMIT_PER_MIN", None)
+        try:
+            self.assertEqual(self.svc._rate_limit(), 10)
+        finally:
+            os.environ["RATE_LIMIT_PER_MIN"] = "1000"
 
     def test_quota_does_not_retry(self):
         providers.mock_queue(providers.ProviderError("quota", "HTTP 429"), reply())
