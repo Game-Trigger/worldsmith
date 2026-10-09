@@ -9,6 +9,29 @@ Inspiration: *The Farmer Was Replaced*. The learner programs a bot, progress unl
 
 Longer-term business ideas (pitch only, do not build): sell as a training set, paid showcase deals with engine/tool companies, community asset marketplace with a commission.
 
+## Project summary (coordinator brief, 2026-10-09)
+Worldsmith is a browser-based, Duolingo-style game-development learning app. Split screen: a live lightweight 3D world (three.js) on top, the code area below. Learner code runs only in the Web Worker sandbox. A Socratic AI coach finds the missing concept, teaches it, sets a task without giving the solution, and evaluates. New feature, **Prompt mode**: the learner writes what they want instead of code, the AI turns it into code against the engine API, the world updates live, and the generated code appears in the editor so the learner learns by reading it.
+- Scope: Level 1 only (3 units: Scene, Movement and input, Collision). JavaScript with a Unity-like API. No real Unity/C#.
+- Hackathon: Starnest AI Hackathon 2026, AI Gaming track. Submission today 20:00 Baku time (internal target: everything merged to `main` by 18:00, after that bug fixes only).
+- Deliverables: deck, demo link, source code, 2-minute video, model/data/component disclosure (`docs/DISCLOSURE.md`), quality test results (`docs/TESTING.md`).
+- The page's own goal checks decide pass/fail; the AI only explains.
+
+## File ownership
+| Owner | Area |
+|---|---|
+| Timmine | `src.html`, `server/coach*` (and `server/model*`), the engine, merging |
+| Isa | `Dockerfile`, `deploy/` |
+| Senan | `web/journey/` |
+| Marmine | `content/`, `tests/eval_cases.json` |
+| Sema | `docs/PITCH.md`, `docs/USER_TEST.md` |
+
+Do not touch another person's area. Everyone works on their own branch and enters `main` through a PR. No unmeasured numbers, never commit `.env`, run the tests after every change, never propose a merge before the tests pass.
+
+## Coordinator tasks
+- Keep `PROGRESS.md` current (what is merged, what is open, what is blocked).
+- Check every PR for ownership (does it only touch its author's files?) and tests (were they run, do they pass?).
+- Propose the next job, in the priority order below.
+
 ## Judging rubric (design every decision against this)
 - 25 value for the user: a specific user and problem, a clear outcome
 - 30 prototype and use of AI: a working core scenario, and what the AI actually contributes
