@@ -25,7 +25,7 @@ Everything used to build Worldsmith. Update it in the same commit that adds anyt
 
 | Model | Used for | Notes |
 |---|---|---|
-| Google Gemini (Flash family, id set in `GEMINI_MODEL`) | The AI coach at runtime, default provider | Free-tier API key from Google AI Studio. Default id in code is `gemini-3.5-flash-lite`, verified against the live API on 2026-10-09 (see `docs/TESTING.md`). Free-tier inputs may be used by Google to improve its products. |
+| Google Gemini `gemini-3.5-flash-lite` (default; can be changed with `GEMINI_MODEL`) | At runtime, default provider: the AI coach, Prompt mode (`/api/model`) and AI Forge (`/api/forge`) | Free-tier API key from Google AI Studio (15 requests per minute per model). Verified against the live API on 2026-10-09 (see `docs/TESTING.md`); `gemini-2.5-flash` was tried first and returned HTTP 429. Free-tier inputs may be used by Google to improve its products. |
 | Anthropic Claude (id set in `ANTHROPIC_MODEL`) | Optional alternative coach provider behind the same adapter | Needs a separately billed API key. Not used unless `LLM_PROVIDER=claude`. |
 | Claude (chat and Claude Code) | Development assistant: wrote and edited code and docs under the team's direction | Not part of the shipped product. |
 
