@@ -51,7 +51,8 @@ The lesson screen offers three look-only styles named "Unity Lite", "Unreal Lite
 | CodeMirror | 5.65.16 | MIT |
 | Python standard library (server) | 3.10+ | PSF |
 | Playwright (tests only, not shipped) | latest at install | Apache-2.0 |
-| Bricolage Grotesque, IBM Plex Sans, JetBrains Mono | via Google Fonts | SIL Open Font License |
+| Press Start 2P, Inter, JetBrains Mono | via Google Fonts (`@import` in the page) | SIL Open Font License |
+| Logo block icon and the "Anvi" mascot | drawn by us as inline pixel SVG in `src.html` | ours |
 | Docker base image `python:3.11-slim` (runtime) | 3.11 | PSF + Debian packages under their own licenses |
 | Docker base image `node:20-slim` (build stage only, not in the final image) | 20 | MIT + Debian packages |
 | Render (hosting, free plan, via `render.yaml`) | service | Render terms of service |
