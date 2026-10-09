@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "worldsmith/forge-schema.json",
+  "title": "ForgeResponse",
+  "description": "AI Forge: the learner describes a game object in words, the model builds it from a few primitive shapes. The server validates every reply against this file and server/forge_validate.py before the page sees it. Numbers are range-checked in code, because the schema checker does not support minimum/maximum.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "label", "parts", "explanation", "source"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 20,
+      "description": "snake_case ASCII id used in code: spawn(\"name\", x, z). Letters, digits, underscore, starts with a letter. The server makes it unique."
+    },
+    "label": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 40,
+      "description": "Display name in the learner's language."
+    },
+    "parts": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 24,
+      "description": "Primitive shapes, y is up, the object rests on y = 0.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["shape", "color", "position", "size"],
+        "properties": {
+          "shape": { "type": "string", "enum": ["box", "cylinder", "cone", "sphere", "pyramid"] },
+          "color": { "type": "string", "minLength": 7, "maxLength": 7, "description": "#rrggbb" },
+          "position": {
+            "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number" },
+            "description": "[x, y, z] centre of the part. x, z in -3..3, y in 0..6."
+          },
+          "size": {
+            "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number" },
+            "description": "[width, height, depth] of the part, each 0.05..4. For round shapes width and depth are diameters."
+          },
+          "rotation_y": { "type": "number", "description": "Degrees around the vertical axis, -360..360." }
+        }
+      }
+    },
+    "explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "What was built and how to place it, in the learner's language."
+    },
+    "source": { "type": "string", "enum": ["llm"] },
+    "model": {
+      "type": ["string", "null"],
+      "maxLength": 80,
+      "description": "Model id that produced the reply, set by the server."
+    }
+  }
+}

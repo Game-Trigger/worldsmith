@@ -22,6 +22,14 @@ import coach  # noqa: E402
 import providers  # noqa: E402
 from playwright.sync_api import sync_playwright  # noqa: E402
 
+
+def enter_lesson(page):
+    """/ opens the home screen; Start (or Continue) leads to the first open lesson, like a learner would."""
+    page.wait_for_selector("#homeGo, #lessonView:not([hidden])", timeout=10000)
+    if page.is_visible("#homeView"):
+        page.click("#homeGo")
+    page.wait_for_selector("#lessonView:not([hidden])", timeout=10000)
+
 SHOTS = os.path.join(HERE, "shots")
 os.makedirs(SHOTS, exist_ok=True)
 MODE = {"fail": False}
@@ -44,7 +52,7 @@ def scripted(system, user, timeout):
         r["missing_concept"] = None if met else "calls need concrete numbers"
         r["message"] = "Your tree stands on the map. Try changing the numbers to move it." if met else "The tree line is still a comment, so nothing runs yet."
     elif stage == "teach":
-        r["message"] = "Here is a nudge."
+        r["message"] = "Here is a nudge. Which line still starts with //?"
         r["hint"] = "Look at the comment line: what has to change so it becomes a real call?"
     elif stage == "showcase":
         r["verdict"] = "pass"
@@ -110,6 +118,7 @@ def main():
 
         # ---- 1. AI works -------------------------------------------------
         page.goto(ai_url)
+        enter_lesson(page)
         page.wait_for_function("document.querySelector('#srv').textContent.includes('ready')", timeout=8000)
         check("health probe marks the AI coach ready", True)
         check("AI toggle is on and enabled", page.get_attribute("#modeAi", "aria-pressed") == "true" and page.is_enabled("#modeAi"))
@@ -175,7 +184,9 @@ def main():
         page.screenshot(path=os.path.join(SHOTS, "02_fallback_desktop.png"))
         MODE["fail"] = False
         page.click("[data-act=retry]")
-        page.wait_for_selector("#msgs .msg .tag b:has-text('AI coach')", timeout=8000)
+        # wait on the last bubble itself: earlier bubbles in this log already carry an AI tag
+        page.wait_for_function("(() => { const m = [...document.querySelectorAll('#msgs .msg')].pop();"
+                               " return m && !m.classList.contains('pending') && m.textContent.includes('AI coach'); })()", timeout=8000)
         check("fallback: retry works once the model is back", True)
         check("fallback: failed bubble was replaced, not duplicated", page.locator("#msgs .tag.rules").count() == 0)
 
@@ -193,6 +204,7 @@ def main():
         mob = b.new_context(viewport={"width": 390, "height": 844}, locale="tr-TR", has_touch=True, is_mobile=True)
         mp = mob.new_page()
         mp.goto(ai_url)
+        enter_lesson(mp)
         mp.wait_for_function("document.querySelector('#srv').textContent.includes('hazır')", timeout=8000)
         mp.click("#btnRun")
         mp.wait_for_selector("#msgs .msg .tag b:has-text('AI koç')", timeout=8000)
@@ -208,6 +220,7 @@ def main():
         off_err = []
         off.on("pageerror", lambda e: off_err.append(str(e)))
         off.goto(static_url)
+        enter_lesson(off)
         off.wait_for_function("document.querySelector('#srv').textContent.includes('No server')", timeout=8000)
         check("no server: label explains it", True)
         check("no server: AI button disabled, rules active", off.is_disabled("#modeAi") and off.get_attribute("#modeRules", "aria-pressed") == "true")

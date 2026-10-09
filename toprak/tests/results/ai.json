@@ -1,0 +1,716 @@
+{
+  "summary": {
+    "mode": "ai",
+    "cases": 30,
+    "check_ok": 30,
+    "gap_found": 19,
+    "gap_total": 22,
+    "gap_by_kind": {
+      "wrong_logic": "4/5",
+      "half_finished": "5/5",
+      "syntax_error": "4/4",
+      "empty": "2/4",
+      "off_topic": "4/4"
+    },
+    "hints_shown": 30,
+    "hint_leaks": 3,
+    "hint_leaks_level3": 2,
+    "hints_level3": 4,
+    "ai_replies": 26,
+    "ai_hints": 24,
+    "ai_hint_leaks": 0,
+    "ai_gap_found": "16/19",
+    "fallbacks": 4,
+    "median_seconds": 1.35,
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite",
+    "requests": 59,
+    "accepted_first_try": 44,
+    "accepted_after_retry": 7,
+    "gave_up_to_rules": 8,
+    "model_replies_rejected": {
+      "leak": 6,
+      "schema": 3,
+      "socratic": 3
+    },
+    "prompt_tokens": 75412,
+    "completion_tokens": 7021,
+    "median_latency_ms": 1421
+  },
+  "cases": [
+    {
+      "id": 1,
+      "lesson": 1,
+      "kind": "correct",
+      "name": "tree with numbers",
+      "expect": "pass",
+      "outcome": "pass",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 2.3,
+      "text": "Passed. You successfully planted your first tree at coordinates 4 and -6! How does adding a second tree nearby change the look of your landscape?\n+50 XP\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 1 object · 12 ms",
+      "hints": []
+    },
+    {
+      "id": 2,
+      "lesson": 1,
+      "kind": "wrong_logic",
+      "name": "x and z left as letters",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 5.3,
+      "text": "Not yet. Your code on line 2 uses letters x and z, but what numbers can you put there to place your tree on the ground?\nMissing concept:\narguments need concrete numbers\nAI coach · gemini-3.5-flash-lite",
+      "status": "Line 2: x is not defined. Available commands: ground, tree, rock, house, sun, fog, random.",
+      "hints": [
+        {
+          "level": 1,
+          "text": "What happens if you replace the letters x and z inside your tree function call with two numbers between negative twenty and twenty?\nTry replacing the letter x with a number like 4, and z with a number like negative 5 inside the parentheses.\nMissing concept:\narguments need concrete numbers\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 3,
+      "lesson": 1,
+      "kind": "half_finished",
+      "name": "tree line still commented out",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "rules",
+      "seconds": 13.1,
+      "text": "The tree(...) line is still commented out with //, so it does not run. Delete the // at the start of the line.\nRule-based coach\nThe AI coach took too long\nTry again",
+      "status": "Ran fine · 0 objects · 12 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Remove the // at the start of the comment line and put numbers in place of x and z.\nRule-based coach\nThe AI coach took too long\nTry again",
+          "leaks": false,
+          "why": null,
+          "source": "rules"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 4,
+      "lesson": 1,
+      "kind": "syntax_error",
+      "name": "missing closing parenthesis",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 2.0,
+      "text": "Not yet. Look at the end of line 2 in your code where you pass the numbers 4 and -6. What punctuation mark is sitting between them right now?\nMissing concept:\nargument separator\nAI coach · gemini-3.5-flash-lite",
+      "status": "Syntax error: missing ) after argument list. A bracket, brace or quote may be missing or extra.",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Let's look at the punctuation between 4 and -6 inside tree(4, -6;. Is a semicolon used to separate multiple numbers in a command?\nCheck the punctuation mark right after the number 4 inside your tree command on line 2.\nMissing concept:\narguments syntax\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 5,
+      "lesson": 1,
+      "kind": "copied_reference",
+      "name": "reference solution pasted",
+      "expect": "pass",
+      "outcome": "pass",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 0.1,
+      "text": "Passed. You successfully planted your first tree at coordinates 4 and -6! How does adding a second tree nearby change the look of your landscape?\n+50 XP\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 1 object · 10 ms",
+      "hints": []
+    },
+    {
+      "id": 6,
+      "lesson": 1,
+      "kind": "empty",
+      "name": "empty editor",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.1,
+      "text": "Not yet. Your code area is completely empty, so how can the program know where to place your first tree?\nMissing concept:\nA command call needs concrete numbers for its arguments.\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 0 objects · 13 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Have you tried typing the name of the tree command in your editor yet?\nLook at the list of available commands and try typing the tree function on your blank line.\nMissing concept:\nCalling a function requires typing its name followed by parentheses containing numbers for its position.\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        },
+        {
+          "level": 2,
+          "text": "For example tree(4, -6); puts the tree 4 units right and 6 units back.\nRule-based coach\nThe AI coach cannot answer right now\nTry again",
+          "leaks": true,
+          "why": "matches solution pattern: 'tree(4'",
+          "source": "rules"
+        },
+        {
+          "level": 3,
+          "text": "Full answer: write tree(4, -6); as a line, with the semicolon at the end.\nRule-based coach\nThe AI coach cannot answer right now\nTry again",
+          "leaks": true,
+          "why": "matches solution pattern: 'tree(4'",
+          "source": "rules"
+        }
+      ],
+      "gap_found": false
+    },
+    {
+      "id": 7,
+      "lesson": 1,
+      "kind": "off_topic",
+      "name": "browser code instead of scene commands",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.2,
+      "text": "Not yet. Your code uses alert on line 2, which is not part of the scene commands. Do you remember which command you need to plant a tree?\nMissing concept:\nUsing available scene commands instead of browser functions\nAI coach · gemini-3.5-flash-lite",
+      "status": "Line 2: alert is not defined. Available commands: ground, tree, rock, house, sun, fog, random.",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Do you see where your code uses alert instead of the tree command? Where should you place the tree function call?\nLook at the list of allowed commands like tree(x, z). Try replacing the alert line with tree and give it two numbers for its coordinates.\nMissing concept:\nFunction call syntax and scene commands\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 8,
+      "lesson": 2,
+      "kind": "correct",
+      "name": "loop with 12 random trees",
+      "expect": "pass",
+      "outcome": "pass",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.0,
+      "text": "Passed. You successfully used a for loop to place twelve trees scattered randomly across your world! How could you add a few rocks or a house among those trees to make the forest look even more natural?\n+50 XP\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 12 objects · 14 ms",
+      "hints": []
+    },
+    {
+      "id": 9,
+      "lesson": 2,
+      "kind": "wrong_logic",
+      "name": "loop condition still i < 3",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.3,
+      "text": "Partly there. Your loop on line 2 only runs 3 times and places every tree at z = 0, so how could you change the loop limit and use i or random() to spread them out?\nMissing concept:\nThe loop condition stops too early and all trees share the same z coordinate.\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 3 objects · 13 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Look at your loop condition on line 2 and the z coordinate on line 3, what numbers should you change to reach twelve trees and spread them across the z axis?\nCheck the number inside your loop condition where it checks i against 3, and see how the second argument in tree(x, z) always stays at 0.\nMissing concept:\nLoop count and z positioning\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": false
+    },
+    {
+      "id": 10,
+      "lesson": 2,
+      "kind": "half_finished",
+      "name": "12 trees typed by hand, no loop",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.5,
+      "text": "Partly there. You successfully placed 12 trees, but did you write them all on a single line instead of using a loop?\nMissing concept:\nUsing a loop (for or while) to repeat tree creation instead of typing each one manually\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 12 objects · 18 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Can you wrap those twelve tree commands inside a single for loop?\nTry writing for (let i = 0; i < 12; i++) { before your tree function and place your tree call inside the curly braces, using i to space them out.\nMissing concept:\nFor loop\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 11,
+      "lesson": 2,
+      "kind": "syntax_error",
+      "name": "missing parenthesis in for header",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.3,
+      "text": "Not yet. Look closely at the parentheses in your for loop on line 2. Is anything missing right before that opening curly brace?\nMissing concept:\nfor loop syntax\nAI coach · gemini-3.5-flash-lite",
+      "status": "Syntax error: Unexpected token '{'. A bracket, brace or quote may be missing or extra.",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Let's look at the opening parentheses and brackets on line 2. Is every opening parenthesis properly closed before your curly brace starts?\nCheck the end of the loop condition on line 2. Every opening parenthesis like ( needs a matching closing parenthesis ) before you write {.\nMissing concept:\nSyntax error in loop header\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 12,
+      "lesson": 2,
+      "kind": "copied_reference",
+      "name": "12 trees in a straight row",
+      "expect": "pass",
+      "outcome": "pass",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.3,
+      "text": "Passed. You successfully built your forest of 12 trees using a loop, but notice how they all line up perfectly straight along the z-axis at 0. How could you use random() for the second coordinate to make your trees scatter naturally across the landscape?\n+50 XP\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 12 objects · 12 ms",
+      "hints": []
+    },
+    {
+      "id": 13,
+      "lesson": 2,
+      "kind": "empty",
+      "name": "empty editor",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.4,
+      "text": "Not yet. Your editor is completely empty and no trees have been planted yet. How can you write a for loop to place at least twelve trees?\nMissing concept:\nfor loop\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 0 objects · 12 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Let us start by setting up the repeat structure, so where should you type the keyword 'for' to begin counting your twelve trees?\nA for loop begins with 'for (let i = 0; i < N; i++)' followed by curly braces where you place your tree call.\nMissing concept:\nfor loop structure\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        },
+        {
+          "level": 2,
+          "text": "Can you see how to write the opening keyword 'for' followed by parentheses and curly braces to prepare your counting block?\nFor example, to repeat an action three times, you would write 'for (let i = 0; i < 3; i++) { tree(i, 0); }' where the numbers inside control the loop.\nMissing concept:\nfor loop syntax\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        },
+        {
+          "level": 3,
+          "text": "Here is how a loop works in a different case: for (let i = 0; i < 5; i++) { rock(i, 0); }. Can you see how that structure repeats an action five times?\nTo write a loop in your editor, start by typing the keyword 'for' followed by parentheses that set up your counter variable, its limit, and its step, with curly braces to hold your tree function.\nMissing concept:\nfor loop syntax\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 14,
+      "lesson": 2,
+      "kind": "off_topic",
+      "name": "endless loop",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 6.1,
+      "text": "Not yet. Your code stopped with a timeout because while (true) creates an endless loop that never finishes. What condition could you put inside the parentheses so the loop runs a specific number of times instead of running forever?\nMissing concept:\nWhile loop condition and infinite loop prevention\nAI coach · gemini-3.5-flash-lite",
+      "status": "The code did not finish in 1.5 seconds. It may be an endless loop: does your while or for have an exit condition?",
+      "hints": [
+        {
+          "level": 1,
+          "text": "You removed the while loop, but how will you tell your new loop to run twelve times instead of three?\nLook at the condition part of your for loop on line 2. What number determines when the loop stops?\nMissing concept:\nfor loop condition and count\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 15,
+      "lesson": 3,
+      "kind": "correct",
+      "name": "low sun and haze",
+      "expect": "pass",
+      "outcome": "pass",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.3,
+      "text": "Passed. You lowered the sun to 10 and added a soft fog of 0.5, which gives the forest a great morning glow. Can you think of how adding a few rocks could make the ground look even more natural?\n+50 XP\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 14 objects · 15 ms",
+      "hints": []
+    },
+    {
+      "id": 16,
+      "lesson": 3,
+      "kind": "wrong_logic",
+      "name": "sun still high",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "rules",
+      "seconds": 12.7,
+      "text": "sun(80) is still high. Go to 15 or lower for a sunset.\nRule-based coach\nThe AI coach cannot answer right now\nTry again",
+      "status": "Ran fine · 14 objects · 14 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Let's look at line 5 where your sunlight is set. What number is currently inside your sun function, and what number does the first goal ask you to use?\nLook at the number passed into your sun function. Overhead is 90 and the horizon is 0, so try replacing that 80 with a value of 15 or less.\nMissing concept:\nsun height\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 17,
+      "lesson": 3,
+      "kind": "half_finished",
+      "name": "sun set, no fog",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.2,
+      "text": "Partly there. You successfully lowered the sun to 10, but what command is missing to add atmosphere to your forest?\nMissing concept:\nfog\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 14 objects · 14 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "You have your trees and a low sun, but which function creates that misty morning feeling?\nTake a look at the available functions in the introduction and find the one that takes an amount between 0 and 1 to control the haze.\nMissing concept:\nfog\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 18,
+      "lesson": 3,
+      "kind": "syntax_error",
+      "name": "missing parenthesis on sun",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.3,
+      "text": "Not yet. It looks like there is a small syntax error on line 5 with a parenthesis. Can you check what punctuation is used to close your sun function call?\nMissing concept:\nsyntax error\nAI coach · gemini-3.5-flash-lite",
+      "status": "Syntax error: missing ) after argument list. A bracket, brace or quote may be missing or extra.",
+      "hints": [
+        {
+          "level": 1,
+          "text": "The light still looks like midday. If you have not written sun(...) yet, add it on a new line.\nRule-based coach\nThe AI coach cannot answer right now\nTry again",
+          "leaks": false,
+          "why": null,
+          "source": "rules"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 19,
+      "lesson": 3,
+      "kind": "wrong_logic",
+      "name": "fog amount out of range (5)",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.7,
+      "text": "Not yet. Your sun call looks great, but what number range does the fog function accept on line 6?\nMissing concept:\nfog(amount) range\nAI coach · gemini-3.5-flash-lite",
+      "status": "Line 6: fog(): amount must be between 0 and 1, you gave 5.",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Look closely at the number you passed to fog() on line 6. What is the maximum allowed value for fog in this world?\nCheck the upper limit for fog. While the sun function accepts numbers up to 90, fog only accepts amounts between 0 and 1. What happens if you change that 5 to a number less than 1?\nMissing concept:\nsun(height) and fog(amount) scale limits\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 20,
+      "lesson": 3,
+      "kind": "empty",
+      "name": "empty editor",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.3,
+      "text": "Not yet. Your code is completely empty, so where should you place the sun and fog functions to start shaping the scene's mood?\nMissing concept:\nsun and fog functions\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 0 objects · 18 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "To set the mood with warm low light and atmosphere, which two functions do you need to add to your empty code?\nCheck the available functions in the instructions for setting light angle and haze, and remember you also need to place at least eight trees in the scene.\nMissing concept:\nsun and fog\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        },
+        {
+          "level": 2,
+          "text": "Here is how you might set an indoor light using a tiny lamp function: lamp(4). How can you use a similar function name to set the height of the sun in your editor?\nTo bring in warm light and mist, type sun() with a number between 0 and 15 inside the parentheses, and add fog() with a number between 0.3 and 1 on the next line.\nMissing concept:\nsun and fog functions\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        },
+        {
+          "level": 3,
+          "text": "Full answer: add two lines: sun(10); and fog(0.5);\nRule-based coach\nThe AI coach cannot answer right now\nTry again",
+          "leaks": true,
+          "why": "matches solution pattern: 'sun(1'",
+          "source": "rules"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 21,
+      "lesson": 3,
+      "kind": "off_topic",
+      "name": "words instead of numbers",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "rules",
+      "seconds": 0.5,
+      "text": "The code hit an error. sun(): height must be a number, but got \"low\". Fix it and run again.\nRule-based coach\nThe AI coach cannot answer right now\nTry again",
+      "status": "Line 5: sun(): height must be a number, but got \"low\".",
+      "hints": [
+        {
+          "level": 1,
+          "text": "The light still looks like midday. If you have not written sun(...) yet, add it on a new line.\nRule-based coach\nThe AI coach cannot answer right now\nTry again",
+          "leaks": false,
+          "why": null,
+          "source": "rules"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 22,
+      "lesson": 4,
+      "kind": "correct",
+      "name": "village with ring of houses",
+      "expect": "pass",
+      "outcome": "pass",
+      "check_ok": true,
+      "source": "rules",
+      "seconds": 1.1,
+      "text": "Village complete. The houses are spread out nicely. The sunset mood suits the village. Using loops kept your code short. You finished the path. +50 XP\nComing next\nCharacter movement\nEnemy behaviour\nImport your own model\nRule-based coach\nThe AI coach cannot answer right now\nTry again",
+      "status": "Ran fine · 31 objects · 12 ms",
+      "hints": []
+    },
+    {
+      "id": 23,
+      "lesson": 4,
+      "kind": "wrong_logic",
+      "name": "two houses on top of each other",
+      "expect": "pass",
+      "outcome": "pass",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.4,
+      "text": "Passed. You successfully placed all the required houses, trees, and rocks! Notice how your trees and rocks form straight horizontal lines along z equals 12 and minus 10; how might you vary their z positions to make them look more natural?\n+50 XP\nComing next\nCharacter movement\nEnemy behaviour\nImport your own model\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 11 objects · 13 ms",
+      "hints": []
+    },
+    {
+      "id": 24,
+      "lesson": 4,
+      "kind": "half_finished",
+      "name": "only one house",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.3,
+      "text": "Partly there. You have built plenty of trees and rocks, but how many houses does your village currently have?\nMissing concept:\nNot enough houses\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 10 objects · 14 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Look at line 2 where you placed the house; how many house calls are currently in your code, and what number does the goal ask for?\nCheck the goals list to see how many houses your village needs, and add another house call to reach that number.\nMissing concept:\nhouse count\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 25,
+      "lesson": 4,
+      "kind": "syntax_error",
+      "name": "missing closing brace",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.7,
+      "text": "Not yet. It looks like a closing bracket or parenthesis is missing at the end of your code on line 6. Can you check where your loop's curly brace or parenthesis needs to close?\nMissing concept:\nsyntax error\nAI coach · gemini-3.5-flash-lite",
+      "status": "Syntax error: Unexpected token ')'. A bracket, brace or quote may be missing or extra.",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Let us look at line 4 where your loop starts. What punctuation is missing at the very end of your code on line 6?\nCheck the end of your code block. Every opening parenthesis or brace needs a matching closing one to finish the statement and the loop.\nMissing concept:\nloops\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 26,
+      "lesson": 4,
+      "kind": "copied_reference",
+      "name": "coach example village pasted",
+      "expect": "pass",
+      "outcome": "pass",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 3.6,
+      "text": "Passed. You built a neat circular village with a ring of houses and a dense ring of trees surrounding the center! How could you adjust the rock loop in your code so the rocks don't all cluster in the middle?\n+50 XP\nComing next\nCharacter movement\nEnemy behaviour\nImport your own model\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 51 objects · 14 ms",
+      "hints": []
+    },
+    {
+      "id": 27,
+      "lesson": 4,
+      "kind": "empty",
+      "name": "empty editor",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.1,
+      "text": "Not yet. Your editor is completely empty right now, so none of the buildings or nature elements are showing up. Which function would you like to call first to place your very first object on the ground?\nMissing concept:\nobject placement functions\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 0 objects · 11 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Your editor is empty, so let us start by placing a house. Which function name should you type to place a house on the ground?\nTake a look at the available functions listed in your instructions, and try typing house(x, z) with two numbers inside the parentheses to choose its coordinates.\nMissing concept:\nobject placement\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        },
+        {
+          "level": 2,
+          "text": "Here is how you place a single rock at coordinates x=2 and z=5: rock(2, 5). Can you use that same idea to write your first house function call in your editor?\nTo place an object, type the function name like house followed by parentheses containing your x and z coordinates, such as house(-3, 4).\nMissing concept:\nobject placement functions\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        },
+        {
+          "level": 3,
+          "text": "Let us break down the steps to start your village: how would you write a single function call to place a house?\nTo place any object, type the function name followed by parentheses with your coordinates inside, like house(x, z). What coordinates will you choose for your first house?\nMissing concept:\nobject placement syntax\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": false
+    },
+    {
+      "id": 28,
+      "lesson": 4,
+      "kind": "off_topic",
+      "name": "house placed far outside the map",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.9,
+      "text": "Not yet. Your house on line 2 uses 100 for x, which is outside the allowed range of -20 to 20. Where on the ground should you place it instead?\nMissing concept:\nCoordinates must stay within the valid bounds of -20 to 20.\nAI coach · gemini-3.5-flash-lite",
+      "status": "Line 2: house(): x must be between -20 and 20, you gave 100.",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Remember that the ground only goes from -20 to 20. What numbers can you put inside house() to keep it on the screen?\nCheck the numbers inside your house() call on line 2 and make sure they are between -20 and 20.\nMissing concept:\nPlacement coordinates must stay within the valid range of -20 to 20 for x and z.\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 29,
+      "lesson": 4,
+      "kind": "half_finished",
+      "name": "houses and trees but no rocks",
+      "expect": "miss",
+      "outcome": "miss",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.9,
+      "text": "Partly there. You have your houses and a nice row of trees, but where are the rocks on your list and why are all eight trees stuck at z equals 12?\nMissing concept:\nadding rocks and varying the depth of trees\nAI coach · gemini-3.5-flash-lite",
+      "status": "Ran fine · 10 objects · 13 ms",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Let us add some boulders to the landscape. Which function should you call to place a rock in your scene?\nTake a look at how you placed your houses and trees on lines 2 and 4. Can you use that same approach to add rock(x, z) calls?\nMissing concept:\nrock placement\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    },
+    {
+      "id": 30,
+      "lesson": 4,
+      "kind": "wrong_logic",
+      "name": "words as coordinates",
+      "expect": "error",
+      "outcome": "error",
+      "check_ok": true,
+      "source": "llm",
+      "seconds": 1.8,
+      "text": "Not yet. Line 2 passes words like \"left\" into house(), but what type of value does the function expect for positions?\nMissing concept:\nnumeric coordinates\nAI coach · gemini-3.5-flash-lite",
+      "status": "Line 2: house(): x must be a number, but got \"left\".",
+      "hints": [
+        {
+          "level": 1,
+          "text": "Where should your single house live on the grid, and what numbers can you put inside house() to place it there?\nCheck line 2 where you wrote house(\"left\", \"top\"). Functions like house(x, z) need numbers between -20 and 20 for their coordinates instead of text words.\nMissing concept:\nnumeric coordinates for placement\nAI coach · gemini-3.5-flash-lite",
+          "leaks": false,
+          "why": null,
+          "source": "llm"
+        }
+      ],
+      "gap_found": true
+    }
+  ]
+}
