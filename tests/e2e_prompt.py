@@ -135,6 +135,13 @@ def main():
         check("model outage: answered in under 13 s", time.time() - t < 13)
         SCRIPT["fail"] = False
 
+        page.click("#btnNext") if page.is_visible("#btnNext") else None
+        check("next mission: unlocked list grows (random)", "random" in page.inner_text("#pmCmds"), page.inner_text("#pmCmds"))
+        page.click("#steps li:nth-child(1) button")
+        if page.is_visible("#confirm"):
+            page.click("#confirmYes")
+        check("mission switch: prompt controls usable again", page.is_enabled("#pmGo") and page.is_enabled("#pmText"))
+
         page.click("#modeRules")
         check("rules mode: prompt off with a reason", page.is_visible("#pmOff") and "you chose Rules" in page.inner_text("#pmOff") and page.is_disabled("#pmText"))
         page.click("#modeAi")

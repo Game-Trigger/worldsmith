@@ -1448,7 +1448,7 @@ function closeAsk() { $('#confirm').hidden = true; confirmYes = null; }
 
 function loadMission(i, silentIntro) {
   state.cur = i; state.hints = 0; state.last = null;
-  pm.req++; pm.busy = false; pm.undo = null; pmStatus('', ''); $('#pmResult').hidden = true;
+  pm.req++; pm.busy = false; pm.undo = null; pmStatus('', ''); $('#pmResult').hidden = true; renderPrompt();   // drop a model answer still in flight
   state.req++; state.busy = false; state.chat = []; state.task = null; state.turn = null;   // drop any coach answer still in flight
   clearErr();
   cm.setValue(pick(MISSIONS[i].starter));
