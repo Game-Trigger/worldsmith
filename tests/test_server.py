@@ -85,6 +85,10 @@ class LeakTests(unittest.TestCase):
         code = "tree(4, -6);"
         self.assertIsNone(self.leaks("first-tree", "Your line `tree(4, -6);` is fine, now run it.", code))
 
+    def test_learners_line_quoted_without_semicolon_is_fine(self):
+        self.assertIsNone(self.leaks("sunset", "Your sun(80) is high in the sky. What height feels like evening?", code="sun(80);"))
+        self.assertIsNotNone(self.leaks("sunset", "Try sun(10) instead.", code="sun(80);"))
+
     def test_loop_with_target_count_leaks(self):
         self.assertIsNotNone(self.leaks("loop-forest", "Use for (let i = 0; i < 12; i++) { tree(random(-15, 15), random(-15, 15)); }"))
 
