@@ -1044,6 +1044,58 @@ textarea, select { border-radius: 0 !important; }
   .ws-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .flow.live .flow-link i { animation: none; } }
+
+/* home */
+.home2 { gap: 22px; }
+.hero2 { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 20px; align-items: center; padding: clamp(18px, 4vw, 40px);
+  background: radial-gradient(90% 120% at 100% 0%, rgba(224, 112, 43, 0.22), transparent 60%), radial-gradient(80% 90% at 0% 100%, rgba(111, 174, 63, 0.14), transparent 60%), var(--panel); }
+.hero2 .hero-text { position: relative; display: grid; gap: 14px; }
+.hero2 h1 { margin: 0; font-family: var(--f-display); font-size: clamp(24px, 5.2vw, 46px); line-height: 1.15; color: var(--fire); text-shadow: 4px 4px 0 #000; letter-spacing: 0; }
+.hero2 .promise { margin: 0; font-size: clamp(18px, 2.6vw, 24px); font-weight: 700; max-width: 30ch; }
+.hero2 .sub { margin: 0; color: var(--muted); max-width: 54ch; }
+.hero-stage { position: relative; }
+#heroCanvas { width: 100%; aspect-ratio: 1 / 1; max-height: 340px; display: block; }
+.hero-tag { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.hero2 > canvas.sparks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.hero2 > .hero-text, .hero2 > .hero-stage { z-index: 1; }
+.home-band { display: grid; gap: 12px; }
+.home-band > h2, .home-sec > h2 { margin: 0; font-family: var(--f-display); font-size: clamp(13px, 2vw, 16px); line-height: 1.5; color: var(--text); }
+.problem { padding: 18px; border: 3px solid var(--dirt); background: repeating-linear-gradient(135deg, rgba(122, 74, 43, 0.14) 0 10px, transparent 10px 20px), var(--panel); box-shadow: var(--hard); }
+.big-quote { margin: 0; font-size: clamp(17px, 2.3vw, 21px); line-height: 1.5; max-width: 62ch; }
+.cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.vcard { padding: 16px; background: var(--panel); border: 3px solid var(--line); box-shadow: var(--hard); display: grid; gap: 8px; align-content: start; }
+.vcard h3, .steps3 h3 { margin: 0; font-size: 16px; }
+.vcard p, .steps3 p { margin: 0; color: var(--muted); }
+.vicon { width: 48px; height: 40px; display: block; image-rendering: pixelated; }
+.vicon .anvi { width: 48px; height: 39px; }
+.vicon.v1 { background: linear-gradient(var(--sky) 0 0) 0 0 / 48px 18px no-repeat, linear-gradient(#000 0 0) 0 18px / 48px 3px no-repeat, linear-gradient(var(--code-bg) 0 0) 0 21px / 48px 19px no-repeat; border: 3px solid #000; box-sizing: border-box; }
+.vicon.v3 { background: linear-gradient(90deg, var(--grass) 0 33%, var(--fire) 33% 66%, var(--accent) 66%); clip-path: var(--px); }
+.steps3 { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; counter-reset: s; }
+.steps3 li { position: relative; padding: 16px 16px 16px 64px; background: var(--panel); border: 3px solid var(--line); box-shadow: var(--hard); display: grid; gap: 6px; }
+.steps3 b { position: absolute; left: 14px; top: 14px; width: 36px; height: 36px; display: grid; place-items: center; font-family: var(--f-display); font-size: 14px; background: var(--accent); color: var(--accent-ink); clip-path: var(--px); }
+.steps3 li:not(:last-child)::after { content: ""; position: absolute; right: -14px; top: 50%; width: 14px; height: 6px; background: var(--fire); }
+.meas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.meas li { padding: 14px; background: var(--panel-2); border: 3px solid var(--line); display: grid; gap: 4px; }
+.meas b { font-family: var(--f-display); font-size: 18px; color: var(--ok); }
+.meas span { color: var(--muted); font-size: 13.5px; }
+.faq { display: grid; gap: 8px; }
+.faq details { background: var(--panel); border: 3px solid var(--line); }
+.faq summary { min-height: 44px; display: flex; align-items: center; padding: 8px 14px; cursor: pointer; font-weight: 700; list-style: none; }
+.faq summary::before { content: "+"; font-family: var(--f-display); font-size: 12px; color: var(--fire); margin-right: 12px; }
+.faq details[open] summary::before { content: "-"; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq p { margin: 0; padding: 0 14px 14px 38px; color: var(--muted); }
+.site-foot { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding: 16px 0 6px; border-top: 3px solid var(--line); color: var(--muted); font-size: 13px; }
+.foot-brand { font-family: var(--f-display); font-size: 11px; color: var(--fire); }
+.site-foot nav { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-left: auto; }
+.site-foot a { color: var(--text); min-height: 44px; display: inline-flex; align-items: center; }
+@media (max-width: 860px) {
+  .hero2 { grid-template-columns: 1fr; }
+  .hero-stage { max-width: 320px; justify-self: center; width: 100%; }
+  .cards3, .steps3, .meas { grid-template-columns: 1fr; }
+  .steps3 li:not(:last-child)::after { right: auto; left: 30px; top: auto; bottom: -14px; width: 6px; height: 14px; }
+  .site-foot nav { margin-left: 0; }
+}
 </style>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1063,22 +1115,78 @@ textarea, select { border-radius: 0 !important; }
   </div>
 </nav>
 
-<section class="view" id="homeView" aria-labelledby="homeTitle" hidden>
-  <div class="hero">
-    <svg class="hero-art" viewBox="0 0 200 200" aria-hidden="true"><g fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.55"><path d="M100 18 171 59v82l-71 41-71-41V59z"/><path d="M100 48 145 74v52l-45 26-45-26V74z"/><path d="M100 18v164M29 59l142 82M171 59 29 141" opacity="0.4"/></g><path d="M100 80 120 100 100 120 80 100z" fill="var(--accent)" opacity="0.8"/></svg>
-    <h1 id="homeTitle">Worldsmith</h1>
-    <p class="promise" data-i="homePromise"></p>
-    <p class="sub" data-i="homeSub"></p>
-    <div class="cta">
-      <button type="button" class="btn primary big" id="homeGo"></button>
-      <button type="button" class="btn" id="homeMap" data-i="homeMap"></button>
+<section class="view home2" id="homeView" aria-labelledby="homeTitle" hidden>
+  <div class="hero hero2">
+    <canvas class="sparks" id="sparks" aria-hidden="true"></canvas>
+    <div class="hero-text">
+      <p class="eyebrow" data-i="homeEyebrow"></p>
+      <h1 id="homeTitle">Worldsmith</h1>
+      <p class="promise" data-i="homePromise"></p>
+      <p class="sub" data-i="homeSub"></p>
+      <div class="cta">
+        <button type="button" class="btn primary big" id="homeGo"></button>
+        <button type="button" class="btn" id="homeMap" data-i="homeMap"></button>
+      </div>
     </div>
+    <div class="hero-stage"><canvas id="heroCanvas" role="img" aria-label="A small voxel world turning slowly"></canvas><span class="hero-tag" data-i="heroTag"></span></div>
   </div>
-  <div class="home-sec">
-    <h2 data-i="engineTitle"></h2>
+
+  <section class="home-band problem" aria-labelledby="hProb">
+    <h2 id="hProb" data-i="probTitle"></h2>
+    <p class="big-quote" data-i="probBody"></p>
+    <p class="note-small" data-i="probOurs"></p>
+  </section>
+
+  <section class="home-band" aria-labelledby="hVal">
+    <h2 id="hVal" data-i="valTitle"></h2>
+    <div class="cards3">
+      <article class="vcard"><span class="vicon v1" aria-hidden="true"></span><h3 data-i="val1T"></h3><p data-i="val1B"></p></article>
+      <article class="vcard"><span class="vicon v2" aria-hidden="true"><svg class="anvi" viewBox="0 0 16 13" shape-rendering="crispEdges" role="img" aria-label="Anvi"><rect x="14" y="0" width="1" height="1" fill="#f5b13d"/><rect x="12" y="1" width="1" height="1" fill="#e0702b"/><rect x="0" y="4" width="2" height="1" fill="#6b6f76"/><rect x="1" y="3" width="14" height="3" fill="#6b6f76"/><rect x="3" y="3" width="11" height="1" fill="#9aa0a8"/><rect x="5" y="4" width="2" height="1" fill="#fff"/><rect x="9" y="4" width="2" height="1" fill="#fff"/><rect x="6" y="4" width="1" height="1" fill="#14110f"/><rect x="10" y="4" width="1" height="1" fill="#14110f"/><rect x="7" y="5" width="2" height="1" fill="#3a3d42"/><rect x="5" y="6" width="6" height="3" fill="#3a3d42"/><rect x="6" y="6" width="1" height="3" fill="#4a4e55"/><rect x="3" y="9" width="10" height="2" fill="#3a3d42"/><rect x="2" y="11" width="12" height="1" fill="#2a2c30"/></svg></span><h3 data-i="val2T"></h3><p data-i="val2B"></p></article>
+      <article class="vcard"><span class="vicon v3" aria-hidden="true"></span><h3 data-i="val3T"></h3><p data-i="val3B"></p></article>
+    </div>
+  </section>
+
+  <section class="home-band" aria-labelledby="hHow">
+    <h2 id="hHow" data-i="howTitle"></h2>
+    <ol class="steps3">
+      <li><b>1</b><h3 data-i="how1T"></h3><p data-i="how1B"></p></li>
+      <li><b>2</b><h3 data-i="how2T"></h3><p data-i="how2B"></p></li>
+      <li><b>3</b><h3 data-i="how3T"></h3><p data-i="how3B"></p></li>
+    </ol>
+  </section>
+
+  <section class="home-band" aria-labelledby="hMeas">
+    <h2 id="hMeas" data-i="measTitle"></h2>
+    <ul class="meas">
+      <li><b>12 / 12</b><span data-i="meas1"></span></li>
+      <li><b>11 / 11</b><span data-i="meas2"></span></li>
+      <li><b>0 / 24</b><span data-i="meas3"></span></li>
+    </ul>
+    <p class="note-small"><span data-i="measNote"></span> <a href="https://github.com/T1mmine/worldsmith/blob/main/docs/TESTING.md" target="_blank" rel="noopener">docs/TESTING.md</a></p>
+  </section>
+
+  <section class="home-band home-sec" aria-labelledby="hEng">
+    <h2 id="hEng" data-i="engineTitle"></h2>
     <div class="engines" id="engineCards" role="radiogroup" aria-label="Engine style"></div>
     <p class="note-small" data-i="engineNote" style="margin-top:8px"></p>
-  </div>
+  </section>
+
+  <section class="home-band" aria-labelledby="hFaq">
+    <h2 id="hFaq" data-i="faqTitle"></h2>
+    <div class="faq">
+      <details><summary data-i="faq1Q"></summary><p data-i="faq1A"></p></details>
+      <details><summary data-i="faq2Q"></summary><p data-i="faq2A"></p></details>
+      <details><summary data-i="faq3Q"></summary><p data-i="faq3A"></p></details>
+      <details><summary data-i="faq4Q"></summary><p data-i="faq4A"></p></details>
+      <details><summary data-i="faq5Q"></summary><p data-i="faq5A"></p></details>
+    </div>
+  </section>
+
+  <footer class="site-foot">
+    <span class="foot-brand">Worldsmith</span>
+    <span data-i="footLine"></span>
+    <nav aria-label="Links"><a href="https://github.com/T1mmine/worldsmith" target="_blank" rel="noopener" data-i="footRepo"></a><a href="https://github.com/T1mmine/worldsmith/blob/main/docs/DISCLOSURE.md" target="_blank" rel="noopener" data-i="footDisc"></a><a href="https://github.com/T1mmine/worldsmith/blob/main/docs/TESTING.md" target="_blank" rel="noopener" data-i="footTest"></a></nav>
+  </footer>
 </section>
 
 <section class="view" id="journeyView" aria-labelledby="jTitle" hidden>
@@ -1448,6 +1556,25 @@ const UI = {
 const UI_BRAND = {
   tr: {
     navHome: 'Ana sayfa', navJourney: 'Yol haritası', navWorkshop: 'Atölye',
+    homeEyebrow: 'TARAYICIDA OYUN GELİŞTİRME', heroTag: 'Canlı three.js sahnesi · senin tarayıcında',
+    probTitle: 'Sorun', probBody: 'Herkes tek satır prompt ile oyun yaptırıyor ama kimse öğrenmiyor. Gerçekten öğrenmek isteyen genç ise Unity ya da Unreal\'in donanım ihtiyacında ve öğrenme eğrisinde pes ediyor.',
+    probOurs: 'Worldsmith ikisinin ortası: kodu sen yazarsın, AI soru sorarak yol gösterir, sonucu anında 3D olarak görürsün.',
+    valTitle: 'Neden Worldsmith', val1T: 'Hafif ve interaktif', val1B: 'Üstte canlı sahne, altta kod. Bir satır değiştirirsin, dünya anında değişir.',
+    val2T: 'Kişisel AI koç', val2B: 'Cevabı vermez, soru sorar. Yazdığın koda bakar, eksik kavramı bulur; istersen tarifinden dünyayı modeller.',
+    val3T: 'Donanım gerekmez', val3B: 'Ağır iş sunucuda yapılır. Eski bir laptop ya da telefon yeter; kurulum yok.',
+    howTitle: 'Nasıl çalışır', how1T: 'Kod yaz', how1B: 'Tarayıcıdaki editörde birkaç satır JavaScript yazarsın: tree(4, -6) gibi.',
+    how2T: 'Sunucu AI\'ı çalıştırır', how2B: 'Koç ve Atölye istekleri Worldsmith sunucusuna gider; model cevap verir, sunucu her cevabı doğrular.',
+    how3T: 'Dünyan canlanır', how3B: 'Kodun güvenli bir sanal alanda çalışır, sahne hemen kurulur ve hedefleri sayfa kendisi kontrol eder.',
+    measTitle: 'Ölçtüklerimiz (gerçek modelle)', meas1: 'Atölye isteği geçerli nesne üretti, ortanca 2,5 sn',
+    meas2: 'Prompt isteği çalışan kod üretti, ortanca 1,6 sn', meas3: 'AI ipucunda çözüm sızıntısı (sızıntı kapısıyla ölçüldü)',
+    measNote: 'Küçük, kendi yazdığımız test kümeleri; yöntem ve başarısızlıklar burada:',
+    faqTitle: 'Sık sorulanlar',
+    faq1Q: 'Bir şey kurmam gerekiyor mu?', faq1A: 'Hayır. Tarayıcı yeter. Kodun tarayıcında çalışır; AI istekleri sunucuda işlenir.',
+    faq2Q: 'AI ödevi benim yerime mi yapıyor?', faq2A: 'Koç çözümü vermez; sunucu çözümü sızdıran cevapları reddeder. Prompt modunun yazdığı kod, sen değiştirmeden XP vermez.',
+    faq3Q: 'Bu gerçek Unity ya da Unreal mi?', faq3A: 'Hayır. Unity\'ye benzeyen küçük bir JavaScript API\'si. Motor adları sadece görünüm tarzıdır, bu motorlarla bağımız yok.',
+    faq4Q: 'Verilerim nereye gidiyor?', faq4A: 'İlerlemen sadece bu tarayıcıda durur. AI modunda kodun ya da tarifin dil modeline gönderilir; sunucu kodu saklamaz, yalnızca süre ve token sayısı kaydeder.',
+    faq5Q: 'Sunucu çalışmazsa ne olur?', faq5A: 'Dersler kural tabanlı koçla devam eder ve sayfa bunu açıkça yazar. Atölye ve Prompt modu nedenini söyleyerek kapanır.',
+    footLine: 'Starnest AI Hackathon 2026 · AI Gaming', footRepo: 'Kaynak kod', footDisc: 'Model ve bileşen açıklaması', footTest: 'Test sonuçları',
     wsEyebrow: 'ATÖLYE · BULUT OCAĞI', wsTitle: 'Tarif et, sunucu modellesin',
     wsSub: 'Cihazın sadece metni gönderir. Ağır iş Worldsmith sunucusunda yapılır: dil modeli nesneyi basit şekillere böler, sunucu her parçayı doğrular, nesne burada ve derslerinde spawn() ile belirir.',
     wsDevice: 'Senin cihazın', wsDeviceSub: 'Herhangi bir laptop ya da telefon. Kod ve sahne burada çalışır.',
@@ -1468,6 +1595,25 @@ const UI_BRAND = {
   },
   en: {
     navHome: 'Home', navJourney: 'Roadmap', navWorkshop: 'Workshop',
+    homeEyebrow: 'GAME DEVELOPMENT IN THE BROWSER', heroTag: 'Live three.js scene · in your browser',
+    probTitle: 'The problem', probBody: 'Everyone gets a game made with a one-line prompt, but nobody learns anything. The young person who really wants to learn gives up on the hardware and the learning curve of Unity or Unreal.',
+    probOurs: 'Worldsmith sits in between: you write the code, the AI guides you with questions, and you see the result in 3D at once.',
+    valTitle: 'Why Worldsmith', val1T: 'Light and interactive', val1B: 'Live scene on top, code below. Change one line and the world changes at once.',
+    val2T: 'A personal AI coach', val2B: 'It does not give the answer, it asks questions. It reads your code, finds the missing concept, and can model the world from your description.',
+    val3T: 'No hardware needed', val3B: 'The heavy work happens on the server. An old laptop or a phone is enough; nothing to install.',
+    howTitle: 'How it works', how1T: 'Write code', how1B: 'You write a few lines of JavaScript in the browser editor, such as tree(4, -6).',
+    how2T: 'The server runs the AI', how2B: 'Coach and Workshop requests go to the Worldsmith server; the model answers and the server checks every answer.',
+    how3T: 'Your world comes alive', how3B: 'Your code runs in a safe sandbox, the scene is built at once, and the page itself checks the goals.',
+    measTitle: 'What we measured (real model)', meas1: 'Workshop requests produced a valid object, median 2.5 s',
+    meas2: 'Prompt requests produced running code, median 1.6 s', meas3: 'AI hints leaking the solution (checked with the leak gate)',
+    measNote: 'Small test sets written by us; method and failures here:',
+    faqTitle: 'FAQ',
+    faq1Q: 'Do I need to install anything?', faq1A: 'No. A browser is enough. Your code runs in your browser; AI requests are handled on the server.',
+    faq2Q: 'Does the AI do the work for me?', faq2A: 'The coach does not give the solution; the server rejects answers that leak it. Code written by Prompt mode earns no XP until you change it.',
+    faq3Q: 'Is this real Unity or Unreal?', faq3A: 'No. It is a small JavaScript API that resembles Unity. The engine names are only look styles; we are not affiliated with those engines.',
+    faq4Q: 'Where does my data go?', faq4A: 'Your progress stays in this browser. In AI mode your code or description is sent to a language model; the server does not store code, only timings and token counts.',
+    faq5Q: 'What if the server is down?', faq5A: 'Lessons continue with the rule-based coach and the page says so. The Workshop and Prompt mode switch off and tell you why.',
+    footLine: 'Starnest AI Hackathon 2026 · AI Gaming', footRepo: 'Source code', footDisc: 'Model and component disclosure', footTest: 'Test results',
     wsEyebrow: 'WORKSHOP · CLOUD FORGE', wsTitle: 'Describe it, the server models it',
     wsSub: 'Your device only sends text. The heavy work happens on the Worldsmith server: a language model splits the object into simple shapes, the server checks every part, and the object appears here and in your lessons with spawn().',
     wsDevice: 'Your device', wsDeviceSub: 'Any laptop or phone. Your code and scene run here.',
@@ -2896,6 +3042,7 @@ function showView(name) {
   const navKey = name === 'lesson' ? 'journey' : name;
   document.querySelectorAll('[data-nav]').forEach((a) => { if (a.dataset.nav === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   if (name === 'workshop') wsEnter(); else wsLeave();
+  if (name === 'home') heroEnter(); else heroLeave();
   if (name === 'lesson') { resize(); cm.refresh(); }
   window.scrollTo(0, 0);
 }
@@ -3157,6 +3304,53 @@ $('#wsList').addEventListener('click', (e) => {
   }
 });
 window.addEventListener('resize', () => { if (ws.stage && !views.workshop.hidden) { ws.stage.fit(); wsPreview(); } });
+
+
+/* Home hero: a small voxel world on the shared mini stage, and ember sparks (both off when reduced motion is asked). */
+var hero = { stage: null, sparks: null };
+function heroWorld() {
+  const g = grassBase(8, 8);
+  if (typeof makeTree === 'function') {
+    const t1 = makeTree(0, 0, 1); t1.position.set(-1.8, 0, -1.2); t1.scale.setScalar(UNIT.tree * 1.1); g.add(t1);
+    const t2 = makeTree(0, 0, 1); t2.position.set(2.2, 0, 1.6); t2.scale.setScalar(UNIT.tree * 0.8); g.add(t2);
+    const h = makeHouse(0, 0, 1); h.position.set(1.2, 0, -1.6); h.scale.setScalar(UNIT.house * 0.8); g.add(h);
+    const r = makeRock(0, 0, 1); r.position.set(-2.2, 0, 2.2); r.scale.setScalar(UNIT.rock * 0.8); g.add(r);
+  }
+  return g;
+}
+function sparkField(canvas) {
+  if (!canvas || reduceMotion) return null;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  const COLORS = ['#f5b13d', '#e0702b', '#ffd27a'];
+  let parts = [], on = false, raf = 0, w = 0, h = 0;
+  const fit = () => { w = canvas.width = canvas.clientWidth; h = canvas.height = canvas.clientHeight; };
+  const spawn = () => ({ x: Math.random() * w, y: h + Math.random() * 40, v: 0.3 + Math.random() * 0.7, s: Math.random() < 0.3 ? 3 : 2, c: COLORS[(Math.random() * 3) | 0], life: 1 });
+  const frame = () => {
+    if (!on) return;
+    ctx.clearRect(0, 0, w, h);
+    while (parts.length < 26) parts.push(spawn());
+    for (const q of parts) {
+      q.y -= q.v; q.x += Math.sin(q.y / 30) * 0.3; q.life -= 0.0035;
+      ctx.globalAlpha = Math.max(0, q.life) * 0.8; ctx.fillStyle = q.c; ctx.fillRect(q.x | 0, q.y | 0, q.s, q.s);
+    }
+    parts = parts.filter((q) => q.y > -10 && q.life > 0);
+    raf = requestAnimationFrame(frame);
+  };
+  return { start() { if (on) return; on = true; fit(); raf = requestAnimationFrame(frame); }, stop() { on = false; cancelAnimationFrame(raf); }, fit };
+}
+function heroEnter() {
+  if (!hero.stage) { hero.stage = miniStage($('#heroCanvas')); if (hero.stage) hero.stage.set(heroWorld(), 15, 1.4); }
+  if (!hero.sparks) hero.sparks = sparkField($('#sparks'));
+  if (hero.stage) { hero.stage.start(); hero.stage.set(heroWorld(), 15, 1.4); }
+  if (hero.sparks) hero.sparks.start();
+}
+function heroLeave() {
+  if (!hero) return;
+  if (hero.stage) hero.stage.stop();
+  if (hero.sparks) hero.sparks.stop();
+}
+window.addEventListener('resize', () => { if (hero.stage && !views.home.hidden) { hero.stage.fit(); if (hero.sparks) hero.sparks.fit(); } });
 
 /* boot */
 renderStatic();
