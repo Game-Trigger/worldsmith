@@ -29,7 +29,7 @@ The last row needs real testers. Do not quote a number until it has been measure
 
 ## Results so far
 
-### Server unit tests: 56 / 56 pass
+### Server unit tests: 57 / 57 pass
 (36 below, plus 3 Socratic-gate tests, 4 `build.py` web-module tests and 13 Prompt-mode tests in `tests/test_model.py` added 2026-10-09: code checks for locked commands, escape attempts (`fetch`, `self.postMessage`, `constructor`, `new Function`, `document`, unknown calls), comments and strings ignored, helper functions allowed; service: schema, `uses` recomputed, locked command retried, two bad replies fall back, 9 malformed requests, page error fed back in the prompt, learner prompt kept in its data block, log never holds the prompt text.)
 Schema validation (extra keys, `reveals_solution` true or `0`, over-long text, bad enums), leak detection (answers in prose, in `task.starter_code`, reformatted answers, learner's own line quoted back is allowed), and the service: bad JSON then a good retry, two bad replies fall back, leaking reply rejected, the model admitting a leak rejected, verdict contradicting the page's goal check rejected, quota does not retry, timeout retries once, missing key gives a clear reason, cache, per-IP rate limit (another IP unaffected), 11 malformed requests, usage log has tokens and never the learner's code, prompt injection stays inside the data block.
 
@@ -51,12 +51,27 @@ Real server + real page + headless Chromium, scripted model. Tab switch and ARIA
 ### Socratic gate, live model (2026-10-09, `gemini-3.5-flash-lite`)
 The server now rejects a `diagnose` or `teach` reply whose `message` has no question mark and retries once with "Sokratik değil: çözümü söyleme, bir soru sor". 5 hand-made requests against the real model:
 - 4 / 5 accepted on the first try, all 4 with a question in `message`; 0 rejected by the Socratic gate.
-- 1 / 5 fell back to rules: `sunset` teach with learner code `sun(80);`, rejected twice by the leak gate (`'sun(8'`). The model quoted the learner's own call, so this is a leak-gate false positive. Open.
+- 1 / 5 fell back to rules: `sunset` teach with learner code `sun(80);`, rejected twice by the leak gate (`'sun(8'`). The model quoted the learner's own call, so this was a leak-gate false positive. Fixed the same day; the same request then passed 3 / 3.
 - Latency 1.2 to 1.4 s on 2 calls, about 13 s on the other 3 (one HTTP call each, so the provider was slow, not our retry).
 Model choice on the same day: `gemini-2.5-flash` answered HTTP 429 (quota), `gemini-2.5-flash-lite` and `gemini-2.0-flash` answered HTTP 404 (retired for new users), `gemini-flash-latest` worked in 7.9 s once and then answered 503 (high demand), `gemini-3.5-flash-lite` answered in 1.5 s. It is now the default.
 
-### Evaluation, AI coach
-**Not run yet.** It needs an API key. The harness is ready: `python tests/run_eval.py --mode ai`. It records first-try acceptance, rejected replies by reason (invalid JSON, schema, leak, verdict conflict), fallbacks, tokens and latency. Paste the numbers here after the run.
+### Evaluation, AI coach: 30 submissions, real model (`tests/results/ai.md`, 2026-10-09, `gemini-3.5-flash-lite`)
+Same 30 cases through the real page and server.
+- The page's goal check agreed with the expected outcome on **30 / 30** (the AI never decides pass/fail).
+- Server: 59 model requests, **44 accepted on the first try, 7 after one retry, 8 fell back to rules**. Rejections that triggered a retry: leak 6, schema 3, Socratic gate 3. Of the 8 fallbacks, **5 were HTTP 429 caused by us**: a second evaluation ran at the same time and the free tier allows 15 requests per minute per model. The other 3: leak twice (2), provider read timeout (1).
+- On the page: the AI answered **26 / 30** run feedbacks and **24 / 30** hints.
+- **AI hints that leak the answer: 0 / 24** (checked with `server/leak.py`, the same gate the server uses, so this is not an independent judge). The 3 leaking hints in this run all came from the rule-based fallback ladder.
+- Coach text named the real problem in **16 / 19** flawed submissions answered by the AI (keyword judge). Rule coach on the same harness: 21 / 22. The AI is not better on this proxy; it asks a question instead of naming the fix, and the keyword judge rewards naming it. Read `tests/results/ai.md` before quoting either number.
+- Median time from Run to feedback 1.35 s; median model latency 1.4 s; 75 412 prompt and 7 021 completion tokens for 59 requests.
+- An earlier run on the same day read the reply source from the wrong tag and reported 0 AI replies; the harness was fixed (`tests/run_eval.py`) and re-run. Numbers above are from the re-run.
+
+### Prompt mode, real model through the page (`tests/results/prompt.md`, `tests/run_prompt_eval.py`)
+11 wishes across the 4 missions (7 EN, 4 TR), each in a fresh page with that mission's unlocked commands, including "a castle" (not in the API) and an instruction to call `fetch`.
+- **11 / 11** produced code that ran and was written to the editor, all on the first model call; 0 needed the page's second request.
+- **11 / 11** scenes passed the wish's count check read from the page's own chips (for example exactly 12 trees for "12 trees in a circle", 5 houses for "five houses around a square"). The sun/fog wishes are only checked for trees, so they are weaker checks.
+- No generated code contained `fetch`; the castle became a ring of rock towers with an explanation.
+- Page time from Build to written code: median 1.6 s, max 1.7 s.
+- First attempt at this run: 4 of 11 failed with HTTP 429 because it ran in parallel with the coach evaluation. The script now pauses 9 s between wishes.
 
 ## Failures found and what we did
 
@@ -69,14 +84,17 @@ Model choice on the same day: `gemini-2.5-flash` answered HTTP 429 (quota), `gem
 | 5 | eval case 2 (`tree(x, z)`) | Rule coach says only "x is not defined. Available commands: ...", never that x and z must be numbers | Open. This is the kind of case the AI coach has to fix, so it stays as the headline comparison |
 | 6 | eval hints | Static hint ladder gives the full answer at level 3 | By design for rules mode. AI mode is gated by `server/leak.py` |
 | 8 | e2e, before and after the Socratic gate | 32 / 33: "no pending bubble left over" fails, on unchanged `main` as well | Open, predates the gate. The mock teach reply needed a question mark to pass the new gate; fixed in the test |
-| 9 | live Socratic check, `sunset` teach | Leak gate rejected the model quoting the learner's own `sun(80)` | Open (see above) |
+| 9 | live Socratic check, `sunset` teach | Leak gate rejected the model quoting the learner's own `sun(80)` (without the `;`) | Fixed in `server/leak.py`, test added; 3 / 3 live retries accepted |
 | 10 | live prompt mode | Model used `ground("green")`; the page only understood colours the browser reports as `rgb()`, so named colours failed | `parseColor` converts names through a canvas; prompt asks for hex |
 | 11 | live prompt mode | One retry spent on a `uses` list that disagreed with the code | Server derives `uses` from the code |
+| 12 | eval harness | Reply source taken from the first `.tag b`, which is "Missing concept" when present, so AI replies counted as rules | Reads all tags; re-run |
+| 13 | e2e `no pending bubble left over` | Flaky: the wait matched an older AI tag, so the check sometimes ran before the retried reply arrived | Waits on the last bubble; 33 / 33 three runs in a row |
+| 14 | two live evals in parallel | Gemini free tier: 15 requests/min per model, HTTP 429 | Run evals one at a time. Our per-IP limit (20/min) is above Google's, so a busy class would hit 429 and get the rules fallback |
 | 7 | e2e console | `ERR_TUNNEL_CONNECTION_FAILED` for Google Fonts | Sandbox network only; the page falls back to system fonts. Not a bug |
 
 ## Known limitations
 
-- **No real LLM run yet.** Everything above about the AI coach is plumbing and failure handling; its teaching quality is unmeasured.
+- The AI coach's teaching quality is measured only by a keyword proxy and the leak gate, on 30 cases written by us. No learner has used it yet.
 - The gap judge is keyword matching, a proxy. Read `tests/results/*.md` before quoting a rate. 30 cases, one author: small and biased toward what we thought of.
 - The leak gate is regexes plus token overlap with our own reference solutions. A model that explains the answer in different words can pass it. The 3-level hint design and manual review of AI replies are the second line.
 - Tested in headless Chromium with software WebGL, not on a real low-end phone or laptop.
