@@ -71,6 +71,25 @@ class SchemaTests(unittest.TestCase):
         self.assertTrue(validate.validate(dict(self.ok, task=dict(task, extra=1)), SCHEMA))
 
 
+class GlobalModelLimitTests(unittest.TestCase):
+    def test_server_wide_limit_answers_quota_without_calling_the_provider(self):
+        calls = []
+        providers.PROVIDERS["fake"] = lambda s, u, t: calls.append(1) or providers.Reply("{}", "fake")
+        os.environ["LLM_PROVIDER"], os.environ["LLM_MAX_PER_MIN"] = "fake", "3"
+        providers._calls.clear()
+        try:
+            for _ in range(3):
+                providers.complete("s", "u", 5)
+            with self.assertRaises(providers.ProviderError) as e:
+                providers.complete("s", "u", 5)
+            self.assertEqual((e.exception.kind, len(calls)), ("quota", 3))
+        finally:
+            os.environ["LLM_PROVIDER"] = "mock"
+            os.environ.pop("LLM_MAX_PER_MIN", None)
+            providers._calls.clear()
+            del providers.PROVIDERS["fake"]
+
+
 class ApiReferenceTests(unittest.TestCase):
     def test_coach_prompt_knows_spawn(self):
         api_ref, lessons = coach.load_lessons()

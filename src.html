@@ -496,7 +496,7 @@ const UI = {
     noteSend: 'AI modunda editördeki kodun bir dil modeline gönderilir. Koda kişisel bilgi yazma.',
     noteRules: 'Kural modu: her şey tarayıcında kalır, hiçbir şey gönderilmez.',
     pending: 'Koç kodunu okuyor…', tagAi: (m) => `AI koç · ${m}`, tagRules: 'Kural tabanlı koç', retry: 'Tekrar dene',
-    whyRules: { offline: 'AI koça ulaşılamadı', timeout: 'AI koç zamanında yanıt vermedi', rate_limited: 'Çok fazla istek gönderildi, biraz bekle', unavailable: 'AI koç şu an yanıt veremiyor' },
+    whyRules: { quota: 'AI kotası doldu, 1 dk sonra tekrar dene', offline: 'AI koça ulaşılamadı', timeout: 'AI koç zamanında yanıt vermedi', rate_limited: 'Çok fazla istek gönderildi, biraz bekle', unavailable: 'AI koç şu an yanıt veremiyor' },
     btnShow: 'Sahneyi anlat', btnChallenge: 'Ek görev ver', loadTask: 'Görev kodunu editöre yükle',
     taskGoal: 'Hedef', taskCrit: 'Ölçütler',
     cTask: 'Editördeki kod, koçun görev iskeleti ile değiştirilecek. Devam edilsin mi?',
@@ -518,7 +518,7 @@ const UI = {
     pmOffRules: "Prompt modu kapalı çünkü Kural modundasın (hiçbir şey gönderilmez). Açmak için koç başlığından AI'yı seç.",
     cModel: 'Editördeki kendi değişikliklerinin yerine modelin kodu yazılacak (Geri al ile dönebilirsin). Devam edilsin mi?',
     pmTag: (m) => `AI tarafından yazıldı · ${m}`,
-    aiQuota: 'AI servisinin dakikalık kotası doldu. Bir dakika sonra tekrar dene; bu arada Kod sekmesi ve koç çalışmaya devam eder.',
+    aiQuota: 'Kota doldu, 1 dk sonra tekrar dene. Bu arada Kod sekmesi ve koç çalışmaya devam eder.',
     aiService: 'AI servisine şu an ulaşılamıyor (sunucu tarafında anahtar ya da bağlantı sorunu). Kod sekmesi ve kural tabanlı koç çalışmaya devam eder.',
     pmNoXp: 'Bu kodu Prompt modu yazdı: hedefler tuttu ama XP ve yeni komut yok. Kodu kendin değiştirip çalıştırınca görev sayılır.',
     tabForge: 'Atölye', chipModel: 'Model',
@@ -565,7 +565,7 @@ const UI = {
     noteSend: 'In AI mode the code in the editor is sent to a language model. Do not put personal details in your code.',
     noteRules: 'Rules mode: everything stays in your browser, nothing is sent.',
     pending: 'The coach is reading your code…', tagAi: (m) => `AI coach · ${m}`, tagRules: 'Rule-based coach', retry: 'Try again',
-    whyRules: { offline: 'The AI coach could not be reached', timeout: 'The AI coach took too long', rate_limited: 'Too many requests, wait a moment', unavailable: 'The AI coach cannot answer right now' },
+    whyRules: { quota: 'AI quota used up, try again in 1 minute', offline: 'The AI coach could not be reached', timeout: 'The AI coach took too long', rate_limited: 'Too many requests, wait a moment', unavailable: 'The AI coach cannot answer right now' },
     btnShow: 'Describe my scene', btnChallenge: 'Give me a follow-up task', loadTask: 'Load the task code into the editor',
     taskGoal: 'Goal', taskCrit: 'Success criteria',
     cTask: "The editor will be replaced with the coach's task skeleton. Continue?",
@@ -587,7 +587,7 @@ const UI = {
     pmOffRules: 'Prompt mode is off because you chose Rules (nothing is sent). Pick AI in the coach header to turn it on.',
     cModel: "The model's code will replace your own edits in the editor (Undo brings them back). Continue?",
     pmTag: (m) => `Written by AI · ${m}`,
-    aiQuota: "The AI service's per-minute quota is used up. Try again in a minute; the Code tab and the coach keep working meanwhile.",
+    aiQuota: 'Quota used up, try again in 1 minute. The Code tab and the coach keep working meanwhile.',
     aiService: 'The AI service cannot be reached right now (a key or connection problem on the server). The Code tab and the rule-based coach keep working.',
     pmNoXp: 'Prompt mode wrote this code: the goals are met, but it earns no XP and unlocks nothing. Change it yourself and run it to complete the mission.',
     tabForge: 'Forge', chipModel: 'Models',
@@ -1424,6 +1424,24 @@ function sceneSummary(ctx) {
 }
 const currentCtx = () => (state.last && state.last.mission === state.cur ? state.last.ctx : null);
 
+/* One queue for every AI request (coach, Prompt, Forge): one at a time, and at most AI_PER_MIN started per minute,
+   so a burst of clicks never trips the provider's per-minute quota (Gemini free tier: 15 per model). */
+const AI_PER_MIN = 12;
+const aiStarts = [];
+let aiChain = Promise.resolve();
+function aiSlot() {
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const prev = aiChain;
+  aiChain = prev.then(() => gate);
+  return prev.then(async () => {
+    const now = Date.now();
+    while (aiStarts.length && now - aiStarts[0] > 60000) aiStarts.shift();
+    if (aiStarts.length >= AI_PER_MIN) await new Promise((r) => setTimeout(r, 60000 - (now - aiStarts[0]) + 50));
+    aiStarts.push(Date.now());
+    return release;
+  });
+}
 async function askCoach(stage, opts) {
   const ctx = opts && opts.noCtx ? null : currentCtx();
   const body = {
@@ -1432,6 +1450,7 @@ async function askCoach(stage, opts) {
     goals: MISSIONS[state.cur].goals.map((g) => { const r = ctx ? g.check(ctx) : { done: false, now: '' }; return { label: g.label.en, done: r.done, now: r.now }; }),
     hints_used: opts && Number.isInteger(opts.hints) ? opts.hints : state.hints, history: state.chat.slice(-6),
   };
+  const done = await aiSlot();   // the 13 s timer starts only once it is this request's turn
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), COACH_TIMEOUT);
   try {
@@ -1440,10 +1459,11 @@ async function askCoach(stage, opts) {
     try { data = await r.json(); } catch (e) { data = null; }
     if (r.ok && data && data.source === 'llm') return { ok: true, reply: data };
     const code = data && data.error && data.error.code;
-    return { ok: false, why: code === 'rate_limited' ? 'rate_limited' : 'unavailable' };
+    const quota = data && data.error && String(data.error.reason || '').startsWith('quota');
+    return { ok: false, why: code === 'rate_limited' ? 'rate_limited' : quota ? 'quota' : 'unavailable' };
   } catch (e) {
     return { ok: false, why: e && e.name === 'AbortError' ? 'timeout' : 'offline' };
-  } finally { clearTimeout(timer); }
+  } finally { clearTimeout(timer); done(); }
 }
 
 function taskHtml(t) {
@@ -1675,6 +1695,7 @@ function setTab(t) {
   else if (!$('#pmText').disabled) $('#pmText').focus();
 }
 async function askModel(body) {
+  const done = await aiSlot();   // the 13 s timer starts only once it is this request's turn
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), MODEL_TIMEOUT);
   try {
@@ -1687,7 +1708,7 @@ async function askModel(body) {
     return { ok: false, text: aiDown(err.reason) || tt().pmBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
   } catch (e) {
     return { ok: false, text: e && e.name === 'AbortError' ? tt().pmTimeout : tt().pmOffline };
-  } finally { clearTimeout(timer); }
+  } finally { clearTimeout(timer); done(); }
 }
 async function modelIt() {
   const T = tt(), prompt = $('#pmText').value.trim();
@@ -1799,6 +1820,7 @@ function fgPlace(name) {
   return line;
 }
 async function askForge(body) {
+  const done = await aiSlot();   // the 13 s timer starts only once it is this request's turn
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), MODEL_TIMEOUT);
   try {
@@ -1815,7 +1837,7 @@ async function askForge(body) {
     return { ok: false, text: aiDown(err.reason) || tt().fgBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
   } catch (e) {
     return { ok: false, text: e && e.name === 'AbortError' ? tt().fgTimeout : tt().fgOffline };
-  } finally { clearTimeout(timer); }
+  } finally { clearTimeout(timer); done(); }
 }
 async function forgeIt() {
   const T = tt(), text = $('#fgText').value.trim();

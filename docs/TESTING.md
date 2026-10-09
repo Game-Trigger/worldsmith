@@ -115,6 +115,7 @@ Scripted model; see `docs/FORGE.md` for the list. Same run: `e2e_browser.py` 33 
 | 15 | AI Forge, real model | Organic objects (cat, spaceship) are valid but look crude | Open. Known limit of primitive-only modelling; the learner can delete and ask again |
 | 16 | prompt mode | Code written by the model could complete a mission and earn XP and unlocks without the learner writing anything | Unchanged prompt code no longer earns XP or unlocks; an e2e check covers it |
 | 17 | Docker, invalid key | Prompt/Forge showed raw provider JSON and blamed the request | Page maps quota / service / timeout reasons to plain messages |
+| 18 | browser, live (17:19 to 17:23 Baku) | AI coach said "cannot answer right now": 4 calls got HTTP 429, the free tier's 15 calls per minute per model (the key worked again minutes later, so not a daily limit) | Server-wide cap `LLM_MAX_PER_MIN` (default 14) answers "quota" before Google refuses; the page sends coach, Prompt and Forge requests through one serial queue (at most 12 started per minute) and says "quota used up, try again in 1 minute". Live after the fix: coach, Prompt and Forge 9 / 9 on the second run; the first run lost Forge to a 12 s provider timeout while Gemini answered in 5 to 9 s per call |
 | 7 | e2e console | `ERR_TUNNEL_CONNECTION_FAILED` for Google Fonts | Sandbox network only; the page falls back to system fonts. Not a bug |
 
 ## Known limitations

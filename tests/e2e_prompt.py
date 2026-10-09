@@ -145,7 +145,7 @@ def main():
             page.click("#confirmYes")
         wait_idle(page)
         msg = page.inner_text("#pmStatus")
-        check("quota: says the per-minute quota is used up, no raw JSON", "quota is used up" in msg and "{" not in msg and page.is_enabled("#pmGo"), msg)
+        check("quota: says the per-minute quota is used up, no raw JSON", "Quota used up" in msg and "{" not in msg and page.is_enabled("#pmGo"), msg)
         SCRIPT["quota"] = False
 
         page.click("#tabCode")

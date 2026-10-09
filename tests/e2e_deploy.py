@@ -77,7 +77,7 @@ def main():
                 check(f"{name}: real model result shown", page.is_visible(result), msg)
             else:
                 check(f"{name}: says the AI service is down (no raw JSON), no hang, button usable", "err" in page.get_attribute(status, "class")
-                      and ("cannot be reached" in msg or "quota" in msg) and "{" not in msg and page.is_enabled(go) and not page.is_visible(result), msg)
+                      and ("cannot be reached" in msg or "quota" in msg.lower()) and "{" not in msg and page.is_enabled(go) and not page.is_visible(result), msg)
         check("no page errors", not errors, "; ".join(errors[:3]))
         b.close()
 
