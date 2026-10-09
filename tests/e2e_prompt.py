@@ -86,6 +86,9 @@ def main():
         check("model: status says the scene updated", "Scene updated" in page.inner_text("#pmStatus"), page.inner_text("#pmStatus"))
         page.wait_for_function("document.querySelector('#chips').textContent.includes('5')", timeout=5000)
         check("model: scene rebuilt by run() (5 trees in chips)", True)
+        page.wait_for_function("document.querySelector('#msgs .msg:last-child') && !document.querySelector('#msgs .msg.pending')", timeout=8000)
+        check("prompt code meets goals but earns no XP", page.inner_text("#xp").strip().startswith("0") and "earns no XP" in page.inner_text("#msgs"), page.inner_text("#xp"))
+        check("prompt code does not unlock the next mission", not page.is_visible("#btnNext"))
         check("model: learner prompt sent inside its data block", "<learner_prompt>\nfive trees in a row" in SCRIPT["seen"][-1])
         page.screenshot(path=os.path.join(base.SHOTS, "05_prompt_desktop.png"))
 
@@ -135,7 +138,13 @@ def main():
         check("model outage: answered in under 13 s", time.time() - t < 13)
         SCRIPT["fail"] = False
 
-        page.click("#btnNext") if page.is_visible("#btnNext") else None
+        page.click("#tabCode")
+        base.type_code(page, GOOD + "\ntree(2, 8);\n")   # the learner's own change counts
+        page.keyboard.press("Control+Enter")
+        page.wait_for_selector("#btnNext", state="visible", timeout=8000)
+        check("learner-edited code earns XP and unlocks", "50 XP" in page.inner_text("#xp"), page.inner_text("#xp"))
+        page.click("#btnNext")
+        page.click("#tabPrompt")
         check("next mission: unlocked list grows (random)", "random" in page.inner_text("#pmCmds"), page.inner_text("#pmCmds"))
         page.click("#steps li:nth-child(1) button")
         if page.is_visible("#confirm"):

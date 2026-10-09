@@ -518,6 +518,7 @@ const UI = {
     pmOffRules: "Prompt modu kapalı çünkü Kural modundasın (hiçbir şey gönderilmez). Açmak için koç başlığından AI'yı seç.",
     cModel: 'Editördeki kendi değişikliklerinin yerine modelin kodu yazılacak (Geri al ile dönebilirsin). Devam edilsin mi?',
     pmTag: (m) => `AI tarafından yazıldı · ${m}`,
+    pmNoXp: 'Bu kodu Prompt modu yazdı: hedefler tuttu ama XP ve yeni komut yok. Kodu kendin değiştirip çalıştırınca görev sayılır.',
     tabForge: 'Atölye', chipModel: 'Model',
     fgLabel: 'Oyun dünyan için bir nesne tarif et. AI onu basit şekillerden modeller ve spawn("isim", x, z) komutuyla koduna ekler.',
     fgPlaceholder: 'Örnek: taş bir kule, tepesinde kırmızı bir bayrak',
@@ -584,6 +585,7 @@ const UI = {
     pmOffRules: 'Prompt mode is off because you chose Rules (nothing is sent). Pick AI in the coach header to turn it on.',
     cModel: "The model's code will replace your own edits in the editor (Undo brings them back). Continue?",
     pmTag: (m) => `Written by AI · ${m}`,
+    pmNoXp: 'Prompt mode wrote this code: the goals are met, but it earns no XP and unlocks nothing. Change it yourself and run it to complete the mission.',
     tabForge: 'Forge', chipModel: 'Models',
     fgLabel: 'Describe an object for your game world. The AI models it from simple shapes and adds it to your code with spawn("name", x, z).',
     fgPlaceholder: 'Example: a stone tower with a red flag on top',
@@ -1565,6 +1567,13 @@ async function run(silent) {
     else addMsg('info', pick(m.miss(ctx)));
     return;
   }
+  // Code that Prompt mode wrote, unchanged by the learner, meets the goals but earns no XP and unlocks nothing.
+  if (fromPrompt(code)) {
+    const note = `<div class="tag"><b>${esc(tt().pmNoXp)}</b></div>`;
+    if (aiOn()) coachTurn('evaluate', { kind: 'success', text: pick(m.pass(ctx)), extra: note });
+    else addMsg('success', pick(m.pass(ctx)), note);
+    return;
+  }
   const first = !state.done.includes(state.cur);
   let text = pick(m.pass(ctx));
   if (first) {
@@ -1615,7 +1624,9 @@ function loadMission(i, silentIntro) {
    ===================================================================== */
 const UNLOCKS = [['ground', 'tree', 'rock'], ['random'], ['sun', 'fog'], ['house']];   // what each mission adds
 const MODEL_TIMEOUT = 13000;   // the server gives up at 12 s
-const pm = { tab: 'code', busy: false, req: 0, undo: null };
+const pm = { tab: 'code', busy: false, req: 0, undo: null, generated: null };
+const squash = (c) => String(c).replace(/\s+/g, '');
+const fromPrompt = (code) => pm.generated !== null && squash(code) === pm.generated;
 const unlocked = () => {
   const out = [];
   UNLOCKS.forEach((cmds, i) => { if (i <= state.cur || state.done.includes(i)) out.push(...cmds); });
@@ -1700,6 +1711,7 @@ async function modelIt() {
   pm.undo = { code: cm.getValue(), dirty: state.dirty };
   clearErr();
   cm.setValue(res.reply.code);
+  pm.generated = squash(res.reply.code);
   state.dirty = false;   // the model's code is not the learner's own edit
   const lines = res.reply.code.split('\n').length;
   $('#pmExplain').textContent = res.reply.explanation;
