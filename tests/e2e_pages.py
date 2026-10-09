@@ -18,7 +18,7 @@ from playwright.sync_api import sync_playwright  # noqa: E402
 base = fz.base
 check, results = base.check, base.results
 PAGES = [("#/", "#homeView", "home"), ("#/journey", "#journeyView", "journey"), ("#/workshop", "#workshopView", "workshop"),
-         ("#/profile", "#profileView", "profile")]
+         ("#/market", "#marketView", "market"), ("#/profile", "#profileView", "profile")]
 
 
 def go(page, url, route, sel):
@@ -94,6 +94,20 @@ def profile(b, url):
     ctx.close()
 
 
+def market(page, url):
+    go(page, url, "#/market", "#marketView")
+    check("market: heading says demo, not a real seller", "Demo list, not a real seller" in page.inner_text("#mkTitle"))
+    for tab in ("engines", "tools", "assets"):
+        page.click(f"[data-mktab={tab}]")
+        cards = page.locator("#mkGrid .mk-card")
+        labelled = page.locator("#mkGrid .mk-card .demo-tag").count()
+        check(f"market {tab}: every card labelled demo, nothing to buy", cards.count() == 3 and labelled == 3
+              and page.locator("#mkGrid .mk-card button:enabled").count() == 0 and page.get_attribute(f"[data-mktab={tab}]", "aria-selected") == "true")
+    check("market: no form, input or payment field", page.locator("#marketView form, #marketView input, #marketView textarea").count() == 0)
+    check("market: business model says rates are not set", "not set" in page.inner_text("#marketView"))
+    page.screenshot(path=os.path.join(base.SHOTS, "30_market.png"), full_page=True)
+
+
 def main():
     srv = base.serve_app()
     app.forge_service = forge.ForgeService(log_dir=os.path.join(base.ROOT, "tests", ".e2e_logs"))
@@ -107,6 +121,7 @@ def main():
         page.on("pageerror", lambda e: errors.append(str(e)))
         workshop(page, url)
         profile(b, url)
+        market(page, url)
 
         # top bar reaches every page, browser back walks back through them
         go(page, url, "#/", "#homeView")
@@ -147,7 +162,7 @@ def main():
             go(mob, url, route, sel)
             mob.wait_for_timeout(300)
             sw = mob.evaluate("document.documentElement.scrollWidth")
-            small = mob.evaluate("""[...document.querySelectorAll('.topnav a, .topnav button, .topnav select, #wsGo, #wsList button, .pf button, .faq summary')]
+            small = mob.evaluate("""[...document.querySelectorAll('.topnav a, .topnav button, .topnav select, #wsGo, #wsList button, .pf button, .faq summary, .mk-tabs button, .mk-card button')]
                 .filter(e => e.offsetParent && e.getBoundingClientRect().height < 44).map(e => (e.id || e.textContent.trim()) + ':' + e.getBoundingClientRect().height.toFixed(0))""")
             check(f"390px {route}: no horizontal scroll, 44px targets", sw <= 390 and not small, f"scrollWidth={sw} small={small}")
             mob.screenshot(path=os.path.join(base.SHOTS, f"31_{name}_mobile.png"), full_page=True)

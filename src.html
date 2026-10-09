@@ -1199,6 +1199,26 @@ textarea, select { border-radius: 0 !important; }
 .pf-data p { margin: 0; }
 #pfReset { border-color: var(--err); color: var(--err); min-height: 44px; }
 @media (max-width: 720px) { .pf-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* market */
+.mk { display: grid; gap: 18px; }
+.mk-head h1 { margin: 0; font-family: var(--f-display); font-size: clamp(18px, 3.4vw, 28px); line-height: 1.4; }
+.mk-head .sub { margin: 8px 0 0; color: var(--muted); max-width: 70ch; }
+.demo-flag { display: inline-block; vertical-align: middle; font-family: var(--f-body); font-size: 12.5px; font-weight: 700; padding: 4px 10px; color: #14110f; background: var(--fire); border: 3px solid #000; }
+.mk-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.mk-tabs button { min-height: 44px; padding: 0 16px; border: 3px solid var(--line); background: var(--panel); color: var(--muted); font-weight: 700; cursor: pointer; box-shadow: 3px 3px 0 #000; }
+.mk-tabs button[aria-selected="true"] { color: var(--text); border-color: var(--accent); background: var(--accent-soft); }
+.mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.mk-card { position: relative; display: grid; gap: 8px; align-content: start; padding: 14px; background: var(--panel); border: 3px dashed var(--iron); }
+.mk-card .thumb { height: 86px; border: 3px solid #000; image-rendering: pixelated; }
+.mk-card .thumb.t0 { background: linear-gradient(#6fae3f 0 0) 0 60% / 100% 40% no-repeat, linear-gradient(#8fc5ee, #cfe6f6); }
+.mk-card .thumb.t1 { background: linear-gradient(#3a3d42 0 0) 0 65% / 100% 35% no-repeat, linear-gradient(#2e4a66, #b8693f); }
+.mk-card .thumb.t2 { background: linear-gradient(#478cbf 0 0) 0 70% / 100% 30% no-repeat, linear-gradient(#9ec3e6, #6fa6d8); }
+.mk-card h3 { margin: 0; font-size: 15px; }
+.mk-card p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.mk-card .demo-tag { justify-self: start; font-size: 11.5px; font-weight: 700; padding: 3px 8px; color: var(--fire); border: 2px solid var(--fire); }
+.mk-card .btn { min-height: 44px; }
+.mk-biz .vcard h3 { color: var(--fire); }
 </style>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1211,6 +1231,7 @@ textarea, select { border-radius: 0 !important; }
     <a href="#/" data-nav="home" data-i="navHome"></a>
     <a href="#/journey" data-nav="journey" data-i="navJourney"></a>
     <a href="#/workshop" data-nav="workshop" data-i="navWorkshop"></a>
+    <a href="#/market" data-nav="market" data-i="navMarket"></a>
     <a href="#/profile" data-nav="profile" data-i="navProfile"></a>
   </div>
   <div class="tn-tools">
@@ -1333,6 +1354,29 @@ textarea, select { border-radius: 0 !important; }
       <ul class="ws-list" id="wsList"></ul>
     </div>
   </div>
+</section>
+
+<section class="view mk" id="marketView" aria-labelledby="mkTitle" hidden>
+  <header class="mk-head">
+    <p class="eyebrow" data-i="mkEyebrow"></p>
+    <h1 id="mkTitle"><span data-i="mkTitle"></span> <span class="demo-flag" data-i="mkDemo"></span></h1>
+    <p class="sub" data-i="mkSub"></p>
+  </header>
+  <div class="mk-tabs" role="tablist" aria-label="Market sections">
+    <button type="button" role="tab" id="mkTabEngines" data-mktab="engines" aria-selected="true" aria-controls="mkGrid" data-i="mkEngines"></button>
+    <button type="button" role="tab" id="mkTabTools" data-mktab="tools" aria-selected="false" aria-controls="mkGrid" data-i="mkTools"></button>
+    <button type="button" role="tab" id="mkTabAssets" data-mktab="assets" aria-selected="false" aria-controls="mkGrid" data-i="mkAssets"></button>
+  </div>
+  <div class="mk-grid" id="mkGrid" role="tabpanel" aria-labelledby="mkTabEngines"></div>
+  <section class="home-band mk-biz" aria-labelledby="mkBizT">
+    <h2 id="mkBizT" data-i="mkBizTitle"></h2>
+    <div class="cards3">
+      <article class="vcard"><h3 data-i="mkBiz1T"></h3><p data-i="mkBiz1B"></p></article>
+      <article class="vcard"><h3 data-i="mkBiz2T"></h3><p data-i="mkBiz2B"></p></article>
+      <article class="vcard"><h3 data-i="mkBiz3T"></h3><p data-i="mkBiz3B"></p></article>
+    </div>
+    <p class="note-small" data-i="mkBizNote"></p>
+  </section>
 </section>
 
 <section class="view pf" id="profileView" aria-labelledby="pfTitle" hidden>
@@ -1676,6 +1720,18 @@ const UI = {
 const UI_BRAND = {
   tr: {
     navHome: 'Ana sayfa', navJourney: 'Yol haritası', navWorkshop: 'Atölye',
+    navMarket: 'Pazar', mkEyebrow: 'PAZAR', mkTitle: 'Demircinin pazarı', mkDemo: 'Demo liste, gerçek satıcı değil',
+    mkSub: 'Worldsmith\'in iş modelini göstermek için hazırlanmış örnek bir vitrin. Buradaki ürünler, satıcılar ve şirketler gerçek değil; satın alma, hesap ya da ödeme yok.',
+    mkEngines: 'Motorlar', mkTools: 'Araçlar', mkAssets: 'Asset paketleri', mkCardDemo: 'DEMO · gerçek satıcı değil', mkNoBuy: 'Satın alma yok (demo)',
+    mkItems: {
+      engines: [['Unity Lite tarzı', 'Parlak, düz renkli sahne görünümü. Worldsmith\'in içinde, ücretsiz.'], ['Unreal Lite tarzı', 'Koyu, sinematik ışık ve hafif sis. Worldsmith\'in içinde, ücretsiz.'], ['Godot Lite tarzı', 'Mavimsi, sade görünüm. Worldsmith\'in içinde, ücretsiz.']],
+      tools: [['Seviye editörü (örnek)', 'Bir aracın öğrencilere tanıtım vitrini nasıl görünürdü: sürükle bırak harita düzenleme.'], ['Ses sentezi (örnek)', 'Kod ile 8-bit ses efekti üreten bir aracın örnek kartı.'], ['Sprite boyayıcı (örnek)', 'Pixel çizim aracı için sponsorlu vitrin örneği.']],
+      assets: [['Çayır voxel paketi (örnek)', 'Topluluk üyesinin hazırladığı ağaç, çit ve çiçek parçaları; spawn() ile kullanılır.'], ['Kale parçaları (örnek)', 'Duvar, kule ve kapı modelleri; Atölye biçiminde basit şekillerden.'], ['Mağara ışıkları (örnek)', 'Ünite 3 için kristal ve meşale modelleri.']],
+    },
+    mkBizTitle: 'Bu vitrin nasıl gelir getirir', mkBiz1T: 'B2B tanıtım', mkBiz1B: 'Motor ve araç şirketleri, oyun geliştirmeyi öğrenen kitleye "Sponsorlu" etiketiyle görünmek için ödeme yapar. Ders içeriği ve koç sponsordan bağımsız kalır.',
+    mkBiz2T: 'Topluluk pazarı', mkBiz2B: 'Öğrenciler ve tasarımcılar Atölye biçiminde modellerini paket olarak satar; Worldsmith her satıştan komisyon alır.',
+    mkBiz3T: 'Eğitim verisi', mkBiz3B: 'İzin verilen, anonim öğrenme adımları (hata, ipucu, düzeltme) eğitim veri kümesi olarak lisanslanabilir.',
+    mkBizNote: 'Bunlar sunum için iş modeli fikirleri; komisyon oranı ve fiyatlar henüz belirlenmedi, hiçbir anlaşma yok.',
     navProfile: 'Profil', pfEyebrow: 'PROFİL', pfTitle: 'Demirci defterin', pfSub: 'Burada yalnızca bu tarayıcıda gerçekten yaptıkların görünür.',
     pfXpL: 'XP', pfStreakL: 'gün seri', pfDoneL: 'bölüm tamamlandı', pfModelsL: 'Atölye modeli',
     pfBadges: 'Rozetler', pfNoBadge: 'Henüz rozet yok. İlk bölümü bitirince ilk rozetin burada parlar.',
@@ -1724,6 +1780,18 @@ const UI_BRAND = {
   },
   en: {
     navHome: 'Home', navJourney: 'Roadmap', navWorkshop: 'Workshop',
+    navMarket: 'Market', mkEyebrow: 'MARKET', mkTitle: 'The smith\'s market', mkDemo: 'Demo list, not a real seller',
+    mkSub: 'A sample showcase that explains Worldsmith\'s business model. The products, sellers and companies here are not real; there is no buying, no account and no payment.',
+    mkEngines: 'Engines', mkTools: 'Tools', mkAssets: 'Asset packs', mkCardDemo: 'DEMO · not a real seller', mkNoBuy: 'No buying (demo)',
+    mkItems: {
+      engines: [['Unity Lite style', 'Bright, flat-coloured scene look. Built into Worldsmith, free.'], ['Unreal Lite style', 'Dark cinematic light and soft haze. Built into Worldsmith, free.'], ['Godot Lite style', 'Bluish, plain look. Built into Worldsmith, free.']],
+      tools: [['Level editor (sample)', 'What a tool\'s showcase to learners could look like: drag and drop map editing.'], ['Sound synth (sample)', 'Sample card for a tool that makes 8-bit sound effects from code.'], ['Sprite painter (sample)', 'Sponsored showcase sample for a pixel drawing tool.']],
+      assets: [['Meadow voxel pack (sample)', 'Trees, fences and flowers made by a community member; used with spawn().'], ['Castle parts (sample)', 'Wall, tower and gate models built from simple shapes, Workshop style.'], ['Cave lights (sample)', 'Crystal and torch models for Unit 3.']],
+    },
+    mkBizTitle: 'How this showcase makes money', mkBiz1T: 'B2B promotion', mkBiz1B: 'Engine and tool companies pay to be seen, labelled "Sponsored", by people learning game development. Lessons and the coach stay independent of sponsors.',
+    mkBiz2T: 'Community market', mkBiz2B: 'Learners and designers sell their Workshop-style models as packs; Worldsmith takes a commission on each sale.',
+    mkBiz3T: 'Training data', mkBiz3B: 'Consented, anonymous learning steps (error, hint, fix) could be licensed as a training dataset.',
+    mkBizNote: 'These are business-model ideas for the pitch; commission rates and prices are not set, and no deals exist.',
     navProfile: 'Profile', pfEyebrow: 'PROFILE', pfTitle: 'Your smith\'s ledger', pfSub: 'Only what you really did in this browser shows up here.',
     pfXpL: 'XP', pfStreakL: 'day streak', pfDoneL: 'lessons completed', pfModelsL: 'Workshop models',
     pfBadges: 'Badges', pfNoBadge: 'No badges yet. Finish the first lesson and your first badge lights up here.',
@@ -3190,7 +3258,7 @@ function setLang(l) {
    ===================================================================== */
 const UNIT_LESSONS = [[0, 1, 2, 3], [], []];   // Level 1: today's four missions are Unit 1; Units 2 and 3 have no content yet
 const lockedIdx = (i) => !state.done.includes(i) && i > firstOpen();
-const views = { home: $('#homeView'), journey: $('#journeyView'), lesson: $('#lessonView'), workshop: $('#workshopView'), profile: $('#profileView') };
+const views = { home: $('#homeView'), journey: $('#journeyView'), lesson: $('#lessonView'), workshop: $('#workshopView'), profile: $('#profileView'), market: $('#marketView') };
 let lessonReady = false;
 function showView(name) {
   for (const [k, el] of Object.entries(views)) el.hidden = k !== name;
@@ -3262,6 +3330,7 @@ function renderShell() {
   renderEngines();
   renderWorkshop();
   if (!views.profile.hidden) renderProfile();
+  renderMarket();
   document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
   renderHome(); renderJourney();
 }
@@ -3288,6 +3357,7 @@ function route() {
   if (h === '#/journey') { renderJourney(); showView('journey'); return; }
   if (h === '#/workshop') { flash(''); renderWorkshop(); showView('workshop'); return; }
   if (h === '#/profile') { flash(''); renderProfile(); showView('profile'); return; }
+  if (h === '#/market') { flash(''); renderMarket(); showView('market'); return; }
   flash('');
   renderHome();
   showView('home');
@@ -3536,6 +3606,20 @@ function renderProfile() {
 }
 $('#pfEngine').addEventListener('click', (e) => { const b = e.target.closest('[data-pfengine]'); if (b) { setEngine(b.dataset.pfengine); renderProfile(); } });
 $('#pfReset').addEventListener('click', () => $('#btnWipe').click());   // same confirm and reset as the lesson screen
+
+
+/* Market (#/market): a labelled demo showcase, nothing can be bought. */
+var mk = { tab: 'engines' };
+function renderMarket() {
+  if (!mk) return;
+  const T = tt();
+  document.querySelectorAll('[data-mktab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.mktab === mk.tab)));
+  $('#mkGrid').setAttribute('aria-labelledby', { engines: 'mkTabEngines', tools: 'mkTabTools', assets: 'mkTabAssets' }[mk.tab]);
+  $('#mkGrid').innerHTML = T.mkItems[mk.tab].map(([name, body], i) => `<article class="mk-card"><span class="thumb t${i % 3}" aria-hidden="true"></span>`
+    + `<span class="demo-tag">${esc(T.mkCardDemo)}</span><h3>${esc(name)}</h3><p>${esc(body)}</p>`
+    + `<button type="button" class="btn small" disabled>${esc(T.mkNoBuy)}</button></article>`).join('');
+}
+document.querySelectorAll('[data-mktab]').forEach((b) => b.addEventListener('click', () => { mk.tab = b.dataset.mktab; renderMarket(); }));
 
 /* boot */
 renderStatic();
