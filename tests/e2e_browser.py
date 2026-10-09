@@ -175,7 +175,9 @@ def main():
         page.screenshot(path=os.path.join(SHOTS, "02_fallback_desktop.png"))
         MODE["fail"] = False
         page.click("[data-act=retry]")
-        page.wait_for_selector("#msgs .msg .tag b:has-text('AI coach')", timeout=8000)
+        # wait on the last bubble itself: earlier bubbles in this log already carry an AI tag
+        page.wait_for_function("(() => { const m = [...document.querySelectorAll('#msgs .msg')].pop();"
+                               " return m && !m.classList.contains('pending') && m.textContent.includes('AI coach'); })()", timeout=8000)
         check("fallback: retry works once the model is back", True)
         check("fallback: failed bubble was replaced, not duplicated", page.locator("#msgs .tag.rules").count() == 0)
 
