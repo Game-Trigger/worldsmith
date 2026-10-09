@@ -25,6 +25,14 @@ import coach  # noqa: E402
 import model  # noqa: E402
 from playwright.sync_api import sync_playwright  # noqa: E402
 
+
+def enter_lesson(page):
+    """/ opens the home screen; Start (or Continue) leads to the first open lesson, like a learner would."""
+    page.wait_for_selector("#homeGo, #lessonView:not([hidden])", timeout=10000)
+    if page.is_visible("#homeView"):
+        page.click("#homeGo")
+    page.wait_for_selector("#lessonView:not([hidden])", timeout=10000)
+
 LOG_DIR = os.path.join(HERE, ".eval_logs", "prompt")
 PAUSE_S = 9
 # (mission index, lang, wish, check on the chips {tree, rock, house} -> bool, what the check means)
@@ -74,6 +82,7 @@ def main():
             ctx.add_init_script(f"localStorage.setItem('worldsmith.v1', JSON.stringify({{lang: '{lang}', done: {list(range(mission))}, xp: 0, ai: true}}))")
             page = ctx.new_page()
             page.goto(url)
+            enter_lesson(page)
             page.wait_for_function("document.querySelector('#srv').className.includes('ready')", timeout=8000)
             page.click("#tabPrompt")
             page.fill("#pmText", wish)

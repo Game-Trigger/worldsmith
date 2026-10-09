@@ -16,6 +16,14 @@ import forge  # noqa: E402
 import providers  # noqa: E402
 from playwright.sync_api import sync_playwright  # noqa: E402
 
+
+def enter_lesson(page):
+    """/ opens the home screen; Start (or Continue) leads to the first open lesson, like a learner would."""
+    page.wait_for_selector("#homeGo, #lessonView:not([hidden])", timeout=10000)
+    if page.is_visible("#homeView"):
+        page.click("#homeGo")
+    page.wait_for_selector("#lessonView:not([hidden])", timeout=10000)
+
 WINDMILL = {
     "name": "windmill", "label": "Windmill",
     "parts": [
@@ -73,6 +81,7 @@ def main():
         noise = ("favicon", "ERR_TUNNEL_CONNECTION_FAILED", "status of 503")
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" and not any(n in m.text for n in noise) else None)
         page.goto(url)
+        enter_lesson(page)
         page.wait_for_function("document.querySelector('#srv').textContent.includes('ready')", timeout=8000)
 
         page.click("#tabForge")
@@ -199,6 +208,7 @@ def main():
         h.on("pageerror", lambda e: herr.append(str(e)))
         h.add_init_script("localStorage.setItem('worldsmith.forge.v1', %s)" % json.dumps(json.dumps(hostile)))
         h.goto(url)
+        enter_lesson(h)
         h.wait_for_function("document.querySelector('#srv').textContent.includes('ready')", timeout=8000)
         h.click("#tabForge")
         items = h.inner_text("#fgList")
@@ -211,6 +221,7 @@ def main():
 
         mob = b.new_context(viewport={"width": 390, "height": 844}, locale="tr-TR", has_touch=True, is_mobile=True).new_page()
         mob.goto(url)
+        enter_lesson(mob)
         mob.wait_for_function("document.querySelector('#srv').textContent.includes('hazır')", timeout=8000)
         mob.click("#tabForge")
         mob.fill("#fgText", "taş bir kule")
@@ -226,6 +237,7 @@ def main():
         off_err = []
         off.on("pageerror", lambda e: off_err.append(str(e)))
         off.goto(static_url)
+        enter_lesson(off)
         off.wait_for_function("document.querySelector('#srv').textContent.includes('No server')", timeout=8000)
         off.click("#tabForge")
         check("no server: forge off and says why", "opened without the AI server" in off.inner_text("#fgOff") and off.is_disabled("#fgGo") and off.is_disabled("#fgText"))

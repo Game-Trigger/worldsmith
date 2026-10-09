@@ -100,6 +100,60 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .app { display: flex; flex-direction: column; gap: 12px; min-height: 100%; }
+.app[hidden], .view[hidden] { display: none; }
+
+/* ---------- shell: home and journey ---------- */
+.view { min-height: 100%; display: flex; flex-direction: column; gap: 18px; animation: viewin 0.22s ease-out; }
+@keyframes viewin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.view-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.view-top .sp { flex: 1; }
+.back { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: transparent; cursor: pointer; font-weight: 600; font-size: 13.5px; }
+.back:hover { background: var(--panel-2); }
+.back svg { width: 14px; height: 14px; }
+.hero { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid var(--line); background:
+  radial-gradient(120% 90% at 85% 10%, var(--accent-soft), transparent 60%),
+  radial-gradient(90% 80% at 0% 100%, var(--ok-soft), transparent 60%), var(--panel);
+  padding: clamp(22px, 5vw, 48px); display: grid; gap: 18px; }
+.hero h1 { margin: 0; font-family: var(--f-display); font-size: clamp(34px, 7vw, 58px); line-height: 1; letter-spacing: -0.03em; }
+.hero .promise { margin: 0; font-size: clamp(17px, 2.4vw, 21px); max-width: 34ch; }
+.hero .sub { margin: 0; color: var(--muted); max-width: 52ch; }
+.hero-art { position: absolute; right: -30px; bottom: -40px; width: min(46vw, 340px); opacity: 0.9; pointer-events: none; animation: drift 18s linear infinite; }
+@keyframes drift { to { transform: rotate(360deg); } }
+.hero > *:not(.hero-art) { position: relative; }
+.cta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn.big { min-height: 52px; padding: 0 26px; font-size: 17px; border-radius: 12px; }
+.note-small { font-size: 12px; color: var(--muted); margin: 0; }
+.home-sec h2, .unit h3 { margin: 0 0 10px; font-family: var(--f-display); font-size: 18px; }
+.level { display: grid; gap: 10px; padding: 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); }
+.level-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.level-head h2 { margin: 0; font-family: var(--f-display); font-size: 22px; }
+.level-head .sp { flex: 1; }
+.bar { height: 10px; border-radius: 99px; background: var(--panel-2); overflow: hidden; }
+.bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok)); border-radius: inherit; transition: width 0.5s ease; }
+.units { display: grid; gap: 14px; }
+.unit { padding: 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); }
+.unit.soon { background: repeating-linear-gradient(135deg, var(--panel), var(--panel) 12px, var(--panel-2) 12px, var(--panel-2) 24px); }
+.unit-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.unit-head h3 { margin: 0; }
+.unit-num { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.pill { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.unit p { margin: 4px 0 0; color: var(--muted); }
+.nodes { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 4px; }
+.node { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; }
+.node:nth-child(even) { margin-left: clamp(0px, 8vw, 64px); }
+.node button { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--line); background: var(--panel-2); cursor: pointer; display: grid; place-items: center; font-weight: 700; font-size: 18px; transition: transform 0.15s, box-shadow 0.15s; }
+.node button:hover:not([disabled]) { transform: translateY(-2px); }
+.node.open button { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); box-shadow: 0 0 0 6px var(--accent-soft); }
+.node.done button { border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
+.node.locked button { cursor: not-allowed; opacity: 0.7; }
+.node button svg { width: 22px; height: 22px; }
+.node-text { min-width: 0; }
+.node-text strong { display: block; }
+.node-text span { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.flash { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+.flash[hidden] { display: none; }
+.lesson-back { margin-right: 2px; }
 
 /* ---------- header ---------- */
 .top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -322,8 +376,42 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>/*__CM_CSS__*/</style>
 
-<div class="app">
+<section class="view" id="homeView" aria-labelledby="homeTitle" hidden>
+  <div class="view-top">
+    <span class="sp"></span>
+    <div class="seg" role="group" aria-label="Language"><button type="button" data-lang="tr" aria-pressed="false">TR</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+  </div>
+  <div class="hero">
+    <svg class="hero-art" viewBox="0 0 200 200" aria-hidden="true"><g fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.55"><path d="M100 18 171 59v82l-71 41-71-41V59z"/><path d="M100 48 145 74v52l-45 26-45-26V74z"/><path d="M100 18v164M29 59l142 82M171 59 29 141" opacity="0.4"/></g><path d="M100 80 120 100 100 120 80 100z" fill="var(--accent)" opacity="0.8"/></svg>
+    <h1 id="homeTitle">Worldsmith</h1>
+    <p class="promise" data-i="homePromise"></p>
+    <p class="sub" data-i="homeSub"></p>
+    <div class="cta">
+      <button type="button" class="btn primary big" id="homeGo"></button>
+      <button type="button" class="btn" id="homeMap" data-i="homeMap"></button>
+    </div>
+  </div>
+  <div class="home-sec" id="engineSec"></div>
+</section>
+
+<section class="view" id="journeyView" aria-labelledby="jTitle" hidden>
+  <div class="view-top">
+    <button type="button" class="back" id="jHome"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2 3.5 6l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i="toHome"></span></button>
+    <span class="sp"></span>
+    <span class="xp" id="jXp"></span>
+    <div class="seg" role="group" aria-label="Language"><button type="button" data-lang="tr" aria-pressed="false">TR</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+  </div>
+  <p class="flash" id="jFlash" role="status" hidden></p>
+  <div class="level">
+    <div class="level-head"><h2 id="jTitle" data-i="levelTitle"></h2><span class="sp"></span><span class="note-small" id="jCount"></span></div>
+    <div class="bar" role="progressbar" id="jBar" aria-valuemin="0" aria-valuemax="100"><i id="jBarFill"></i></div>
+  </div>
+  <div class="units" id="units"></div>
+</section>
+
+<div class="app" id="lessonView" hidden>
   <header class="top">
+    <button type="button" class="back lesson-back" id="toJourney"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2 3.5 6l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i="toJourney"></span></button>
     <div class="brand">
       <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2.5 27.5 9v14L16 29.5 4.5 23V9z" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round"/><path d="M16 10.5 21.5 16 16 21.5 10.5 16z" fill="var(--accent)"/></svg>
       <span>Worldsmith</span>
@@ -501,6 +589,16 @@ const UI = {
     taskGoal: 'Hedef', taskCrit: 'Ölçütler',
     cTask: 'Editördeki kod, koçun görev iskeleti ile değiştirilecek. Devam edilsin mi?',
     verdictPass: 'Geçti', verdictPartial: 'Kısmen', verdictFail: 'Henüz değil', concept: 'Eksik kavram',
+    homePromise: 'Kod yaz, dünyanı kur, AI koçla öğren.',
+    homeSub: 'Güçlü bilgisayar ya da oyun motoru kurulumu gerekmez. Tarayıcıda küçük programlar yazarsın, 3D sahnen anında değişir; koç kodunu okuyup bir sonraki adımı sorar.',
+    homeStart: 'Başla', homeContinue: (n) => `Devam et · ${n}`, homeMap: 'Yol haritası', toHome: 'Giriş', toJourney: 'Yol haritası',
+    levelTitle: 'Seviye 1 · Temeller', levelCount: (d, t, xp) => `${d} / ${t} bölüm · ${xp} XP`,
+    unitWord: (n) => `Ünite ${n}`, unitNames: ['Sahne', 'Hareket ve girdi', 'Çarpışma'],
+    unitDesc: ['Komutlarla bir dünya kur: ağaç, kaya, ev, ışık ve sis.', 'Nesneleri klavyeyle hareket ettir, oyun döngüsünü öğren.', 'Nesneler çarpıştığında ne olacağına sen karar ver.'],
+    soon: 'Yakında', soonBody: 'Bu ünitenin bölümleri hazırlanıyor. Ünite 1 bitince kaldığın yerden buradan devam edeceksin.',
+    unitDone: 'Tamamlandı', nodeDone: 'Tamamlandı · tekrar oynayabilirsin', nodeOpen: 'Sıradaki bölüm',
+    nodeLocked: (prev) => `Kilitli: önce "${prev}" bölümünü bitir`, lockedFlash: (name, prev) => `"${name}" henüz kilitli. Önce "${prev}" bölümünü bitirmen gerekiyor.`,
+    unknownLesson: 'Bu adreste bir bölüm yok. Yol haritasından bir bölüm seç.',
     tabCode: 'Kod', tabPrompt: 'Prompt', pmLabel: 'Sahnede ne görmek istediğini yaz. AI bunu koda çevirir, kod editörde görünür.',
     pmPlaceholder: 'Örnek: Ortada boş bir alan kalsın, çevresine çember şeklinde 12 ağaç dik ve araya birkaç kaya koy.',
     pmGo: 'Modelle', pmUndo: 'Geri al', pmShowCode: 'Üretilen kodu gör', pmCmds: (l) => `Açık komutlar: ${l}`,
@@ -570,6 +668,16 @@ const UI = {
     taskGoal: 'Goal', taskCrit: 'Success criteria',
     cTask: "The editor will be replaced with the coach's task skeleton. Continue?",
     verdictPass: 'Passed', verdictPartial: 'Partly there', verdictFail: 'Not yet', concept: 'Missing concept',
+    homePromise: 'Write code, build your world, learn with an AI coach.',
+    homeSub: 'No powerful computer or engine install needed. You write small programs in the browser, your 3D scene changes at once, and the coach reads your code and asks about the next step.',
+    homeStart: 'Start', homeContinue: (n) => `Continue · ${n}`, homeMap: 'Roadmap', toHome: 'Home', toJourney: 'Roadmap',
+    levelTitle: 'Level 1 · Foundations', levelCount: (d, t, xp) => `${d} / ${t} lessons · ${xp} XP`,
+    unitWord: (n) => `Unit ${n}`, unitNames: ['Scene', 'Movement and input', 'Collision'],
+    unitDesc: ['Build a world with commands: trees, rocks, houses, light and fog.', 'Move objects with the keyboard and learn the game loop.', 'Decide what happens when objects collide.'],
+    soon: 'Coming soon', soonBody: 'The lessons of this unit are being prepared. Once you finish Unit 1, you will continue from here.',
+    unitDone: 'Completed', nodeDone: 'Completed · play it again any time', nodeOpen: 'Up next',
+    nodeLocked: (prev) => `Locked: finish "${prev}" first`, lockedFlash: (name, prev) => `"${name}" is still locked. Finish "${prev}" first.`,
+    unknownLesson: 'There is no lesson at that address. Pick one from the roadmap.',
     tabCode: 'Code', tabPrompt: 'Prompt', pmLabel: 'Describe what you want to see. The AI turns it into code, and the code shows up in the editor.',
     pmPlaceholder: 'Example: Leave a clearing in the middle, plant 12 trees in a circle around it and scatter a few rocks between them.',
     pmGo: 'Build it', pmUndo: 'Undo', pmShowCode: 'Show the generated code', pmCmds: (l) => `Unlocked: ${l}`,
@@ -619,7 +727,13 @@ const UI = {
    ===================================================================== */
 const STORE_KEY = 'worldsmith.v1';
 let saved = {};
-try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}; } catch (e) { saved = {}; }
+try {
+  saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) throw new Error('bad store');
+} catch (e) {
+  saved = {};
+  try { localStorage.removeItem(STORE_KEY); } catch (e2) { /* storage unavailable */ }
+}
 const guessLang = () => (/^(tr|az)/i.test(navigator.language || '') ? 'tr' : 'en');
 const state = {
   lang: saved.lang === 'en' || saved.lang === 'tr' ? saved.lang : guessLang(),
@@ -1920,9 +2034,9 @@ $('#msgs').addEventListener('click', (e) => {
     ask(tt().cTask, () => { clearErr(); cm.setValue(state.task.starter_code); state.dirty = true; cm.focus(); });
   }
 });
-$('#btnNext').addEventListener('click', () => loadMission(state.cur + 1));
+$('#btnNext').addEventListener('click', () => goLesson(state.cur + 1, true));   // the mission is passed, moving on is expected
 $('#btnExample').addEventListener('click', () => ask(tt().cExample, () => { clearErr(); cm.setValue(pick(EXAMPLE)); state.dirty = false; run(false); }));
-$('#btnWipe').addEventListener('click', () => ask(tt().cWipe, () => { state.done = []; state.xp = 0; persist(); loadMission(0); renderStatic(); }));
+$('#btnWipe').addEventListener('click', () => ask(tt().cWipe, () => { state.done = []; state.xp = 0; persist(); loadMission(0); renderStatic(); location.hash = '#/journey'; }));
 $('#confirmYes').addEventListener('click', () => { const f = confirmYes; closeAsk(); if (f) f(); });
 $('#confirmNo').addEventListener('click', closeAsk);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#confirm').hidden) closeAsk(); });
@@ -1931,22 +2045,121 @@ $('#steps').addEventListener('click', (e) => {
   if (!b || b.disabled) return;
   const i = Number(b.dataset.idx);
   if (i === state.cur) return;
-  const go = () => loadMission(i);
-  if (state.dirty) ask(tt().cSwitch, go); else go();
+  goLesson(i);
 });
 function setLang(l) {
   if (l === state.lang) return;
   state.lang = l; persist();
-  renderStatic();
+  renderStatic(); renderShell();
   if (state.last) { /* keep feedback text, only chrome changes */ }
 }
+
+/* =====================================================================
+   App shell: #/ home, #/journey roadmap, #/lesson/<id> the lesson screen above.
+   ===================================================================== */
+const UNIT_LESSONS = [[0, 1, 2, 3], [], []];   // Level 1: today's four missions are Unit 1; Units 2 and 3 have no content yet
+const lockedIdx = (i) => !state.done.includes(i) && i > firstOpen();
+const views = { home: $('#homeView'), journey: $('#journeyView'), lesson: $('#lessonView') };
+let lessonReady = false;
+function showView(name) {
+  for (const [k, el] of Object.entries(views)) el.hidden = k !== name;
+  if (name === 'lesson') { resize(); cm.refresh(); }
+  window.scrollTo(0, 0);
+}
+function goLesson(i, noAsk) {
+  if (i === state.cur && location.hash === '#/lesson/' + LESSON_IDS[i]) return;
+  const go = () => { location.hash = '#/lesson/' + LESSON_IDS[i]; };
+  if (i !== state.cur && state.dirty && !noAsk) ask(tt().cSwitch, go); else go();
+}
+function flash(text) {
+  const f = $('#jFlash');
+  f.textContent = text || '';
+  f.hidden = !text;
+}
+function renderHome() {
+  const T = tt(), started = state.done.length > 0 || state.xp > 0;
+  $('#homeGo').textContent = started ? T.homeContinue(pick(MISSIONS[firstOpen()].name)) : T.homeStart;
+}
+function renderJourney() {
+  const T = tt(), total = MISSIONS.length, done = state.done.length;
+  $('#jXp').textContent = T.xp(state.xp);
+  $('#jCount').textContent = T.levelCount(done, total, state.xp);
+  const pct = Math.round((done / total) * 100);
+  $('#jBarFill').style.width = pct + '%';
+  $('#jBar').setAttribute('aria-valuenow', String(pct));
+  $('#jBar').setAttribute('aria-label', T.levelCount(done, total, state.xp));
+  $('#units').innerHTML = UNIT_LESSONS.map((idxs, u) => {
+    const head = `<div class="unit-head"><span class="unit-num">${esc(T.unitWord(u + 1))}</span><h3>${esc(T.unitNames[u])}</h3>`;
+    if (!idxs.length) {
+      return `<section class="unit soon">${head}<span class="pill">${esc(T.soon)}</span></div><p>${esc(T.unitDesc[u])}</p><p>${esc(T.soonBody)}</p></section>`;
+    }
+    const all = idxs.every((i) => state.done.includes(i));
+    const nodes = idxs.map((i, k) => {
+      const done = state.done.includes(i), locked = lockedIdx(i);
+      const prev = k > 0 ? pick(MISSIONS[idxs[k - 1]].name) : '';
+      const cls = done ? 'done' : locked ? 'locked' : 'open';
+      const status = done ? T.nodeDone : locked ? T.nodeLocked(prev) : T.nodeOpen;
+      const icon = done ? checkSvg : locked ? '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>' : String(i + 1);
+      return `<li class="node ${cls}"><button type="button" data-node="${i}" aria-disabled="${locked}" aria-label="${esc(pick(MISSIONS[i].name) + ': ' + status)}">${icon}</button>`
+        + `<div class="node-text"><strong>${esc(pick(MISSIONS[i].name))}</strong><span>${esc(status)}</span></div></li>`;
+    }).join('');
+    return `<section class="unit">${head}${all ? `<span class="pill ok">${esc(T.unitDone)}</span>` : ''}</div><p>${esc(T.unitDesc[u])}</p><ol class="nodes">${nodes}</ol></section>`;
+  }).join('');
+}
+function renderShell() {
+  document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
+  renderHome(); renderJourney();
+}
+function route() {
+  const h = location.hash || '#/';
+  const m = /^#\/lesson\/([\w-]+)$/.exec(h);
+  if (m) {
+    const i = LESSON_IDS.indexOf(m[1]);
+    if (i < 0) { flash(tt().unknownLesson); location.replace('#/journey'); return; }
+    if (lockedIdx(i)) {
+      const prev = UNIT_LESSONS[0][UNIT_LESSONS[0].indexOf(i) - 1];
+      flash(tt().lockedFlash(pick(MISSIONS[i].name), pick(MISSIONS[prev].name)));
+      location.replace('#/journey');
+      return;
+    }
+    flash('');
+    if (!lessonReady || i !== state.cur) loadMission(i);
+    lessonReady = true;
+    showView('lesson');
+    return;
+  }
+  if (h === '#/journey') { renderJourney(); showView('journey'); return; }
+  flash('');
+  renderHome();
+  showView('home');
+}
+$('#homeGo').addEventListener('click', () => goLesson(firstOpen()));
+$('#homeMap').addEventListener('click', () => { location.hash = '#/journey'; });
+$('#jHome').addEventListener('click', () => { location.hash = '#/'; });
+$('#toJourney').addEventListener('click', () => { location.hash = '#/journey'; });
+$('#units').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-node]');
+  if (!b) return;
+  const i = Number(b.dataset.node);
+  if (lockedIdx(i)) {
+    const k = UNIT_LESSONS[0].indexOf(i);
+    flash(tt().lockedFlash(pick(MISSIONS[i].name), pick(MISSIONS[UNIT_LESSONS[0][k - 1]].name)));
+    return;
+  }
+  flash('');
+  goLesson(i);
+});
+document.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
+window.addEventListener('hashchange', route);
+
 $('#langTr').addEventListener('click', () => setLang('tr'));
 $('#langEn').addEventListener('click', () => setLang('en'));
 
 /* boot */
 renderStatic();
+renderShell();
 setStatus('', tt().idle);
-loadMission(firstOpen());
+route();
 probeServer();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => cm.refresh());
 setTimeout(() => cm.refresh(), 60);

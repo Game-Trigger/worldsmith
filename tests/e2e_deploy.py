@@ -14,6 +14,14 @@ import urllib.request
 
 from playwright.sync_api import sync_playwright
 
+
+def enter_lesson(page):
+    """/ opens the home screen; Start (or Continue) leads to the first open lesson, like a learner would."""
+    page.wait_for_selector("#homeGo, #lessonView:not([hidden])", timeout=10000)
+    if page.is_visible("#homeView"):
+        page.click("#homeGo")
+    page.wait_for_selector("#lessonView:not([hidden])", timeout=10000)
+
 results = []
 
 
@@ -47,6 +55,7 @@ def main():
         errors = []
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.goto(base + "/")
+        enter_lesson(page)
         page.wait_for_function("!document.querySelector('#srv').textContent.includes('Looking')", timeout=10000)
         srv = page.inner_text("#srv")
         check("server label settles", srv in ("AI coach ready", "No API key · rule-based coach"), srv)

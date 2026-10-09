@@ -17,6 +17,14 @@ import model  # noqa: E402
 import providers  # noqa: E402
 from playwright.sync_api import sync_playwright  # noqa: E402
 
+
+def enter_lesson(page):
+    """/ opens the home screen; Start (or Continue) leads to the first open lesson, like a learner would."""
+    page.wait_for_selector("#homeGo, #lessonView:not([hidden])", timeout=10000)
+    if page.is_visible("#homeView"):
+        page.click("#homeGo")
+    page.wait_for_selector("#lessonView:not([hidden])", timeout=10000)
+
 GOOD = 'ground("#6a994e");\n// a row of trees\nfor (let i = 0; i < 5; i++) {\n  tree(i * 3 - 6, 0);\n}'
 BROKEN = "for (let i = 0; i < 5; i++) {\n  tree(i * 30, 0);\n}"   # x out of range: fails in the worker, not on the server
 SCRIPT = {"replies": [], "seen": [], "fail": False}
@@ -63,6 +71,7 @@ def main():
         noise = ("favicon", "ERR_TUNNEL_CONNECTION_FAILED", "status of 503")
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" and not any(n in m.text for n in noise) else None)
         page.goto(url)
+        enter_lesson(page)
         page.wait_for_function("document.querySelector('#srv').textContent.includes('ready')", timeout=8000)
 
         page.click("#tabPrompt")
@@ -154,6 +163,7 @@ def main():
         page.wait_for_selector("#btnNext", state="visible", timeout=8000)
         check("learner-edited code earns XP and unlocks", "50 XP" in page.inner_text("#xp"), page.inner_text("#xp"))
         page.click("#btnNext")
+        page.wait_for_function("location.hash === '#/lesson/loop-forest'", timeout=5000)
         page.click("#tabPrompt")
         check("next mission: unlocked list grows (random)", "random" in page.inner_text("#pmCmds"), page.inner_text("#pmCmds"))
         page.click("#steps li:nth-child(1) button")
@@ -171,6 +181,7 @@ def main():
 
         mob = b.new_context(viewport={"width": 390, "height": 844}, locale="tr-TR", has_touch=True, is_mobile=True).new_page()
         mob.goto(url)
+        enter_lesson(mob)
         mob.wait_for_function("document.querySelector('#srv').textContent.includes('hazır')", timeout=8000)
         mob.click("#tabPrompt")
         sw = mob.evaluate("document.documentElement.scrollWidth")
@@ -187,6 +198,7 @@ def main():
         off_err = []
         off.on("pageerror", lambda e: off_err.append(str(e)))
         off.goto(static_url)
+        enter_lesson(off)
         off.wait_for_function("document.querySelector('#srv').textContent.includes('No server')", timeout=8000)
         off.click("#tabPrompt")
         check("no server: prompt off and says why", "opened without the AI server" in off.inner_text("#pmOff") and off.is_disabled("#pmGo") and off.is_disabled("#pmText"))

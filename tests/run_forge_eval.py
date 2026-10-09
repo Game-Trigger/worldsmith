@@ -25,6 +25,14 @@ import app  # noqa: E402
 import forge  # noqa: E402
 import providers  # noqa: E402
 
+
+def enter_lesson(page):
+    """/ opens the home screen; Start (or Continue) leads to the first open lesson, like a learner would."""
+    page.wait_for_selector("#homeGo, #lessonView:not([hidden])", timeout=10000)
+    if page.is_visible("#homeView"):
+        page.click("#homeGo")
+    page.wait_for_selector("#lessonView:not([hidden])", timeout=10000)
+
 CASES = [
     ("en", "a wooden windmill"), ("tr", "taş bir kule, tepesinde kırmızı bir bayrak"), ("en", "a campfire with logs around it"),
     ("en", "a small wooden bridge"), ("tr", "bir fener"), ("en", "a market stall with a striped awning"),
@@ -117,6 +125,7 @@ def main():
         page = b.new_context(viewport={"width": 1280, "height": 820}, locale="en-US").new_page()
         page.add_init_script("localStorage.setItem('worldsmith.forge.v1', %s)" % json.dumps(json.dumps(made)))
         page.goto(f"http://127.0.0.1:{srv.server_address[1]}/test.html")
+        enter_lesson(page)
         page.wait_for_selector(".CodeMirror")
         for m in made:
             page.evaluate("code => { const cm = document.querySelector('.CodeMirror').CodeMirror; cm.setValue(code); }", f'spawn("{m["name"]}", 0, 0, 4);')
