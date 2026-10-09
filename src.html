@@ -1096,6 +1096,51 @@ textarea, select { border-radius: 0 !important; }
   .steps3 li:not(:last-child)::after { right: auto; left: 30px; top: auto; bottom: -14px; width: 6px; height: 14px; }
   .site-foot nav { margin-left: 0; }
 }
+
+/* roadmap: biome world map */
+#journeyView { gap: 16px; }
+.jbar { position: sticky; top: var(--navh, 90px); z-index: 10; background: var(--panel); }
+.jbar .level-head { gap: 8px 12px; }
+.streak { font-size: 12.5px; font-weight: 700; padding: 4px 9px; border: 3px solid var(--line); color: var(--muted); }
+.streak.on { color: var(--fire); border-color: var(--fire); }
+.jbar .bar { height: 14px; border-radius: 0; border: 3px solid #000; background: var(--code-bg); }
+.jbar .bar i { border-radius: 0; background: repeating-linear-gradient(90deg, var(--grass) 0 10px, #5f9a34 10px 14px); }
+.unit { position: relative; overflow: hidden; padding: 18px 18px 44px; }
+.unit > * { position: relative; }
+.unit .decor { position: absolute; inset: auto 0 0 0; height: 26px; pointer-events: none; }
+.biome-name { display: inline-block; margin-bottom: 6px; font-family: var(--f-display); font-size: 9px; letter-spacing: 0.08em; padding: 4px 6px; background: rgba(0, 0, 0, 0.35); }
+.biome-meadow { background: linear-gradient(180deg, rgba(143, 197, 238, 0.12), transparent 40%), #1d2416; border-color: #4d7a2c; }
+.biome-meadow .decor { background: linear-gradient(90deg, #6fae3f 0 8px, #5f9a34 8px 16px) 0 0 / 16px 8px repeat-x, linear-gradient(#7a4a2b 0 0) 0 8px / 100% 18px no-repeat; }
+.biome-meadow .biome-name { color: #9fd36a; }
+.biome-quarry { background: repeating-linear-gradient(135deg, #24211f 0 14px, #2b2724 14px 28px); border-color: #6b6f76; }
+.biome-quarry .decor { background: linear-gradient(90deg, #6b6f76 0 12px, #55585e 12px 20px, #7c8087 20px 28px) 0 0 / 28px 10px repeat-x, linear-gradient(#3a3d42 0 0) 0 10px / 100% 16px no-repeat; }
+.biome-quarry .biome-name { color: #c9ccd1; }
+.biome-cave { background: radial-gradient(60% 80% at 80% 20%, rgba(245, 177, 61, 0.08), transparent 60%), #120f14; border-color: #3b3346; }
+.biome-cave .decor { background: linear-gradient(90deg, #2a2430 0 10px, #1c1820 10px 18px) 0 0 / 18px 26px repeat-x; }
+.biome-cave .biome-name { color: #b9a6d6; }
+.unit.soon { background-blend-mode: normal; }
+.unit.soon::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(135deg, transparent 0 12px, rgba(0, 0, 0, 0.18) 12px 24px); pointer-events: none; }
+.nodes { position: relative; margin: 18px 0 30px; display: grid; gap: 18px; }
+.node:not(:first-child) button::before { content: none; }
+.node:not(:first-child)::before { content: ""; position: absolute; left: 31px; top: -18px; width: 6px; height: 18px; background: repeating-linear-gradient(180deg, #7a4a2b 0 6px, transparent 6px 9px); }
+.node, .node:nth-child(even) { position: relative; margin-left: calc(var(--x, 0) * 1%); grid-template-columns: 72px auto auto; justify-content: start; }
+.node button { width: 68px; height: 68px; border-radius: 0; border: 3px solid #000; clip-path: var(--px); position: relative; font-family: var(--f-display); font-size: 16px; box-shadow: none;
+  background: linear-gradient(#9aa0a8 0 0) 0 0 / 100% 6px no-repeat, var(--iron); color: #1b1713; }
+.node.locked button { background: linear-gradient(#55585e 0 0) 0 0 / 100% 6px no-repeat, var(--iron-d); color: #9aa0a8; opacity: 1; }
+.node.open button { background: linear-gradient(#ffd27a 0 0) 0 0 / 100% 6px no-repeat, var(--fire); color: #14110f; animation: pulse 1.6s steps(4) infinite; }
+.node.done button { background: linear-gradient(#9fd36a 0 0) 0 0 / 100% 6px no-repeat, var(--grass); color: #10200a; }
+.node button svg { width: 26px; height: 26px; }
+@keyframes pulse { 0%, 100% { filter: none; } 50% { filter: brightness(1.18) drop-shadow(0 0 6px #f5b13d); } }
+.node .spark { position: absolute; right: 6px; top: 6px; width: 6px; height: 6px; background: var(--fire); box-shadow: 6px -6px 0 #ffd27a, -6px -6px 0 var(--accent); }
+.node-text strong { font-size: 15px; }
+.anvi-pin { display: inline-flex; align-items: center; }
+.anvi-pin .anvi { width: 44px; height: 36px; animation: hop 1.2s steps(2) infinite; }
+@keyframes hop { 50% { transform: translateY(-4px); } }
+@media (max-width: 720px) {
+  .node, .node:nth-child(even) { margin-left: calc(var(--x, 0) * 0.6%); grid-template-columns: 72px 1fr; }
+  .anvi-pin { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) { .node.open button, .anvi-pin .anvi { animation: none; } }
 </style>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1192,12 +1237,10 @@ textarea, select { border-radius: 0 !important; }
 <section class="view" id="journeyView" aria-labelledby="jTitle" hidden>
   <div class="view-top">
     <button type="button" class="back" id="jHome"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2 3.5 6l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i="toHome"></span></button>
-    <span class="sp"></span>
-    <span class="xp" id="jXp"></span>
   </div>
   <p class="flash" id="jFlash" role="status" hidden></p>
-  <div class="level">
-    <div class="level-head"><h2 id="jTitle" data-i="levelTitle"></h2><span class="sp"></span><span class="note-small" id="jCount"></span></div>
+  <div class="level jbar">
+    <div class="level-head"><h2 id="jTitle" data-i="levelTitle"></h2><span class="sp"></span><span class="xp" id="jXp"></span><span class="streak" id="jStreak"></span><span class="note-small" id="jCount"></span></div>
     <div class="bar" role="progressbar" id="jBar" aria-valuemin="0" aria-valuemax="100"><i id="jBarFill"></i></div>
   </div>
   <div class="units" id="units"></div>
@@ -1556,6 +1599,7 @@ const UI = {
 const UI_BRAND = {
   tr: {
     navHome: 'Ana sayfa', navJourney: 'Yol haritası', navWorkshop: 'Atölye',
+    biomes: ['Çayır', 'Taş Ocağı', 'Mağara'], streak: (n) => n ? `${n} gün seri` : 'Seri yok: bugün bir bölüm bitir',
     homeEyebrow: 'TARAYICIDA OYUN GELİŞTİRME', heroTag: 'Canlı three.js sahnesi · senin tarayıcında',
     probTitle: 'Sorun', probBody: 'Herkes tek satır prompt ile oyun yaptırıyor ama kimse öğrenmiyor. Gerçekten öğrenmek isteyen genç ise Unity ya da Unreal\'in donanım ihtiyacında ve öğrenme eğrisinde pes ediyor.',
     probOurs: 'Worldsmith ikisinin ortası: kodu sen yazarsın, AI soru sorarak yol gösterir, sonucu anında 3D olarak görürsün.',
@@ -1595,6 +1639,7 @@ const UI_BRAND = {
   },
   en: {
     navHome: 'Home', navJourney: 'Roadmap', navWorkshop: 'Workshop',
+    biomes: ['Meadow', 'Quarry', 'Cave'], streak: (n) => n ? `${n}-day streak` : 'No streak yet: finish a lesson today',
     homeEyebrow: 'GAME DEVELOPMENT IN THE BROWSER', heroTag: 'Live three.js scene · in your browser',
     probTitle: 'The problem', probBody: 'Everyone gets a game made with a one-line prompt, but nobody learns anything. The young person who really wants to learn gives up on the hardware and the learning curve of Unity or Unreal.',
     probOurs: 'Worldsmith sits in between: you write the code, the AI guides you with questions, and you see the result in 3D at once.',
@@ -1655,7 +1700,24 @@ const state = {
   server: 'checking',            // checking | ready | noserver | nokey (what /api/health said)
   req: 0, busy: false, chat: [], task: null, turn: null,
 };
+/* Streak data: the days on which a lesson was completed (one entry per day, newest last). Only real completions count. */
+const DAYS_KEY = 'worldsmith.days.v1';
+let doneDays = [];
+try { const d = JSON.parse(localStorage.getItem(DAYS_KEY) || '[]'); if (Array.isArray(d)) doneDays = d.filter((x) => typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x)).slice(-60); } catch (e) { doneDays = []; }
+let doneSeen = state.done.length;
+const dayKey = (t) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+function streakDays() {
+  let n = 0, t = Date.now();
+  if (!doneDays.includes(dayKey(t))) t -= 86400000;   // a streak survives until the end of the next day
+  while (doneDays.includes(dayKey(t))) { n++; t -= 86400000; }
+  return n;
+}
 const persist = () => {
+  if (state.done.length > doneSeen && !doneDays.includes(dayKey(Date.now()))) {
+    doneDays.push(dayKey(Date.now()));
+    try { localStorage.setItem(DAYS_KEY, JSON.stringify(doneDays.slice(-60))); } catch (e) { /* storage unavailable */ }
+  }
+  doneSeen = state.done.length;
   try { localStorage.setItem(STORE_KEY, JSON.stringify({ lang: state.lang, done: state.done, xp: state.xp, ai: state.ai, engine: state.engine })); } catch (e) { /* storage unavailable */ }
 };
 const tt = () => UI[state.lang];
@@ -3043,6 +3105,7 @@ function showView(name) {
   document.querySelectorAll('[data-nav]').forEach((a) => { if (a.dataset.nav === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   if (name === 'workshop') wsEnter(); else wsLeave();
   if (name === 'home') heroEnter(); else heroLeave();
+  document.documentElement.style.setProperty('--navh', ($('#topnav').offsetHeight + 8) + 'px');
   if (name === 'lesson') { resize(); cm.refresh(); }
   window.scrollTo(0, 0);
 }
@@ -3060,30 +3123,39 @@ function renderHome() {
   const T = tt(), started = state.done.length > 0 || state.xp > 0;
   $('#homeGo').textContent = started ? T.homeContinue(pick(MISSIONS[firstOpen()].name)) : T.homeStart;
 }
+const BIOMES = ['meadow', 'quarry', 'cave'];
+const NODE_X = [0, 14, 26, 10];   // winding path: left offset in % per node
 function renderJourney() {
   const T = tt(), total = MISSIONS.length, done = state.done.length;
   $('#jXp').textContent = T.xp(state.xp);
+  const st = streakDays();
+  $('#jStreak').textContent = T.streak(st);
+  $('#jStreak').classList.toggle('on', st > 0);
   $('#jCount').textContent = T.levelCount(done, total, state.xp);
   const pct = Math.round((done / total) * 100);
   $('#jBarFill').style.width = pct + '%';
   $('#jBar').setAttribute('aria-valuenow', String(pct));
   $('#jBar').setAttribute('aria-label', T.levelCount(done, total, state.xp));
+  const anvi = (document.querySelector('.ws-head .anvi') || { outerHTML: '' }).outerHTML;
   $('#units').innerHTML = UNIT_LESSONS.map((idxs, u) => {
+    const biome = `<span class="biome-name">${esc(T.biomes[u])}</span>`;
     const head = `<div class="unit-head"><span class="unit-num">${esc(T.unitWord(u + 1))}</span><h3>${esc(T.unitNames[u])}</h3>`;
+    const decor = `<span class="decor" aria-hidden="true"></span>`;
     if (!idxs.length) {
-      return `<section class="unit soon">${head}<span class="pill">${esc(T.soon)}</span></div><p>${esc(T.unitDesc[u])}</p><p>${esc(T.soonBody)}</p></section>`;
+      return `<section class="unit soon biome-${BIOMES[u]}">${decor}${biome}${head}<span class="pill">${esc(T.soon)}</span></div><p>${esc(T.unitDesc[u])}</p><p>${esc(T.soonBody)}</p></section>`;
     }
     const all = idxs.every((i) => state.done.includes(i));
     const nodes = idxs.map((i, k) => {
-      const done = state.done.includes(i), locked = lockedIdx(i);
+      const isDone = state.done.includes(i), locked = lockedIdx(i);
       const prev = k > 0 ? pick(MISSIONS[idxs[k - 1]].name) : '';
-      const cls = done ? 'done' : locked ? 'locked' : 'open';
-      const status = done ? T.nodeDone : locked ? T.nodeLocked(prev) : T.nodeOpen;
-      const icon = done ? checkSvg : locked ? '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>' : String(i + 1);
-      return `<li class="node ${cls}"><button type="button" data-node="${i}" aria-disabled="${locked}" aria-label="${esc(pick(MISSIONS[i].name) + ': ' + status)}">${icon}</button>`
-        + `<div class="node-text"><strong>${esc(pick(MISSIONS[i].name))}</strong><span>${esc(status)}</span></div></li>`;
+      const cls = isDone ? 'done' : locked ? 'locked' : 'open';
+      const status = isDone ? T.nodeDone : locked ? T.nodeLocked(prev) : T.nodeOpen;
+      const icon = isDone ? checkSvg : locked ? '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>' : String(i + 1);
+      const pin = cls === 'open' ? `<span class="anvi-pin">${anvi}</span>` : '';
+      return `<li class="node ${cls}" style="--x:${NODE_X[k % NODE_X.length]}"><button type="button" data-node="${i}" aria-disabled="${locked}" aria-label="${esc(pick(MISSIONS[i].name) + ': ' + status)}">${icon}${isDone ? '<i class="spark" aria-hidden="true"></i>' : ''}</button>`
+        + `<div class="node-text"><strong>${esc(pick(MISSIONS[i].name))}</strong><span>${esc(status)}</span></div>${pin}</li>`;
     }).join('');
-    return `<section class="unit">${head}${all ? `<span class="pill ok">${esc(T.unitDone)}</span>` : ''}</div><p>${esc(T.unitDesc[u])}</p><ol class="nodes">${nodes}</ol></section>`;
+    return `<section class="unit biome-${BIOMES[u]}">${decor}${biome}${head}${all ? `<span class="pill ok">${esc(T.unitDone)}</span>` : ''}</div><p>${esc(T.unitDesc[u])}</p><ol class="nodes">${nodes}</ol></section>`;
   }).join('');
 }
 function renderEngines() {
