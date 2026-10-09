@@ -947,16 +947,123 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
 }
 /* touch-size engine picker on phones, whatever the pointer media query reports */
 @media (max-width: 720px), (pointer: coarse) { .eng-sel { min-height: 44px; } }
+
+/* ===================== Worldsmith brand layer: forge palette, 3 px borders, hard offset shadows ===================== */
+:root, :root[data-theme="light"], :root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14110f; --panel: #1b1713; --panel-2: #241e19; --line: #3a3d42; --line-2: #6b6f76;
+  --text: #f3ece4; --muted: #c2b6a8; --accent: #e0702b; --accent-ink: #14110f; --accent-soft: rgba(224, 112, 43, 0.16);
+  --fire: #f5b13d; --grass: #6fae3f; --dirt: #7a4a2b; --sky: #8fc5ee; --iron: #6b6f76; --iron-d: #3a3d42;
+  --ok: #7cc24a; --ok-soft: rgba(111, 174, 63, 0.18); --err: #ff7a66; --err-soft: rgba(255, 122, 102, 0.14);
+  --code-bg: #110e0c; --hard: 4px 4px 0 #000;
+  --f-display: "Press Start 2P", "Courier New", monospace; --f-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --px: polygon(0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px));
+}
+@media (prefers-color-scheme: light) { :root { color-scheme: dark; } }
+body { background: var(--bg); color: var(--text); }
+:focus-visible { outline: 3px solid var(--fire); outline-offset: 2px; }
+.panel, .level, .unit, .engine, .hero { border: 3px solid var(--line); border-radius: 0; box-shadow: var(--hard); }
+.btn { border: 3px solid var(--line); border-radius: 0; box-shadow: 3px 3px 0 #000; font-weight: 700; }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
+.btn.primary { background: var(--accent); border-color: #000; color: var(--accent-ink); box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.25), 3px 3px 0 #000; }
+.btn.primary:hover { background: #ec7d36; }
+.btn[disabled] { box-shadow: none; }
+.seg { border: 3px solid var(--line); border-radius: 0; }
+.eng-sel { border: 3px solid var(--line); border-radius: 0; background: var(--panel); }
+textarea, select { border-radius: 0 !important; }
+.pm textarea, #wsText { border: 3px solid var(--line); background: var(--code-bg); }
+.logo-block { width: 28px; height: 28px; image-rendering: pixelated; flex: none; filter: drop-shadow(2px 2px 0 #000); }
+.anvi { width: 48px; height: 39px; flex: none; filter: drop-shadow(2px 2px 0 #000); }
+
+/* top bar */
+.topnav { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap;
+  margin: 0 0 12px; padding: 8px 10px; background: var(--panel); border: 3px solid var(--line); box-shadow: var(--hard); }
+.tn-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--text); text-decoration: none; }
+.tn-brand span { font-family: var(--f-display); font-size: 13px; letter-spacing: 0.02em; }
+.tn-links { display: flex; gap: 6px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.tn-links::-webkit-scrollbar { display: none; }
+.tn-links a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; white-space: nowrap; color: var(--muted); text-decoration: none; font-weight: 700; font-size: 13.5px; border: 3px solid transparent; }
+.tn-links a:hover { color: var(--text); }
+.tn-links a[aria-current="page"] { color: var(--text); border-color: var(--accent); background: var(--accent-soft); }
+.tn-tools { display: flex; gap: 8px; align-items: center; }
+.tn-tools .seg button, .tn-tools .eng-sel { min-height: 44px; }
+@media (max-width: 720px) {
+  .topnav { gap: 6px 8px; }
+  .tn-links { order: 3; flex-basis: 100%; }
+  .tn-tools { margin-left: auto; }
+  .tn-brand span { font-size: 11px; }
+}
+
+/* workshop: Cloud Forge */
+.ws { display: grid; gap: 16px; }
+.ws-head { display: flex; gap: 14px; align-items: center; }
+.ws-head .anvi { width: 64px; height: 52px; }
+.eyebrow { margin: 0 0 6px; font-family: var(--f-display); font-size: 10px; color: var(--fire); letter-spacing: 0.06em; }
+.ws-head h1 { margin: 0; font-family: var(--f-display); font-size: clamp(18px, 3.4vw, 28px); line-height: 1.3; }
+.ws-head .sub { margin: 6px 0 0; color: var(--muted); max-width: 70ch; }
+.flow { display: grid; grid-template-columns: 1fr 64px 1.15fr 64px 1.2fr; align-items: stretch; }
+.flow-node { position: relative; padding: 14px; background: var(--panel); border: 3px solid var(--line); box-shadow: var(--hard); display: grid; gap: 8px; align-content: start; min-width: 0; }
+.flow-node.core { border-color: var(--accent); background: linear-gradient(180deg, rgba(224, 112, 43, 0.14), transparent 60%), var(--panel); }
+.flow-node h3 { margin: 0; font-family: var(--f-display); font-size: 11px; line-height: 1.5; }
+.flow-node > p { margin: 0; color: var(--muted); font-size: 13px; }
+.flow-node svg.icon { width: 40px; height: 40px; }
+.kv { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 12.5px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--f-mono); overflow-wrap: anywhere; }
+.kv dd.ok { color: var(--ok); } .kv dd.bad { color: var(--err); } .kv dd.wait { color: var(--fire); }
+.flow-link { position: relative; align-self: center; height: 12px; margin: 0 -3px; background: repeating-linear-gradient(90deg, var(--iron-d) 0 8px, transparent 8px 12px); }
+.flow-link i { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, var(--fire) 0 8px, transparent 8px 24px); opacity: 0; }
+.flow.live .flow-link i { opacity: 1; animation: flowrun 0.6s steps(3) infinite; }
+@keyframes flowrun { to { background-position: 24px 0; } }
+.ws-canvas { width: 100%; aspect-ratio: 4 / 3; display: block; background: linear-gradient(180deg, #8fc5ee, #cfe6f6); border: 3px solid #000; image-rendering: auto; }
+.ws-off { margin: 0; padding: 10px 12px; border: 3px solid var(--err); background: var(--err-soft); }
+.ws-off[hidden] { display: none; }
+.ws-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; align-items: start; }
+.ws-form, .ws-gallery { padding: 14px; display: grid; gap: 10px; }
+.ws-form label { font-size: 13px; color: var(--muted); }
+#wsGo, #wsUse { min-height: 44px; }
+#wsText { width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; padding: 9px 10px; color: var(--text); font: 15px/1.45 var(--f-body); }
+.ws-result { padding: 12px; border: 3px solid var(--ok); background: var(--ok-soft); display: grid; gap: 8px; }
+.ws-result[hidden] { display: none; }
+.ws-result p { margin: 0; }
+.ws-line { display: block; padding: 8px 10px; background: var(--code-bg); border: 3px solid #000; font-family: var(--f-mono); font-size: 13.5px; color: var(--fire); overflow-x: auto; }
+.ws-gallery h2 { margin: 0; font-family: var(--f-display); font-size: 12px; }
+.ws-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.ws-list li { display: flex; }
+.ws-list button { min-height: 44px; padding: 0 12px; border: 3px solid var(--line); background: var(--panel-2); color: var(--text); font-weight: 700; cursor: pointer; }
+.ws-list button[aria-pressed="true"] { border-color: var(--fire); }
+.ws-list button.del { min-width: 44px; padding: 0; color: var(--muted); border-left: 0; }
+.empty-note { margin: 0; color: var(--muted); }
+.empty-note[hidden] { display: none; }
+@media (max-width: 860px) {
+  .flow { grid-template-columns: 1fr; }
+  .flow-link { justify-self: center; width: 12px; height: 34px; margin: -3px 0; background: repeating-linear-gradient(180deg, var(--iron-d) 0 8px, transparent 8px 12px); }
+  .flow-link i { background: repeating-linear-gradient(180deg, var(--fire) 0 8px, transparent 8px 24px); }
+  @keyframes flowrun { to { background-position: 0 24px; } }
+  .ws-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .flow.live .flow-link i { animation: none; } }
 </style>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Press+Start+2P&display=swap");</style>
 <style>/*__CM_CSS__*/</style>
 
-<section class="view" id="homeView" aria-labelledby="homeTitle" hidden>
-  <div class="view-top">
-    <span class="sp"></span>
-    <div class="seg" role="group" aria-label="Language"><button type="button" data-lang="tr" aria-pressed="false">TR</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+<nav class="topnav" id="topnav" aria-label="Main">
+  <a class="tn-brand" href="#/"><svg class="logo-block" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><rect width="16" height="16" fill="#7a4a2b"/><rect width="16" height="5" fill="#6fae3f"/><rect width="16" height="1" fill="#8fd35a"/><rect x="1" y="5" width="2" height="2" fill="#6fae3f"/><rect x="6" y="5" width="1" height="3" fill="#6fae3f"/><rect x="10" y="5" width="3" height="1" fill="#6fae3f"/><rect x="14" y="5" width="1" height="2" fill="#6fae3f"/><rect x="4" y="10" width="2" height="1" fill="#5e3920"/><rect x="11" y="12" width="2" height="1" fill="#5e3920"/><rect x="7" y="14" width="1" height="1" fill="#5e3920"/><rect x="2" y="13" width="1" height="1" fill="#9a6440"/><rect x="12" y="8" width="1" height="1" fill="#9a6440"/></svg><span>Worldsmith</span></a>
+  <div class="tn-links" id="tnLinks">
+    <a href="#/" data-nav="home" data-i="navHome"></a>
+    <a href="#/journey" data-nav="journey" data-i="navJourney"></a>
+    <a href="#/workshop" data-nav="workshop" data-i="navWorkshop"></a>
   </div>
+  <div class="tn-tools">
+    <select class="eng-sel" id="engineSel" aria-label="Engine style"></select>
+    <div class="seg" role="group" aria-label="Language"><button type="button" id="langTr" data-lang="tr" aria-pressed="false">TR</button><button type="button" id="langEn" data-lang="en" aria-pressed="false">EN</button></div>
+  </div>
+</nav>
+
+<section class="view" id="homeView" aria-labelledby="homeTitle" hidden>
   <div class="hero">
     <svg class="hero-art" viewBox="0 0 200 200" aria-hidden="true"><g fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.55"><path d="M100 18 171 59v82l-71 41-71-41V59z"/><path d="M100 48 145 74v52l-45 26-45-26V74z"/><path d="M100 18v164M29 59l142 82M171 59 29 141" opacity="0.4"/></g><path d="M100 80 120 100 100 120 80 100z" fill="var(--accent)" opacity="0.8"/></svg>
     <h1 id="homeTitle">Worldsmith</h1>
@@ -979,7 +1086,6 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
     <button type="button" class="back" id="jHome"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2 3.5 6l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i="toHome"></span></button>
     <span class="sp"></span>
     <span class="xp" id="jXp"></span>
-    <div class="seg" role="group" aria-label="Language"><button type="button" data-lang="tr" aria-pressed="false">TR</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
   </div>
   <p class="flash" id="jFlash" role="status" hidden></p>
   <div class="level">
@@ -987,6 +1093,36 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
     <div class="bar" role="progressbar" id="jBar" aria-valuemin="0" aria-valuemax="100"><i id="jBarFill"></i></div>
   </div>
   <div class="units" id="units"></div>
+</section>
+
+<section class="view ws" id="workshopView" aria-labelledby="wsTitle" hidden>
+  <header class="ws-head"><svg class="anvi" viewBox="0 0 16 13" shape-rendering="crispEdges" role="img" aria-label="Anvi"><rect x="14" y="0" width="1" height="1" fill="#f5b13d"/><rect x="12" y="1" width="1" height="1" fill="#e0702b"/><rect x="0" y="4" width="2" height="1" fill="#6b6f76"/><rect x="1" y="3" width="14" height="3" fill="#6b6f76"/><rect x="3" y="3" width="11" height="1" fill="#9aa0a8"/><rect x="5" y="4" width="2" height="1" fill="#fff"/><rect x="9" y="4" width="2" height="1" fill="#fff"/><rect x="6" y="4" width="1" height="1" fill="#14110f"/><rect x="10" y="4" width="1" height="1" fill="#14110f"/><rect x="7" y="5" width="2" height="1" fill="#3a3d42"/><rect x="5" y="6" width="6" height="3" fill="#3a3d42"/><rect x="6" y="6" width="1" height="3" fill="#4a4e55"/><rect x="3" y="9" width="10" height="2" fill="#3a3d42"/><rect x="2" y="11" width="12" height="1" fill="#2a2c30"/></svg><div><p class="eyebrow" data-i="wsEyebrow"></p><h1 id="wsTitle" data-i="wsTitle"></h1><p class="sub" data-i="wsSub"></p></div></header>
+  <div class="flow" id="wsFlow">
+    <div class="flow-node"><svg class="icon" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="3" width="12" height="8" fill="#3a3d42"/><rect x="3" y="4" width="10" height="6" fill="#8fc5ee"/><rect x="1" y="11" width="14" height="2" fill="#6b6f76"/><rect x="11" y="6" width="3" height="7" fill="#14110f"/><rect x="11.5" y="7" width="2" height="5" fill="#6fae3f"/></svg><h3 data-i="wsDevice"></h3><p data-i="wsDeviceSub"></p><dl class="kv" id="wsDeviceKv"></dl></div>
+    <div class="flow-link" aria-hidden="true"><i></i></div>
+    <div class="flow-node core"><svg class="icon" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><rect x="3" y="1" width="10" height="4" fill="#3a3d42"/><rect x="3" y="6" width="10" height="4" fill="#3a3d42"/><rect x="3" y="11" width="10" height="4" fill="#3a3d42"/><rect x="4" y="2" width="2" height="2" fill="#6fae3f"/><rect x="4" y="7" width="2" height="2" fill="#f5b13d"/><rect x="4" y="12" width="2" height="2" fill="#e0702b"/><rect x="8" y="3" width="4" height="1" fill="#6b6f76"/><rect x="8" y="8" width="4" height="1" fill="#6b6f76"/><rect x="8" y="13" width="4" height="1" fill="#6b6f76"/></svg><h3 data-i="wsServer"></h3><p data-i="wsServerSub"></p><dl class="kv" id="wsServerKv"></dl></div>
+    <div class="flow-link" aria-hidden="true"><i></i></div>
+    <div class="flow-node"><canvas class="ws-canvas" id="wsCanvas" role="img" aria-label="3D preview of the selected model"></canvas><h3 data-i="wsWorld"></h3><p id="wsWorldSub"></p></div>
+  </div>
+  <p class="ws-off" id="wsOff" role="note" hidden></p>
+  <div class="ws-grid">
+    <div class="panel ws-form">
+      <label for="wsText" data-i="wsLabel"></label>
+      <textarea id="wsText" maxlength="120" rows="2" autocomplete="off"></textarea>
+      <div class="pm-row"><span class="pm-count" id="wsCount">0 / 120</span><span class="sp"></span><button type="button" class="btn primary" id="wsGo"><span data-i="wsGo"></span><kbd>Ctrl+Enter</kbd></button></div>
+      <div class="pm-status" id="wsStatus" role="status" aria-live="polite"></div>
+      <div class="ws-result" id="wsResult" hidden>
+        <p id="wsExplain"></p>
+        <code class="ws-line" id="wsLine"></code>
+        <div class="pm-row"><button type="button" class="btn small" id="wsUse" data-i="wsUse"></button><span class="sp"></span><span class="note-small" id="wsTag"></span></div>
+      </div>
+    </div>
+    <div class="panel ws-gallery">
+      <h2 data-i="wsGallery"></h2>
+      <p class="empty-note" id="wsNone" data-i="wsNone"></p>
+      <ul class="ws-list" id="wsList"></ul>
+    </div>
+  </div>
 </section>
 
 <div class="app" id="lessonView" hidden>
@@ -1001,12 +1137,7 @@ code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
       <ol class="steps" id="steps" aria-label="Path"></ol>
     </div>
     <div class="tools">
-      <select class="eng-sel" id="engineSel" aria-label="Engine style"></select>
       <span class="xp" id="xp" aria-live="polite">0 XP</span>
-      <div class="seg" role="group" aria-label="Language">
-        <button type="button" id="langTr" aria-pressed="false">TR</button>
-        <button type="button" id="langEn" aria-pressed="false">EN</button>
-      </div>
     </div>
   </header>
 
@@ -1313,6 +1444,51 @@ const UI = {
 /* =====================================================================
    State
    ===================================================================== */
+
+const UI_BRAND = {
+  tr: {
+    navHome: 'Ana sayfa', navJourney: 'Yol haritası', navWorkshop: 'Atölye',
+    wsEyebrow: 'ATÖLYE · BULUT OCAĞI', wsTitle: 'Tarif et, sunucu modellesin',
+    wsSub: 'Cihazın sadece metni gönderir. Ağır iş Worldsmith sunucusunda yapılır: dil modeli nesneyi basit şekillere böler, sunucu her parçayı doğrular, nesne burada ve derslerinde spawn() ile belirir.',
+    wsDevice: 'Senin cihazın', wsDeviceSub: 'Herhangi bir laptop ya da telefon. Kod ve sahne burada çalışır.',
+    wsServer: 'Worldsmith sunucusu', wsServerSub: 'AI modelleme: istek sırası, dil modeli, doğrulama.',
+    wsWorld: '3D dünyan', wsWorldNone: 'Henüz model yok. Aşağıdan bir nesne tarif et.', wsWorldSel: (l, n) => `${l} · ${n} parça`,
+    kvQueue: 'Kuyruk', kvWindow: 'Son 60 sn', kvStatus: 'Durum', kvProvider: 'Sağlayıcı', kvModel: 'Model', kvLatency: 'Son gecikme', kvLast: 'Son istek',
+    kvQueueVal: (n) => n ? `${n} istek işleniyor` : 'boş', kvWindowVal: (n, m) => `${n} / ${m} istek`,
+    kvNone: 'henüz istek yok', kvReady: 'hazır', kvChecking: 'aranıyor…', kvNoKey: 'API anahtarı yok', kvNoServer: 'ulaşılamıyor',
+    kvKinds: { coach: 'koç', model: 'Prompt', forge: 'Atölye' }, kvOk: 'başarılı', kvFail: (st) => `başarısız (${st})`,
+    wsLabel: 'Bir oyun nesnesi tarif et (en çok 120 karakter).', wsPlaceholder: 'Örnek: kırmızı bayraklı taş bir gözetleme kulesi',
+    wsGo: 'Ocağa gönder', wsUse: 'Derse ekle', wsGallery: 'Modellerin', wsNone: 'Henüz model yok. İlk nesneni tarif et; burada listelenir ve derslerinde spawn() ile kullanılır.',
+    wsLine: (n) => `spawn("${n}", 0, 0);`,
+    wsOffRules: 'Kural modundasın, bu yüzden Atölye hiçbir şey göndermez. Derste koç başlığından AI\'yı seçince açılır.',
+    wsOffNoServer: 'Worldsmith sunucusuna ulaşılamıyor, bu yüzden modelleme kapalı. Derslerdeki kod ve kural tabanlı koç çalışmaya devam eder.',
+    wsOffNoKey: 'Sunucu çalışıyor ama dil modeli için API anahtarı tanımlı değil. Modelleme kapalı; dersler kural tabanlı koçla devam eder.',
+    wsOffChecking: 'Sunucu aranıyor…',
+    wsDel: (l) => `${l} modelini sil`, wsShow: (l) => `${l} modelini önizle`,
+  },
+  en: {
+    navHome: 'Home', navJourney: 'Roadmap', navWorkshop: 'Workshop',
+    wsEyebrow: 'WORKSHOP · CLOUD FORGE', wsTitle: 'Describe it, the server models it',
+    wsSub: 'Your device only sends text. The heavy work happens on the Worldsmith server: a language model splits the object into simple shapes, the server checks every part, and the object appears here and in your lessons with spawn().',
+    wsDevice: 'Your device', wsDeviceSub: 'Any laptop or phone. Your code and scene run here.',
+    wsServer: 'Worldsmith server', wsServerSub: 'AI modelling: request queue, language model, validation.',
+    wsWorld: 'Your 3D world', wsWorldNone: 'No model yet. Describe an object below.', wsWorldSel: (l, n) => `${l} · ${n} parts`,
+    kvQueue: 'Queue', kvWindow: 'Last 60 s', kvStatus: 'Status', kvProvider: 'Provider', kvModel: 'Model', kvLatency: 'Last latency', kvLast: 'Last request',
+    kvQueueVal: (n) => n ? `${n} in progress` : 'empty', kvWindowVal: (n, m) => `${n} / ${m} requests`,
+    kvNone: 'no request yet', kvReady: 'ready', kvChecking: 'checking…', kvNoKey: 'no API key', kvNoServer: 'unreachable',
+    kvKinds: { coach: 'coach', model: 'Prompt', forge: 'Workshop' }, kvOk: 'ok', kvFail: (st) => `failed (${st})`,
+    wsLabel: 'Describe a game object (120 characters at most).', wsPlaceholder: 'Example: a stone watchtower with a red flag',
+    wsGo: 'Send to the forge', wsUse: 'Add to my lesson', wsGallery: 'Your models', wsNone: 'No models yet. Describe your first object; it is listed here and you can use it in lessons with spawn().',
+    wsLine: (n) => `spawn("${n}", 0, 0);`,
+    wsOffRules: 'You are in Rules mode, so the Workshop sends nothing. Pick AI in the coach header of a lesson to turn it on.',
+    wsOffNoServer: 'The Worldsmith server cannot be reached, so modelling is off. Lesson code and the rule-based coach keep working.',
+    wsOffNoKey: 'The server is running but has no API key for a language model. Modelling is off; lessons continue with the rule-based coach.',
+    wsOffChecking: 'Looking for the server…',
+    wsDel: (l) => `Delete the ${l} model`, wsShow: (l) => `Preview the ${l} model`,
+  },
+};
+Object.assign(UI.tr, UI_BRAND.tr);
+Object.assign(UI.en, UI_BRAND.en);
 const STORE_KEY = 'worldsmith.v1';
 let saved = {};
 try {
@@ -2180,7 +2356,14 @@ const currentCtx = () => (state.last && state.last.mission === state.cur ? state
 const AI_PER_MIN = 12;
 const aiStarts = [];
 let aiChain = Promise.resolve();
+var aiQ = { pending: 0, last: null, model: null };   // read by the Workshop status panel; only measured values
+function noteAi(kind, t0, status, data) {
+  aiQ.last = { kind, ms: Math.round(performance.now() - t0), status, at: Date.now() };
+  if (data && typeof data.model === 'string') aiQ.model = data.model;
+  if (typeof wsTick === 'function') wsTick();
+}
 function aiSlot() {
+  aiQ.pending++;
   let release;
   const gate = new Promise((r) => { release = r; });
   const prev = aiChain;
@@ -2190,7 +2373,7 @@ function aiSlot() {
     while (aiStarts.length && now - aiStarts[0] > 60000) aiStarts.shift();
     if (aiStarts.length >= AI_PER_MIN) await new Promise((r) => setTimeout(r, 60000 - (now - aiStarts[0]) + 50));
     aiStarts.push(Date.now());
-    return release;
+    return () => { aiQ.pending--; release(); if (typeof wsTick === 'function') wsTick(); };
   });
 }
 async function askCoach(stage, opts) {
@@ -2202,17 +2385,20 @@ async function askCoach(stage, opts) {
     hints_used: opts && Number.isInteger(opts.hints) ? opts.hints : state.hints, history: state.chat.slice(-6),
   };
   const done = await aiSlot();   // the 13 s timer starts only once it is this request's turn
+  const t0 = performance.now();
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), COACH_TIMEOUT);
   try {
     const r = await fetch('/api/coach', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
     let data = null;
     try { data = await r.json(); } catch (e) { data = null; }
+    noteAi('coach', t0, r.status, data);
     if (r.ok && data && data.source === 'llm') return { ok: true, reply: data };
     const code = data && data.error && data.error.code;
     const quota = data && data.error && String(data.error.reason || '').startsWith('quota');
     return { ok: false, why: code === 'rate_limited' ? 'rate_limited' : quota ? 'quota' : 'unavailable' };
   } catch (e) {
+    noteAi('coach', t0, e && e.name === 'AbortError' ? 'timeout' : 'offline', null);
     return { ok: false, why: e && e.name === 'AbortError' ? 'timeout' : 'offline' };
   } finally { clearTimeout(timer); done(); }
 }
@@ -2287,8 +2473,9 @@ async function probeServer() {
     const r = await fetch('/api/health', { cache: 'no-store', signal: ctl.signal });
     const d = await r.json();
     state.server = d && d.ok ? (d.configured ? 'ready' : 'nokey') : 'noserver';
+    state.provider = d && typeof d.provider === 'string' ? d.provider : null;
   } catch (e) { state.server = 'noserver'; } finally { clearTimeout(timer); }
-  renderServer(); renderActions();
+  renderServer(); renderActions(); renderWorkshop();
 }
 
 async function run(silent) {
@@ -2447,17 +2634,20 @@ function setTab(t) {
 }
 async function askModel(body) {
   const done = await aiSlot();   // the 13 s timer starts only once it is this request's turn
+  const t0 = performance.now();
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), MODEL_TIMEOUT);
   try {
     const r = await fetch('/api/model', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
     let data = null;
     try { data = await r.json(); } catch (e) { data = null; }
+    noteAi('model', t0, r.status, data);
     if (r.ok && data && data.source === 'llm' && typeof data.code === 'string') return { ok: true, reply: data };
     const err = (data && data.error) || {};
     if (r.status === 429) return { ok: false, text: tt().pmRate(err.retry_after || 60) };
     return { ok: false, text: aiDown(err.reason) || tt().pmBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
   } catch (e) {
+    noteAi('model', t0, e && e.name === 'AbortError' ? 'timeout' : 'offline', null);
     return { ok: false, text: e && e.name === 'AbortError' ? tt().pmTimeout : tt().pmOffline };
   } finally { clearTimeout(timer); done(); }
 }
@@ -2572,12 +2762,14 @@ function fgPlace(name) {
 }
 async function askForge(body) {
   const done = await aiSlot();   // the 13 s timer starts only once it is this request's turn
+  const t0 = performance.now();
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), MODEL_TIMEOUT);
   try {
     const r = await fetch('/api/forge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
     let data = null;
     try { data = await r.json(); } catch (e) { data = null; }
+    noteAi('forge', t0, r.status, data);
     if (r.ok && data && data.source === 'llm') {
       const m = sanitizeModel(data);
       if (m) return { ok: true, model: m, reply: data };
@@ -2587,6 +2779,7 @@ async function askForge(body) {
     if (r.status === 429) return { ok: false, text: tt().fgRate(err.retry_after || 60) };
     return { ok: false, text: aiDown(err.reason) || tt().fgBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
   } catch (e) {
+    noteAi('forge', t0, e && e.name === 'AbortError' ? 'timeout' : 'offline', null);
     return { ok: false, text: e && e.name === 'AbortError' ? tt().fgTimeout : tt().fgOffline };
   } finally { clearTimeout(timer); done(); }
 }
@@ -2696,10 +2889,13 @@ function setLang(l) {
    ===================================================================== */
 const UNIT_LESSONS = [[0, 1, 2, 3], [], []];   // Level 1: today's four missions are Unit 1; Units 2 and 3 have no content yet
 const lockedIdx = (i) => !state.done.includes(i) && i > firstOpen();
-const views = { home: $('#homeView'), journey: $('#journeyView'), lesson: $('#lessonView') };
+const views = { home: $('#homeView'), journey: $('#journeyView'), lesson: $('#lessonView'), workshop: $('#workshopView') };
 let lessonReady = false;
 function showView(name) {
   for (const [k, el] of Object.entries(views)) el.hidden = k !== name;
+  const navKey = name === 'lesson' ? 'journey' : name;
+  document.querySelectorAll('[data-nav]').forEach((a) => { if (a.dataset.nav === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  if (name === 'workshop') wsEnter(); else wsLeave();
   if (name === 'lesson') { resize(); cm.refresh(); }
   window.scrollTo(0, 0);
 }
@@ -2752,6 +2948,7 @@ function renderEngines() {
 }
 function renderShell() {
   renderEngines();
+  renderWorkshop();
   document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
   renderHome(); renderJourney();
 }
@@ -2771,9 +2968,12 @@ function route() {
     if (!lessonReady || i !== state.cur) loadMission(i);
     lessonReady = true;
     showView('lesson');
+    if (ws && ws.place && fg.models[ws.place]) { fgPlace(ws.place); renderForge(); }
+    if (ws) ws.place = null;
     return;
   }
   if (h === '#/journey') { renderJourney(); showView('journey'); return; }
+  if (h === '#/workshop') { flash(''); renderWorkshop(); showView('workshop'); return; }
   flash('');
   renderHome();
   showView('home');
@@ -2801,6 +3001,162 @@ window.addEventListener('hashchange', route);
 
 $('#langTr').addEventListener('click', () => setLang('tr'));
 $('#langEn').addEventListener('click', () => setLang('en'));
+
+
+/* =====================================================================
+   Workshop (#/workshop): the Cloud Forge showcase. Reuses askForge, sanitizeModel, fg.models, fgSave, makeModel
+   and fgPlace from the Forge tab; only the page around them is new. Status values are measured, never made up.
+   ===================================================================== */
+/* A small second three.js view (workshop preview, home hero). It shares geometries and materials with the main scene. */
+function miniStage(canvas) {
+  if (!gl || !canvas) return null;
+  let r;
+  try { r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch (e) { return null; }
+  const sc = new THREE.Scene();
+  const camr = new THREE.PerspectiveCamera(34, 4 / 3, 0.1, 300);
+  sc.add(new THREE.HemisphereLight(0xfff4e6, 0x3a2a1c, 0.7));
+  const key = new THREE.DirectionalLight(0xffd9a0, 0.75); key.position.set(8, 14, 10); sc.add(key);
+  const holder = new THREE.Group(); sc.add(holder);
+  let on = false, raf = 0;
+  const fit = () => {
+    const w = Math.max(1, canvas.clientWidth), h = Math.max(1, canvas.clientHeight);
+    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); r.setSize(w, h, false);
+    camr.aspect = w / h; camr.updateProjectionMatrix();
+  };
+  const frame = (t) => {
+    if (!on) return;
+    if (!reduceMotion) holder.rotation.y = t / 2800;
+    r.render(sc, camr);
+    if (!reduceMotion) raf = requestAnimationFrame(frame);
+  };
+  return {
+    set(obj, dist, lookY) {
+      while (holder.children.length) holder.remove(holder.children[0]);
+      if (obj) holder.add(obj);
+      camr.position.set(dist * 0.72, dist * 0.5, dist); camr.lookAt(0, lookY || 0, 0);
+      if (on) { fit(); r.render(sc, camr); }
+    },
+    start() { if (on) return; on = true; fit(); raf = requestAnimationFrame(frame); },
+    stop() { on = false; cancelAnimationFrame(raf); },
+    fit,
+  };
+}
+function grassBase(w, d) {
+  const g = new THREE.Group();
+  const top = new THREE.Mesh(new THREE.BoxGeometry(w, 0.5, d), mat('#6fae3f')); top.position.y = -0.25;
+  const soil = new THREE.Mesh(new THREE.BoxGeometry(w, 1.4, d), mat('#7a4a2b')); soil.position.y = -1.2;
+  g.add(top, soil);
+  return g;
+}
+var ws = { busy: false, req: 0, sel: null, place: null, stage: null, timer: 0 };
+function wsStatus(kind, text) {
+  const el = $('#wsStatus');
+  el.className = 'pm-status' + (kind ? ' ' + kind : '');
+  el.textContent = text;
+}
+function wsPreview() {
+  const T = tt(), def = ws.sel && fg.models[ws.sel];
+  $('#wsWorldSub').textContent = def ? T.wsWorldSel(def.label, def.parts.length) : T.wsWorldNone;
+  if (!ws.stage) return;
+  const g = new THREE.Group();
+  g.add(grassBase(9, 9));
+  if (def) { const m = makeModel(def); m.scale.setScalar(def.unit); g.add(m); }
+  ws.stage.set(g, 13, 1.6);
+}
+function kvRows(rows) {
+  return rows.map(([k, v, cls]) => `<dt>${esc(k)}</dt><dd${cls ? ` class="${cls}"` : ''}>${esc(v)}</dd>`).join('');
+}
+function wsTick() {
+  if (!ws || views.workshop.hidden) return;
+  const T = tt(), now = Date.now();
+  const inWindow = aiStarts.filter((t) => now - t <= 60000).length;
+  $('#wsDeviceKv').innerHTML = kvRows([
+    [T.kvQueue, T.kvQueueVal(aiQ.pending), aiQ.pending ? 'wait' : ''],
+    [T.kvWindow, T.kvWindowVal(inWindow, AI_PER_MIN), inWindow >= AI_PER_MIN ? 'bad' : ''],
+  ]);
+  const st = { ready: [T.kvReady, 'ok'], checking: [T.kvChecking, 'wait'], nokey: [T.kvNoKey, 'bad'], noserver: [T.kvNoServer, 'bad'] }[state.server] || [T.kvNoServer, 'bad'];
+  const L = aiQ.last;
+  $('#wsServerKv').innerHTML = kvRows([
+    [T.kvStatus, st[0], st[1]],
+    [T.kvProvider, state.provider || '—'],
+    [T.kvModel, aiQ.model || T.kvNone],
+    [T.kvLatency, L ? `${L.ms} ms` : T.kvNone],
+    [T.kvLast, L ? `${T.kvKinds[L.kind] || L.kind} · ${L.status === 200 ? T.kvOk : T.kvFail(L.status)}` : T.kvNone, L ? (L.status === 200 ? 'ok' : 'bad') : ''],
+  ]);
+  $('#wsFlow').classList.toggle('live', aiQ.pending > 0 || ws.busy);
+}
+function renderWorkshop() {
+  if (!ws) return;
+  const T = tt(), ready = aiOn();
+  const off = ready ? '' : !state.ai && state.server === 'ready' ? T.wsOffRules
+    : { checking: T.wsOffChecking, nokey: T.wsOffNoKey, noserver: T.wsOffNoServer }[state.server] || T.wsOffNoServer;
+  $('#wsOff').hidden = ready;
+  $('#wsOff').textContent = off;
+  $('#wsText').disabled = !ready || ws.busy;
+  $('#wsText').placeholder = T.wsPlaceholder;
+  $('#wsGo').disabled = !ready || ws.busy;
+  const list = Object.values(fg.models);
+  if (ws.sel && !fg.models[ws.sel]) ws.sel = null;
+  if (!ws.sel && list.length) ws.sel = list[list.length - 1].name;
+  $('#wsNone').hidden = list.length > 0;
+  $('#wsList').innerHTML = list.map((m) => `<li><button type="button" data-show="${esc(m.name)}" aria-pressed="${m.name === ws.sel}" aria-label="${esc(T.wsShow(m.label))}">${esc(m.label)}</button>`
+    + `<button type="button" class="del" data-wsdel="${esc(m.name)}" aria-label="${esc(T.wsDel(m.label))}" title="${esc(T.wsDel(m.label))}">×</button></li>`).join('');
+  wsPreview();
+  wsTick();
+}
+function wsEnter() {
+  if (!ws.stage) ws.stage = miniStage($('#wsCanvas'));
+  renderWorkshop();
+  if (ws.stage) { ws.stage.start(); wsPreview(); }
+  clearInterval(ws.timer);
+  ws.timer = setInterval(wsTick, 1000);
+}
+function wsLeave() {
+  if (!ws) return;
+  if (ws.stage) ws.stage.stop();
+  clearInterval(ws.timer);
+}
+async function wsForge() {
+  const T = tt(), text = $('#wsText').value.trim();
+  if (ws.busy || !aiOn()) return;
+  if (!text) { wsStatus('err', T.fgEmpty); $('#wsText').focus(); return; }
+  if (Object.keys(fg.models).length >= FG_MAX) { wsStatus('err', T.fgFull); return; }
+  const id = ++ws.req;
+  ws.busy = true; $('#wsResult').hidden = true; wsStatus('busy', T.fgBusy); renderWorkshop();
+  const res = await askForge({ lang: state.lang, description: text.slice(0, 120), existing: Object.keys(fg.models) });
+  if (id !== ws.req) return;
+  ws.busy = false;
+  if (!res.ok) { wsStatus('err', res.text); renderWorkshop(); return; }
+  fg.models[res.model.name] = res.model;
+  fgSave();
+  ws.sel = res.model.name;
+  $('#wsExplain').textContent = res.reply.explanation;
+  $('#wsLine').textContent = T.wsLine(res.model.name);
+  $('#wsTag').textContent = T.fgTag(res.reply.model || 'AI');
+  $('#wsResult').hidden = false;
+  wsStatus('ok', T.fgDone(res.model.label, res.model.parts.length));
+  renderWorkshop(); renderForge();
+}
+$('#wsText').addEventListener('input', () => { $('#wsCount').textContent = `${$('#wsText').value.length} / 120`; });
+$('#wsText').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('#wsGo').click(); } });
+$('#wsGo').addEventListener('click', wsForge);
+$('#wsUse').addEventListener('click', () => {
+  if (!ws.sel || !fg.models[ws.sel]) return;
+  ws.place = ws.sel;
+  goLesson(lessonReady ? state.cur : firstOpen(), true);
+});
+$('#wsList').addEventListener('click', (e) => {
+  const show = e.target.closest('[data-show]'), del = e.target.closest('[data-wsdel]');
+  if (show && fg.models[show.dataset.show]) {
+    ws.sel = show.dataset.show;
+    $('#wsLine').textContent = tt().wsLine(ws.sel);
+    renderWorkshop();
+  } else if (del && fg.models[del.dataset.wsdel]) {
+    const name = del.dataset.wsdel;
+    ask(tt().cDelModel, () => { delete fg.models[name]; fgSave(); if (ws.sel === name) ws.sel = null; renderWorkshop(); renderForge(); });
+  }
+});
+window.addEventListener('resize', () => { if (ws.stage && !views.workshop.hidden) { ws.stage.fit(); wsPreview(); } });
 
 /* boot */
 renderStatic();
