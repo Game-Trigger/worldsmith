@@ -48,3 +48,6 @@ Everything used to build Worldsmith. Update it in the same commit that adds anyt
 | Python standard library (server) | 3.10+ | PSF |
 | Playwright (tests only, not shipped) | latest at install | Apache-2.0 |
 | Bricolage Grotesque, IBM Plex Sans, JetBrains Mono | via Google Fonts | SIL Open Font License |
+| Docker base image `python:3.11-slim` (runtime) | 3.11 | PSF + Debian packages under their own licenses |
+| Docker base image `node:20-slim` (build stage only, not in the final image) | 20 | MIT + Debian packages |
+| Render (hosting, free plan, via `render.yaml`) | service | Render terms of service |

@@ -518,6 +518,8 @@ const UI = {
     pmOffRules: "Prompt modu kapalı çünkü Kural modundasın (hiçbir şey gönderilmez). Açmak için koç başlığından AI'yı seç.",
     cModel: 'Editördeki kendi değişikliklerinin yerine modelin kodu yazılacak (Geri al ile dönebilirsin). Devam edilsin mi?',
     pmTag: (m) => `AI tarafından yazıldı · ${m}`,
+    aiQuota: 'AI servisinin dakikalık kotası doldu. Bir dakika sonra tekrar dene; bu arada Kod sekmesi ve koç çalışmaya devam eder.',
+    aiService: 'AI servisine şu an ulaşılamıyor (sunucu tarafında anahtar ya da bağlantı sorunu). Kod sekmesi ve kural tabanlı koç çalışmaya devam eder.',
     pmNoXp: 'Bu kodu Prompt modu yazdı: hedefler tuttu ama XP ve yeni komut yok. Kodu kendin değiştirip çalıştırınca görev sayılır.',
     tabForge: 'Atölye', chipModel: 'Model',
     fgLabel: 'Oyun dünyan için bir nesne tarif et. AI onu basit şekillerden modeller ve spawn("isim", x, z) komutuyla koduna ekler.',
@@ -585,6 +587,8 @@ const UI = {
     pmOffRules: 'Prompt mode is off because you chose Rules (nothing is sent). Pick AI in the coach header to turn it on.',
     cModel: "The model's code will replace your own edits in the editor (Undo brings them back). Continue?",
     pmTag: (m) => `Written by AI · ${m}`,
+    aiQuota: "The AI service's per-minute quota is used up. Try again in a minute; the Code tab and the coach keep working meanwhile.",
+    aiService: 'The AI service cannot be reached right now (a key or connection problem on the server). The Code tab and the rule-based coach keep working.',
     pmNoXp: 'Prompt mode wrote this code: the goals are met, but it earns no XP and unlocks nothing. Change it yourself and run it to complete the mission.',
     tabForge: 'Forge', chipModel: 'Models',
     fgLabel: 'Describe an object for your game world. The AI models it from simple shapes and adds it to your code with spawn("name", x, z).',
@@ -1624,6 +1628,12 @@ function loadMission(i, silentIntro) {
    ===================================================================== */
 const UNLOCKS = [['ground', 'tree', 'rock'], ['random'], ['sun', 'fog'], ['house']];   // what each mission adds
 const MODEL_TIMEOUT = 13000;   // the server gives up at 12 s
+// A 503 whose reason is about the AI service itself (quota, key, network, timeout), not about what the model wrote:
+// say that plainly instead of passing on raw provider JSON and asking for a simpler request.
+const aiDown = (reason) => {
+  const r = String(reason || ''), T = tt();
+  return r.startsWith('quota') ? T.aiQuota : r.startsWith('timeout') ? T.pmTimeout : ['http', 'config', 'parse'].some((k) => r.startsWith(k)) ? T.aiService : '';
+};
 const pm = { tab: 'code', busy: false, req: 0, undo: null, generated: null };
 const squash = (c) => String(c).replace(/\s+/g, '');
 const fromPrompt = (code) => pm.generated !== null && squash(code) === pm.generated;
@@ -1674,7 +1684,7 @@ async function askModel(body) {
     if (r.ok && data && data.source === 'llm' && typeof data.code === 'string') return { ok: true, reply: data };
     const err = (data && data.error) || {};
     if (r.status === 429) return { ok: false, text: tt().pmRate(err.retry_after || 60) };
-    return { ok: false, text: tt().pmBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
+    return { ok: false, text: aiDown(err.reason) || tt().pmBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
   } catch (e) {
     return { ok: false, text: e && e.name === 'AbortError' ? tt().pmTimeout : tt().pmOffline };
   } finally { clearTimeout(timer); }
@@ -1802,7 +1812,7 @@ async function askForge(body) {
     }
     const err = (data && data.error) || {};
     if (r.status === 429) return { ok: false, text: tt().fgRate(err.retry_after || 60) };
-    return { ok: false, text: tt().fgBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
+    return { ok: false, text: aiDown(err.reason) || tt().fgBad(String(err.reason || err.message || 'HTTP ' + r.status).slice(0, 140)) };
   } catch (e) {
     return { ok: false, text: e && e.name === 'AbortError' ? tt().fgTimeout : tt().fgOffline };
   } finally { clearTimeout(timer); }

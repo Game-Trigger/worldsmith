@@ -168,7 +168,7 @@ def main():
         wait_idle(page)
         msg = page.inner_text("#fgStatus")
         check("model outage: specific message, button usable, code untouched",
-              "could not build a valid object" in msg and page.is_enabled("#fgGo") and editor(page) == before, msg)
+              "cannot be reached" in msg and page.is_enabled("#fgGo") and editor(page) == before, msg)
         SCRIPT["fail"] = False
 
         bad = dict(WINDMILL, name="Bad Name")

@@ -26,6 +26,8 @@ def scripted(system, user, timeout):
     if "You turn a beginner's wish" not in system:
         return base.scripted(system, user, timeout)
     SCRIPT["seen"].append(user)
+    if SCRIPT.get("quota"):
+        raise providers.ProviderError("quota", "HTTP 429 scripted quota")
     if SCRIPT["fail"]:
         raise providers.ProviderError("http", "HTTP 503 scripted outage")
     code = SCRIPT["replies"].pop(0) if SCRIPT["replies"] else GOOD
@@ -134,9 +136,17 @@ def main():
             page.click("#confirmYes")
         wait_idle(page)
         msg = page.inner_text("#pmStatus")
-        check("model outage: specific message, no stuck spinner, button usable", "could not write valid scene code" in msg and page.is_enabled("#pmGo"), msg)
+        check("model outage: specific message, no stuck spinner, button usable", "cannot be reached" in msg and page.is_enabled("#pmGo"), msg)
         check("model outage: answered in under 13 s", time.time() - t < 13)
         SCRIPT["fail"] = False
+        SCRIPT["quota"] = True
+        page.click("#pmGo")
+        if page.is_visible("#confirm"):
+            page.click("#confirmYes")
+        wait_idle(page)
+        msg = page.inner_text("#pmStatus")
+        check("quota: says the per-minute quota is used up, no raw JSON", "quota is used up" in msg and "{" not in msg and page.is_enabled("#pmGo"), msg)
+        SCRIPT["quota"] = False
 
         page.click("#tabCode")
         base.type_code(page, GOOD + "\ntree(2, 8);\n")   # the learner's own change counts

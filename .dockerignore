@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+!.env.example
+node_modules
+dist
+tests
+docs
+**/__pycache__
+**/*.pyc
+server/logs
+*.md
+!README.md
