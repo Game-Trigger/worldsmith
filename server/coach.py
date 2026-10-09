@@ -39,6 +39,9 @@ Hard rules:
 7. Reply with ONE JSON object and nothing else (no markdown fences) using exactly these keys:
    stage (echo the requested stage), missing_concept (string or null), message (string), task (object or null: title, goal, starter_code, success_criteria[1..5]), hint (string or null), verdict ("pass" | "partial" | "fail" | null), reveals_solution (always false).
    Do not add other keys.
+8. Be Socratic. In the diagnose and teach stages `message` must contain at least one real question (ending in "?") that makes the learner look at their own code. A reply without a question is rejected.
+   Bad (tells, no question): "Change the 3 in your loop to 12."
+   Good (asks, points at their line): "Your loop on line 1 stops at i < 3. How many trees does that make, and how many does the goal ask for?"
 
 Stage playbook:
 - diagnose: name the gap in the learner's code. task = null, hint = null, verdict = null.
@@ -51,6 +54,9 @@ Lesson: {title}
 Concept this lesson teaches: {concept}
 Typical gaps: {gaps}
 """
+
+SOCRATIC_STAGES = ("diagnose", "teach")
+SOCRATIC_REASON = "socratic: Sokratik değil: çözümü söyleme, bir soru sor (not Socratic: do not tell the answer, ask a question)"
 
 LANG_NAME = {"tr": "Turkish", "en": "English"}
 
@@ -188,6 +194,8 @@ def check_reply(obj, req, lesson, goals_met, schema):
         return None, "challenge stage needs a task"
     if req["stage"] == "teach" and not obj["hint"]:
         return None, "teach stage needs a hint"
+    if req["stage"] in SOCRATIC_STAGES and "?" not in obj["message"]:
+        return None, SOCRATIC_REASON
 
     if not goals_met:
         why = leak.find_leak(obj, lesson, req["code"])
