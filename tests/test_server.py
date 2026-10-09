@@ -214,6 +214,13 @@ class ServiceTests(unittest.TestCase):
         self.assertIsNone(good)
         self.assertIn("bir soru sor", why)
 
+    def test_rate_limit_default_is_10(self):
+        os.environ.pop("RATE_LIMIT_PER_MIN", None)
+        try:
+            self.assertEqual(self.svc._rate_limit(), 10)
+        finally:
+            os.environ["RATE_LIMIT_PER_MIN"] = "1000"
+
     def test_quota_does_not_retry(self):
         providers.mock_queue(providers.ProviderError("quota", "HTTP 429"), reply())
         st, body = self.svc.handle(req())

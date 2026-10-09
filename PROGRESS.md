@@ -36,6 +36,6 @@ Hepsi sadece Timmine/koordinatör alanına dokunuyor (`src.html`, `server/`, `sh
 ## Sıradaki işler
 1. PR #1, #2, #3 ve `test/ai-eval` PR'ını sırayla birleştir (18:00 hedefi).
 2. Pasted brief "additionalProperties" kelimesinde kesildi: Prompt modundan sonraki maddeler (3, 4, ...) koordinatöre ulaşmadı. Tam listeyi yeniden gönder.
-3. Kalabalık kullanım için ücretli Gemini katmanı veya `RATE_LIMIT_PER_MIN` değerini 15'in altına çekmek (şu an 20).
+3. Kalabalık kullanım için ücretli Gemini katmanı. `RATE_LIMIT_PER_MIN` artık 10 (IP başına); ama sınır IP başına olduğu için birden fazla kullanıcı birlikte yine Google'ın 15/dk sınırını aşabilir.
 4. Herkese açık demo: sunucu barındırılmalı (Isa: Dockerfile, deploy/); yoksa yayındaki sayfa kural tabanlı koçla çalışır ve Prompt sekmesi kapalıdır.
 5. Senan'ın `web/journey/` modülü geldiğinde `python build.py` ile otomatik inline olur.

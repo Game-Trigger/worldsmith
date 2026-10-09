@@ -223,7 +223,7 @@ class CoachService:
 
     @staticmethod
     def _rate_limit():
-        return int(os.environ.get("RATE_LIMIT_PER_MIN", "20"))
+        return int(os.environ.get("RATE_LIMIT_PER_MIN", "10"))
 
     def _rate_ok(self, ip):
         now = time.monotonic()

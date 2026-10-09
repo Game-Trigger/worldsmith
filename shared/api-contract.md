@@ -32,7 +32,7 @@ Responses:
 | 200 | CoachResponse, `source: "llm"` | accepted reply |
 | 400 | `{"error": {"code": "bad_request", "message"}}` | malformed request |
 | 413 | same | body too large |
-| 429 | `{"error": {"code": "rate_limited", "retry_after"}}` + `Retry-After` | per-IP limit (`RATE_LIMIT_PER_MIN`, default 20) |
+| 429 | `{"error": {"code": "rate_limited", "retry_after"}}` + `Retry-After` | per-IP limit (`RATE_LIMIT_PER_MIN`, default 10) |
 | 503 | `{"error": {"code": "llm_unavailable", "reason"}, "fallback": "rules"}` | no key, quota, timeout, bad JSON twice, or leaking twice |
 
 A model reply is accepted only if it is valid JSON, matches the schema, has the requested stage, `reveals_solution` is false, `server/leak.py` finds no solution in it (skipped once the goals are met), and for `evaluate` its `verdict` agrees with `goals`. Otherwise one retry with the reason appended, then 503. Total budget `COACH_TIMEOUT_MS` (default 12 000). Identical requests are served from a 1-hour cache.
