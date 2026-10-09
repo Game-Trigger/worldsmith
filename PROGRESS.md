@@ -20,6 +20,12 @@ Proje özeti ve öncelik sırası için bkz. `CLAUDE.md`.
 4. `test/ai-eval`: değerlendirme betiği düzeltmesi, kararsız e2e testi düzeltmesi, gerçek model ölçümleri.
 Hepsi sadece Timmine/koordinatör alanına dokunuyor (`src.html`, `server/`, `shared/` (yeni şema, brief'te istendi), `build.py`, `tests/`, `docs/TESTING.md`). Birleştirme için `gh pr merge --admin` gerekir (tek onaylayıcı yok).
 
+## Yeni (2026-10-09 akşam)
+- Uygulama kabuğu: `#/` giriş, `#/journey` yol haritası (Seviye 1, 3 ünite; Ünite 2-3 "Yakında"), `#/lesson/<id>` ders. Senan'ın `web/journey/` alanına dokunulmadı, kabuk `src.html` içinde.
+- Motor tarzları (Unity Lite / Unreal Lite / Godot Lite): sadece görünüm. Görev, kod, XP, koç aynı.
+- Kota: sunucu genelinde `LLM_MAX_PER_MIN=14`, sayfada tek seri AI kuyruğu (dakikada en çok 12).
+- Testler: birim 86/86, e2e_browser 33/33, e2e_prompt 37/37, e2e_forge 36/36, e2e_shell 33/33.
+
 ## Testler (2026-10-09, ölçülen)
 - Birim: 57/57. Tarayıcı: `e2e_browser.py` 33/33 (3 kez üst üste), `e2e_prompt.py` 33/33.
 - Gerçek model, 30 vaka: sayfada 26/30 geri bildirim ve 24/30 ipucu AI'dan; AI ipuçlarında sızıntı 0/24; 8 yedeğe düşüşün 5'i bizim paralel testimizin yol açtığı 429.
