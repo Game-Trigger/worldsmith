@@ -55,6 +55,9 @@ Concept this lesson teaches: {concept}
 Typical gaps: {gaps}
 """
 
+SPAWN_REF = ("spawn(name, x, z, size?) also exists: it places a custom model the learner built in the Forge tab, "
+             "for example spawn(\"windmill\", 3, -2). name is text in quotes and must be one of the learner's own models; "
+             "an unknown name is an error that lists their models. At most 60 spawn calls per run.")
 SOCRATIC_STAGES = ("diagnose", "teach")
 SOCRATIC_REASON = "socratic: Sokratik değil: çözümü söyleme, bir soru sor (not Socratic: do not tell the answer, ask a question)"
 
@@ -68,7 +71,10 @@ def load_lessons(path=None):
     path = path or os.path.join(ROOT, "content", "lessons.json")
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
-    return data["api_reference"], {l["id"]: l for l in data["lessons"]}
+    api_ref = data["api_reference"]
+    if "spawn(" not in api_ref:  # content/ is owned by another team member; add the Forge command here until it lists it
+        api_ref += " " + SPAWN_REF
+    return api_ref, {l["id"]: l for l in data["lessons"]}
 
 
 def public_lesson(lesson):

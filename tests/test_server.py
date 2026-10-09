@@ -71,6 +71,15 @@ class SchemaTests(unittest.TestCase):
         self.assertTrue(validate.validate(dict(self.ok, task=dict(task, extra=1)), SCHEMA))
 
 
+class ApiReferenceTests(unittest.TestCase):
+    def test_coach_prompt_knows_spawn(self):
+        api_ref, lessons = coach.load_lessons()
+        self.assertIn("spawn(name, x, z, size?)", api_ref)
+        system, _, _ = coach.build_prompts(coach.clean_request(req(), lessons), lessons["loop-forest"], api_ref)
+        self.assertIn("spawn(", system)
+        self.assertEqual(api_ref.count("spawn(name"), 1)
+
+
 class LeakTests(unittest.TestCase):
     def leaks(self, lesson_id, message, code="", **kw):
         return leak.find_leak(dict(message=message, **kw), LESSONS[lesson_id], code)
