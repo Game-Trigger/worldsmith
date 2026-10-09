@@ -1,0 +1,371 @@
+{
+  "note": "30 hand-written learner submissions, 7 kinds. `expect` is what the page's own goal check must say. `gap` is a list of lowercase regexes naming the CONCEPT that is actually wrong (generic words like 'tree' or 'only' were removed on purpose): a coach reply counts as 'found the gap' if ANY matches. This keyword judge is a cheap proxy; run_eval.py saves every reply for manual review.",
+  "cases": [
+    {
+      "id": 1,
+      "lesson": 0,
+      "kind": "correct",
+      "name": "tree with numbers",
+      "expect": "pass",
+      "gap": [],
+      "code": "ground(\"#6a994e\");\ntree(4, -6);\n"
+    },
+    {
+      "id": 2,
+      "lesson": 0,
+      "kind": "wrong_logic",
+      "name": "x and z left as letters",
+      "expect": "error",
+      "gap": [
+        "\\bnumber",
+        "replace",
+        "\\bvalue"
+      ],
+      "code": "ground(\"#6a994e\");\ntree(x, z);\n"
+    },
+    {
+      "id": 3,
+      "lesson": 0,
+      "kind": "half_finished",
+      "name": "tree line still commented out",
+      "expect": "miss",
+      "gap": [
+        "comment"
+      ],
+      "code": "ground(\"#6a994e\");\n// tree(4, -6);\n"
+    },
+    {
+      "id": 4,
+      "lesson": 0,
+      "kind": "syntax_error",
+      "name": "missing closing parenthesis",
+      "expect": "error",
+      "gap": [
+        "syntax",
+        "parenthes",
+        "bracket",
+        "closing"
+      ],
+      "code": "ground(\"#6a994e\");\ntree(4, -6;\n"
+    },
+    {
+      "id": 5,
+      "lesson": 0,
+      "kind": "copied_reference",
+      "name": "reference solution pasted",
+      "expect": "pass",
+      "gap": [],
+      "code": "ground(\"#6a994e\");\ntree(4, -6);\n"
+    },
+    {
+      "id": 6,
+      "lesson": 0,
+      "kind": "empty",
+      "name": "empty editor",
+      "expect": "miss",
+      "gap": [
+        "no tree",
+        "add a"
+      ],
+      "code": ""
+    },
+    {
+      "id": 7,
+      "lesson": 0,
+      "kind": "off_topic",
+      "name": "browser code instead of scene commands",
+      "expect": "error",
+      "gap": [
+        "not defined",
+        "isn.t defined",
+        "unknown",
+        "not available",
+        "only these",
+        "only use"
+      ],
+      "code": "console.log(\"hello\");\nalert(1);\n"
+    },
+    {
+      "id": 8,
+      "lesson": 1,
+      "kind": "correct",
+      "name": "loop with 12 random trees",
+      "expect": "pass",
+      "gap": [],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 12; i++) {\n  tree(random(-15, 15), random(-15, 15));\n}\n"
+    },
+    {
+      "id": 9,
+      "lesson": 1,
+      "kind": "wrong_logic",
+      "name": "loop condition still i < 3",
+      "expect": "miss",
+      "gap": [
+        "turns",
+        "i <",
+        "how many"
+      ],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 3; i++) {\n  tree(i * 5 - 5, 0);\n}\n"
+    },
+    {
+      "id": 10,
+      "lesson": 1,
+      "kind": "half_finished",
+      "name": "12 trees typed by hand, no loop",
+      "expect": "miss",
+      "gap": [
+        "loop"
+      ],
+      "code": "ground(\"#6a994e\");\ntree(-15,0);tree(-12,0);tree(-9,0);tree(-6,0);tree(-3,0);tree(0,0);tree(3,0);tree(6,0);tree(9,0);tree(12,0);tree(14,2);tree(15,4);\n"
+    },
+    {
+      "id": 11,
+      "lesson": 1,
+      "kind": "syntax_error",
+      "name": "missing parenthesis in for header",
+      "expect": "error",
+      "gap": [
+        "syntax",
+        "parenthes",
+        "bracket",
+        "closing"
+      ],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 12; i++ {\n  tree(1, 1);\n}\n"
+    },
+    {
+      "id": 12,
+      "lesson": 1,
+      "kind": "copied_reference",
+      "name": "12 trees in a straight row",
+      "expect": "pass",
+      "gap": [],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 12; i++) {\n  tree(i * 3 - 18, 0);\n}\n"
+    },
+    {
+      "id": 13,
+      "lesson": 1,
+      "kind": "empty",
+      "name": "empty editor",
+      "expect": "miss",
+      "gap": [
+        "loop",
+        "no tree"
+      ],
+      "code": ""
+    },
+    {
+      "id": 14,
+      "lesson": 1,
+      "kind": "off_topic",
+      "name": "endless loop",
+      "expect": "error",
+      "gap": [
+        "endless",
+        "never end",
+        "infinite",
+        "stopped",
+        "too long",
+        "forever"
+      ],
+      "code": "ground(\"#6a994e\");\nwhile (true) { }\n"
+    },
+    {
+      "id": 15,
+      "lesson": 2,
+      "kind": "correct",
+      "name": "low sun and haze",
+      "expect": "pass",
+      "gap": [],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 14; i++) {\n  tree(random(-16, 16), random(-16, 16), random(0.8, 1.7));\n}\nsun(10);\nfog(0.5);\n"
+    },
+    {
+      "id": 16,
+      "lesson": 2,
+      "kind": "wrong_logic",
+      "name": "sun still high",
+      "expect": "miss",
+      "gap": [
+        "high",
+        "lower",
+        "15",
+        "horizon",
+        "midday"
+      ],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 14; i++) {\n  tree(random(-16, 16), random(-16, 16));\n}\nsun(80);\nfog(0.5);\n"
+    },
+    {
+      "id": 17,
+      "lesson": 2,
+      "kind": "half_finished",
+      "name": "sun set, no fog",
+      "expect": "miss",
+      "gap": [
+        "fog",
+        "haze"
+      ],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 14; i++) {\n  tree(random(-16, 16), random(-16, 16));\n}\nsun(10);\n"
+    },
+    {
+      "id": 18,
+      "lesson": 2,
+      "kind": "syntax_error",
+      "name": "missing parenthesis on sun",
+      "expect": "error",
+      "gap": [
+        "syntax",
+        "parenthes",
+        "bracket",
+        "closing"
+      ],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 14; i++) {\n  tree(random(-16, 16), random(-16, 16));\n}\nsun(10;\nfog(0.5);\n"
+    },
+    {
+      "id": 19,
+      "lesson": 2,
+      "kind": "wrong_logic",
+      "name": "fog amount out of range (5)",
+      "expect": "error",
+      "gap": [
+        "range",
+        "between",
+        "0 and 1",
+        "0 to 1",
+        "at most"
+      ],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 14; i++) {\n  tree(random(-16, 16), random(-16, 16));\n}\nsun(10);\nfog(5);\n"
+    },
+    {
+      "id": 20,
+      "lesson": 2,
+      "kind": "empty",
+      "name": "empty editor",
+      "expect": "miss",
+      "gap": [
+        "sun",
+        "light",
+        "midday"
+      ],
+      "code": ""
+    },
+    {
+      "id": 21,
+      "lesson": 2,
+      "kind": "off_topic",
+      "name": "words instead of numbers",
+      "expect": "error",
+      "gap": [
+        "\\bnumber",
+        "text",
+        "string",
+        "quote"
+      ],
+      "code": "ground(\"#6a994e\");\nfor (let i = 0; i < 14; i++) {\n  tree(random(-16, 16), random(-16, 16));\n}\nsun(\"low\");\nfog(\"a lot\");\n"
+    },
+    {
+      "id": 22,
+      "lesson": 3,
+      "kind": "correct",
+      "name": "village with ring of houses",
+      "expect": "pass",
+      "gap": [],
+      "code": "ground(\"#7aa35a\");\nsun(12);\nfog(0.35);\nfor (let i = 0; i < 6; i++) {\n  const a = (i / 6) * Math.PI * 2;\n  house(Math.cos(a) * 8, Math.sin(a) * 8, 1);\n}\nfor (let i = 0; i < 20; i++) {\n  tree(random(-18, 18), random(-18, -12));\n}\nfor (let i = 0; i < 5; i++) {\n  rock(random(-5, 5), random(-5, 5));\n}\n"
+    },
+    {
+      "id": 23,
+      "lesson": 3,
+      "kind": "wrong_logic",
+      "name": "two houses on top of each other",
+      "expect": "pass",
+      "gap": [],
+      "code": "ground(\"#6a994e\");\nhouse(0, 0);\nhouse(0, 0);\nfor (let i = 0; i < 6; i++) { tree(random(-15, 15), 12); }\nfor (let i = 0; i < 3; i++) { rock(random(-8, 8), -10); }\n"
+    },
+    {
+      "id": 24,
+      "lesson": 3,
+      "kind": "half_finished",
+      "name": "only one house",
+      "expect": "miss",
+      "gap": [
+        "house"
+      ],
+      "code": "ground(\"#6a994e\");\nhouse(0, 0);\nfor (let i = 0; i < 6; i++) { tree(random(-15, 15), 12); }\nfor (let i = 0; i < 3; i++) { rock(random(-8, 8), -10); }\n"
+    },
+    {
+      "id": 25,
+      "lesson": 3,
+      "kind": "syntax_error",
+      "name": "missing closing brace",
+      "expect": "error",
+      "gap": [
+        "syntax",
+        "brace",
+        "bracket",
+        "closing",
+        "unexpected",
+        "end of"
+      ],
+      "code": "ground(\"#6a994e\");\nhouse(0, 0);\nhouse(6, 4);\nfor (let i = 0; i < 6; i++) {\n  tree(random(-15, 15), 12);\n"
+    },
+    {
+      "id": 26,
+      "lesson": 3,
+      "kind": "copied_reference",
+      "name": "coach example village pasted",
+      "expect": "pass",
+      "gap": [],
+      "code": "ground(\"#7aa35a\");\nsun(12);\nfog(0.35);\nfor (let i = 0; i < 6; i++) {\n  const a = (i / 6) * Math.PI * 2;\n  house(Math.cos(a) * 8, Math.sin(a) * 8, 1);\n}\nfor (let i = 0; i < 40; i++) {\n  const a = random(0, Math.PI * 2);\n  const r = random(13, 19);\n  tree(Math.cos(a) * r, Math.sin(a) * r, random(0.8, 1.6));\n}\nfor (let i = 0; i < 5; i++) {\n  rock(random(-5, 5), random(-5, 5), random(0.6, 1.2));\n}\n"
+    },
+    {
+      "id": 27,
+      "lesson": 3,
+      "kind": "empty",
+      "name": "empty editor",
+      "expect": "miss",
+      "gap": [
+        "house",
+        "tree",
+        "rock"
+      ],
+      "code": ""
+    },
+    {
+      "id": 28,
+      "lesson": 3,
+      "kind": "off_topic",
+      "name": "house placed far outside the map",
+      "expect": "error",
+      "gap": [
+        "range",
+        "-20",
+        "map",
+        "between"
+      ],
+      "code": "ground(\"#6a994e\");\nhouse(100, 100);\n"
+    },
+    {
+      "id": 29,
+      "lesson": 3,
+      "kind": "half_finished",
+      "name": "houses and trees but no rocks",
+      "expect": "miss",
+      "gap": [
+        "rock"
+      ],
+      "code": "ground(\"#6a994e\");\nhouse(-6, 2);\nhouse(6, -3);\nfor (let i = 0; i < 8; i++) { tree(random(-15, 15), 12); }\n"
+    },
+    {
+      "id": 30,
+      "lesson": 3,
+      "kind": "wrong_logic",
+      "name": "words as coordinates",
+      "expect": "error",
+      "gap": [
+        "\\bnumber",
+        "text",
+        "string",
+        "quote"
+      ],
+      "code": "ground(\"#6a994e\");\nhouse(\"left\", \"top\");\n"
+    }
+  ]
+}

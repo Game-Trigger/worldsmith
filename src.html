@@ -1,0 +1,1438 @@
+<title>Worldsmith</title>
+<style>
+/*
+  Layout: a one-screen workbench. Left column stacks the live 3D result (top) over the code editor (bottom);
+  right column holds the current mission and the coach's running feedback. Below 960px everything stacks.
+  Palette: foundry slate + ember amber, moss green for "done", brick red for errors.
+  Type: Bricolage Grotesque (headings), IBM Plex Sans (text), JetBrains Mono (code).
+*/
+:root {
+  --bg: #12171a;
+  --panel: #192024;
+  --panel-2: #1f282c;
+  --line: #2c373c;
+  --text: #e6ebe8;
+  --muted: #8f9d98;
+  --accent: #e3a23a;
+  --accent-ink: #1c1406;
+  --accent-soft: rgba(227, 162, 58, 0.14);
+  --ok: #88b66c;
+  --ok-soft: rgba(136, 182, 108, 0.16);
+  --err: #ee7058;
+  --err-soft: rgba(238, 112, 88, 0.16);
+  --code-bg: #0f1417;
+  --syn-kw: #e68b6b;
+  --syn-str: #a1cd7e;
+  --syn-num: #e8b957;
+  --syn-com: #6f7f79;
+  --syn-var: #a9c9da;
+  --syn-api: #f2c451;
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 24px rgba(0, 0, 0, 0.28);
+  --f-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #e7edeb;
+    --panel: #f8faf9;
+    --panel-2: #eef3f1;
+    --line: #cbd6d2;
+    --text: #17211e;
+    --muted: #586964;
+    --accent: #b86a00;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(184, 106, 0, 0.12);
+    --ok: #3b7a34;
+    --ok-soft: rgba(59, 122, 52, 0.13);
+    --err: #b43a26;
+    --err-soft: rgba(180, 58, 38, 0.11);
+    --code-bg: #fbfcfc;
+    --syn-kw: #b5472a;
+    --syn-str: #3f7a2c;
+    --syn-num: #96630a;
+    --syn-com: #7c8c86;
+    --syn-var: #276a86;
+    --syn-api: #a35c00;
+    --shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 6px 18px rgba(23, 33, 30, 0.1);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #e7edeb;
+  --panel: #f8faf9;
+  --panel-2: #eef3f1;
+  --line: #cbd6d2;
+  --text: #17211e;
+  --muted: #586964;
+  --accent: #b86a00;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(184, 106, 0, 0.12);
+  --ok: #3b7a34;
+  --ok-soft: rgba(59, 122, 52, 0.13);
+  --err: #b43a26;
+  --err-soft: rgba(180, 58, 38, 0.11);
+  --code-bg: #fbfcfc;
+  --syn-kw: #b5472a;
+  --syn-str: #3f7a2c;
+  --syn-num: #96630a;
+  --syn-com: #7c8c86;
+  --syn-var: #276a86;
+  --syn-api: #a35c00;
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 6px 18px rgba(23, 33, 30, 0.1);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--f-body);
+  font-size: 14px;
+  line-height: 1.5;
+  padding-inline: 16px;
+  padding-block: 12px;
+}
+button { font: inherit; color: inherit; }
+code, kbd { font-family: var(--f-mono); font-size: 0.92em; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { display: flex; flex-direction: column; gap: 12px; min-height: 100%; }
+
+/* ---------- header ---------- */
+.top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
+.brand svg { width: 26px; height: 26px; flex: none; }
+.path { flex: 1 1 360px; min-width: 0; display: flex; align-items: center; gap: 12px; }
+.path-name { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; align-items: flex-start; flex: 1; min-width: 0; }
+.steps li { display: flex; align-items: flex-start; flex: 1 1 0; min-width: 0; }
+.steps li:last-child { flex: 0 0 auto; }
+.step { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; padding: 0; cursor: pointer; min-width: 44px; }
+.step[disabled] { cursor: not-allowed; }
+.dot {
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  border: 2px solid var(--line); background: var(--panel); color: var(--muted);
+  font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+.dot svg { width: 14px; height: 14px; }
+.step.done .dot { background: var(--ok); border-color: var(--ok); color: var(--bg); }
+.step.current .dot { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.step-label { font-size: 11.5px; color: var(--muted); max-width: 90px; text-align: center; line-height: 1.2; }
+.step.current .step-label { color: var(--text); }
+.link { flex: 1; height: 2px; background: var(--line); margin: 14px 4px 0; border-radius: 2px; min-width: 8px; }
+.link.done { background: var(--ok); }
+.tools { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.xp { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13px; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.xp.pop { animation: pop 0.5s ease-out; }
+@keyframes pop { 0% { transform: scale(1); } 35% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { background: transparent; border: 0; padding: 6px 11px; min-height: 32px; cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--text); }
+
+/* ---------- panels ---------- */
+.stage, .side { display: contents; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); min-width: 0; }
+
+/* preview */
+.preview { position: relative; overflow: hidden; height: clamp(250px, 42vh, 420px); order: 1; background: var(--panel-2); }
+.preview canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+.preview canvas:active { cursor: grabbing; }
+.chips { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; }
+.chip { font-size: 12px; font-variant-numeric: tabular-nums; padding: 3px 9px; border-radius: 999px; background: color-mix(in srgb, var(--bg) 78%, transparent); border: 1px solid var(--line); color: var(--muted); backdrop-filter: blur(4px); }
+.chip b { color: var(--text); font-weight: 600; margin-left: 4px; }
+.pv-help { position: absolute; left: 10px; bottom: 8px; font-size: 11.5px; color: var(--muted); pointer-events: none; padding: 2px 8px; border-radius: 6px; background: color-mix(in srgb, var(--bg) 70%, transparent); }
+.empty { position: absolute; inset: 0; display: grid; place-content: center; padding: 16px; pointer-events: none; }
+.empty > div { text-align: center; padding: 14px 20px; border-radius: 10px; background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--line); box-shadow: var(--shadow); max-width: 34ch; }
+.empty strong { display: block; font-family: var(--f-display); font-size: 17px; color: var(--text); }
+.empty span { display: block; color: var(--muted); margin-top: 2px; }
+.empty[hidden] { display: none; }
+.glerr { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; text-align: center; color: var(--err); }
+
+/* editor */
+.editor { order: 3; display: flex; flex-direction: column; overflow: hidden; height: clamp(300px, 44vh, 420px); }
+.ed-bar { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.file { font-family: var(--f-mono); font-size: 12.5px; color: var(--muted); padding: 3px 8px; border-radius: 6px; background: var(--panel-2); }
+.ed-bar .sp { flex: 1; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px; border: 1px solid var(--line); background: transparent; padding: 7px 13px; min-height: 36px; cursor: pointer; font-weight: 500; transition: background-color 0.15s, border-color 0.15s, transform 0.1s; }
+.btn:hover { background: var(--panel-2); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.06); background: var(--accent); }
+.btn svg { width: 13px; height: 13px; }
+.btn kbd { font-size: 11px; opacity: 0.75; padding-left: 2px; }
+.btn.small { min-height: 32px; padding: 4px 10px; font-size: 13px; }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.ed-body { flex: 1; min-height: 0; position: relative; background: var(--code-bg); }
+.ed-body .CodeMirror { position: absolute; inset: 0; height: 100%; }
+.status { display: flex; gap: 8px; align-items: baseline; padding: 7px 12px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); min-height: 34px; font-variant-numeric: tabular-nums; }
+.status span { min-width: 0; overflow-wrap: anywhere; }
+.status code { background: color-mix(in srgb, var(--text) 10%, transparent); padding: 1px 5px; border-radius: 4px; }
+.status.ok { color: var(--ok); }
+.status.err { color: var(--err); background: var(--err-soft); }
+
+/* mission card */
+.mission { order: 2; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.mission .count { font-size: 12.5px; color: var(--muted); }
+.mission h2 { font-family: var(--f-display); font-size: 22px; line-height: 1.15; margin: 2px 0 0; letter-spacing: -0.01em; text-wrap: balance; }
+.mission p { margin: 0; max-width: 62ch; }
+.goals { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.goals-title { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
+.goal { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px; background: var(--panel-2); }
+.goal .ck { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); flex: none; display: grid; place-items: center; color: transparent; transition: background-color 0.2s, border-color 0.2s; }
+.goal .ck svg { width: 11px; height: 11px; }
+.goal.done .ck { background: var(--ok); border-color: var(--ok); color: var(--bg); }
+.goal .gl { flex: 1; min-width: 0; }
+.goal .now { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.goal.done .now { color: var(--ok); }
+
+/* coach log */
+.log { order: 4; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.log-head { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-family: var(--f-display); font-weight: 700; }
+.log-head svg { width: 20px; height: 20px; }
+.msgs { flex: 1; min-height: 140px; max-height: 340px; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.msg { padding: 9px 12px; border-radius: 4px 12px 12px 12px; background: var(--panel-2); max-width: 100%; overflow-wrap: anywhere; animation: rise 0.25s ease-out; }
+.msg.hint { background: var(--accent-soft); }
+.msg.error { background: var(--err-soft); }
+.msg.success { background: var(--ok-soft); }
+.msg code { background: color-mix(in srgb, var(--text) 10%, transparent); padding: 1px 5px; border-radius: 4px; }
+.msg ul { margin: 6px 0 0; padding-left: 18px; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 14px; border-top: 1px solid var(--line); }
+.foot { padding: 0 14px 12px; }
+.linkbtn { background: none; border: 0; padding: 4px 0; color: var(--muted); font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 32px; }
+.log-head .sp { flex: 1; }
+.log-head .seg button { padding: 3px 10px; }
+.log-head .seg button:disabled { opacity: 0.45; cursor: not-allowed; }
+.srv { font-family: var(--f-body); font-weight: 500; font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+.srv::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.srv.ready::before { background: var(--ok); }
+.srv.off::before { background: var(--err); }
+.note { margin: 0 0 6px; font-size: 12px; color: var(--muted); max-width: 52ch; }
+.msg.pending { background: var(--panel-2); color: var(--muted); font-style: italic; }
+.tag { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; font-size: 11.5px; color: var(--muted); }
+.tag b { font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.tag.rules b { background: var(--panel); border: 1px solid var(--line); color: var(--muted); }
+.tag .linkbtn { min-height: 24px; padding: 0; font-size: 11.5px; }
+.msg .verdict { font-weight: 600; }
+.task { margin-top: 10px; padding: 10px 12px; border-radius: 8px; background: var(--panel); border: 1px solid var(--line); }
+.task h4 { margin: 0 0 4px; font-family: var(--f-display); font-size: 15px; }
+.task p { margin: 0 0 6px; }
+.task ul { margin: 0 0 8px; padding-left: 18px; }
+.task .btn { margin-top: 2px; }
+
+/* confirm bar */
+.confirm { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 30; width: min(94vw, 540px); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--accent); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4); }
+.confirm p { margin: 0; flex: 1 1 220px; }
+.confirm .row { display: flex; gap: 8px; }
+
+/* CodeMirror theme */
+.cm-s-ws.CodeMirror { background: var(--code-bg); color: var(--text); font-family: var(--f-mono); font-size: 13.5px; line-height: 1.6; }
+.cm-s-ws .CodeMirror-gutters { background: var(--code-bg); border-right: 1px solid var(--line); }
+.cm-s-ws .CodeMirror-linenumber { color: var(--syn-com); padding: 0 8px 0 6px; }
+.cm-s-ws .CodeMirror-cursor { border-left: 2px solid var(--accent); }
+.cm-s-ws .CodeMirror-selected { background: var(--accent-soft); }
+.cm-s-ws.CodeMirror-focused .CodeMirror-selected { background: color-mix(in srgb, var(--accent) 28%, transparent); }
+.cm-s-ws .CodeMirror-activeline-background { background: color-mix(in srgb, var(--text) 5%, transparent); }
+.cm-s-ws .cm-keyword { color: var(--syn-kw); }
+.cm-s-ws .cm-atom, .cm-s-ws .cm-number { color: var(--syn-num); }
+.cm-s-ws .cm-string, .cm-s-ws .cm-string-2 { color: var(--syn-str); }
+.cm-s-ws .cm-comment { color: var(--syn-com); font-style: italic; }
+.cm-s-ws .cm-variable, .cm-s-ws .cm-variable-2, .cm-s-ws .cm-def, .cm-s-ws .cm-property { color: var(--syn-var); }
+.cm-s-ws .cm-operator, .cm-s-ws .cm-punctuation, .cm-s-ws .cm-bracket { color: var(--text); }
+.cm-s-ws .cm-ws-api { color: var(--syn-api); font-weight: 500; }
+.cm-s-ws .CodeMirror-matchingbracket { color: var(--accent) !important; text-decoration: underline; }
+.cm-s-ws .CodeMirror-nonmatchingbracket { color: var(--err) !important; }
+.cm-err-line { background: var(--err-soft); }
+.cm-err-gutter { color: var(--err) !important; font-weight: 700; }
+
+/* ---------- desktop workbench ---------- */
+@media (min-width: 960px) and (min-height: 640px) {
+  .app { display: grid; grid-template-columns: minmax(0, 1fr) 390px; grid-template-rows: auto minmax(0, 1fr); height: 100%; }
+  .top { grid-column: 1 / -1; }
+  .stage { display: grid; grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; min-height: 0; }
+  .side { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+  .preview, .editor { height: auto; min-height: 0; }
+  .mission { flex: 0 1 auto; max-height: 58%; overflow-y: auto; }
+  .log { flex: 1 1 0; }
+  .msgs { max-height: none; min-height: 0; }
+}
+@media (max-width: 720px) {
+  .step-label { display: none; }
+  .path-name { display: none; }
+  .link { margin-top: 14px; }
+  .tools { width: 100%; justify-content: space-between; margin-left: 0; }
+  .top { gap: 10px; }
+}
+@media (pointer: coarse) {
+  .btn, .seg button, .linkbtn { min-height: 44px; }
+  .btn.small { min-height: 44px; }
+  .step { min-height: 44px; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>/*__CM_CSS__*/</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2.5 27.5 9v14L16 29.5 4.5 23V9z" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round"/><path d="M16 10.5 21.5 16 16 21.5 10.5 16z" fill="var(--accent)"/></svg>
+      <span>Worldsmith</span>
+    </div>
+    <div class="path">
+      <span class="path-name" id="pathName"></span>
+      <ol class="steps" id="steps" aria-label="Path"></ol>
+    </div>
+    <div class="tools">
+      <span class="xp" id="xp" aria-live="polite">0 XP</span>
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" id="langTr" aria-pressed="false">TR</button>
+        <button type="button" id="langEn" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="stage">
+    <div class="panel preview" id="preview">
+      <canvas id="scene" role="img" aria-label="3D preview"></canvas>
+      <div class="chips" id="chips"></div>
+      <div class="empty" id="empty" hidden><div><strong data-i="emptyTitle"></strong><span data-i="emptyBody"></span></div></div>
+      <div class="glerr" id="glerr" hidden></div>
+      <div class="pv-help" data-i="pvHelp"></div>
+    </div>
+
+    <div class="panel editor" id="editorPanel">
+      <div class="ed-bar">
+        <span class="file">world.js</span>
+        <span class="sp"></span>
+        <button type="button" class="btn small" id="btnReset" data-i="reset"></button>
+        <button type="button" class="btn primary" id="btnRun">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1.2v9.6L10.5 6z" fill="currentColor"/></svg>
+          <span data-i="run"></span><kbd>Ctrl+Enter</kbd>
+        </button>
+      </div>
+      <div class="ed-body" id="edBody"></div>
+      <div class="status" id="status" role="status"></div>
+    </div>
+  </section>
+
+  <aside class="side">
+    <section class="panel mission" id="mission" aria-labelledby="mTitle">
+      <div>
+        <div class="count" id="mCount"></div>
+        <h2 id="mTitle"></h2>
+      </div>
+      <p id="mLesson"></p>
+      <div>
+        <div class="goals-title" data-i="goals"></div>
+        <ul class="goals" id="goals"></ul>
+      </div>
+    </section>
+
+    <section class="panel log" aria-label="Coach">
+      <div class="log-head">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="var(--accent)"/><path d="M16 8 23 12v8l-7 4-7-4v-8z" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span data-i="coach"></span>
+        <span class="srv" id="srv" role="status"></span>
+        <span class="sp"></span>
+        <div class="seg" role="group" aria-label="Coach mode">
+          <button type="button" id="modeAi" aria-pressed="false">AI</button>
+          <button type="button" id="modeRules" aria-pressed="false"></button>
+        </div>
+      </div>
+      <div class="msgs" id="msgs" aria-live="polite"></div>
+      <div class="actions" id="actions">
+        <button type="button" class="btn" id="btnHint"></button>
+        <button type="button" class="btn small" id="btnShow" hidden></button>
+        <button type="button" class="btn small" id="btnChallenge" hidden></button>
+        <button type="button" class="btn small" id="btnExample" hidden data-i="example"></button>
+        <button type="button" class="btn primary" id="btnNext" hidden data-i="next"></button>
+      </div>
+      <div class="foot">
+        <p class="note" id="aiNote"></p>
+        <button type="button" class="linkbtn" id="btnWipe" data-i="wipe"></button>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<div class="confirm" id="confirm" role="alertdialog" aria-live="assertive" hidden>
+  <p id="confirmText"></p>
+  <div class="row">
+    <button type="button" class="btn small" id="confirmNo" data-i="no"></button>
+    <button type="button" class="btn small primary" id="confirmYes" data-i="yes"></button>
+  </div>
+</div>
+
+<script>/*__THREE__*/</script>
+<script>/*__CM_JS__*/</script>
+<script>
+(() => {
+'use strict';
+
+/* =====================================================================
+   Helpers and i18n
+   ===================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const L = (tr, en) => ({ tr, en });
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const md = (s) => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+
+const UI = {
+  tr: {
+    path: 'Çevre tasarımı patikası', mission: (n, t) => `Görev ${n} / ${t}`, goals: 'Hedefler', coach: 'Koç',
+    run: 'Çalıştır', reset: 'Başlangıç koduna dön', hint: (n) => `İpucu (${n}/3)`, hintDone: 'İpuçları bitti',
+    next: 'Sonraki görev', example: 'Koçun örneğini yaz', wipe: 'İlerlemeyi sıfırla',
+    idle: 'Henüz çalıştırılmadı. Ctrl+Enter ile çalıştır.', ok: (n, ms) => `Çalıştı · ${n} nesne · ${ms} ms`,
+    pvHelp: 'Sürükle: döndür · Tekerlek: yakınlaştır', emptyTitle: 'Sahne boş',
+    emptyBody: 'Kodun sahneye bir şey eklediğinde burada belirir. Editördeki yönergeden başla.',
+    chipTree: 'Ağaç', chipRock: 'Kaya', chipHouse: 'Ev', yes: 'Evet, devam et', no: 'Vazgeç',
+    cReset: 'Editördeki kod başlangıç koduna dönecek. Devam edilsin mi?',
+    cSwitch: 'Editördeki değişiklikler silinecek ve seçtiğin görevin başlangıç kodu yüklenecek. Devam edilsin mi?',
+    cWipe: 'Tüm görev ilerlemesi ve XP silinecek. Devam edilsin mi?',
+    cExample: 'Editördeki kodun yerine koçun örnek köyü yazılacak. Devam edilsin mi?',
+    stepAria: (i, name, st) => `Görev ${i}: ${name} (${st})`, stDone: 'tamamlandı', stCurrent: 'sırada', stLocked: 'kilitli',
+    noWorker: 'Kod çalıştırma ortamı başlatılamadı. Tarayıcın arka plan çalışanlarını (Web Worker) engelliyor olabilir; sayfayı yenile ya da başka bir tarayıcı dene.',
+    noGL: 'Bu tarayıcıda 3D sahne açılamadı. WebGL kapalı olabilir; tarayıcı ayarlarında donanım hızlandırmayı aç ve sayfayı yenile.',
+    line: (n) => `Satır ${n}`, xp: (n) => `${n} XP`,
+    roadmapTitle: 'Sıradaki patikalar',
+    modeRules: 'Kural', srvChecking: 'Sunucu aranıyor…', srvReady: 'AI koç hazır',
+    srvNoServer: 'Sunucu yok · kural tabanlı koç', srvNoKey: 'API anahtarı yok · kural tabanlı koç',
+    noteSend: 'AI modunda editördeki kodun bir dil modeline gönderilir. Koda kişisel bilgi yazma.',
+    noteRules: 'Kural modu: her şey tarayıcında kalır, hiçbir şey gönderilmez.',
+    pending: 'Koç kodunu okuyor…', tagAi: (m) => `AI koç · ${m}`, tagRules: 'Kural tabanlı koç', retry: 'Tekrar dene',
+    whyRules: { offline: 'AI koça ulaşılamadı', timeout: 'AI koç zamanında yanıt vermedi', rate_limited: 'Çok fazla istek gönderildi, biraz bekle', unavailable: 'AI koç şu an yanıt veremiyor' },
+    btnShow: 'Sahneyi anlat', btnChallenge: 'Ek görev ver', loadTask: 'Görev kodunu editöre yükle',
+    taskGoal: 'Hedef', taskCrit: 'Ölçütler',
+    cTask: 'Editördeki kod, koçun görev iskeleti ile değiştirilecek. Devam edilsin mi?',
+    verdictPass: 'Geçti', verdictPartial: 'Kısmen', verdictFail: 'Henüz değil', concept: 'Eksik kavram',
+  },
+  en: {
+    path: 'Environment design path', mission: (n, t) => `Mission ${n} of ${t}`, goals: 'Goals', coach: 'Coach',
+    run: 'Run', reset: 'Restore starter code', hint: (n) => `Hint (${n}/3)`, hintDone: 'No more hints',
+    next: 'Next mission', example: "Write the coach's example", wipe: 'Reset progress',
+    idle: 'Not run yet. Press Ctrl+Enter to run.', ok: (n, ms) => `Ran fine · ${n} ${n === 1 ? 'object' : 'objects'} · ${ms} ms`,
+    pvHelp: 'Drag to rotate · Scroll to zoom', emptyTitle: 'The scene is empty',
+    emptyBody: 'Whatever your code adds shows up here. Start with the instructions in the editor.',
+    chipTree: 'Trees', chipRock: 'Rocks', chipHouse: 'Houses', yes: 'Yes, continue', no: 'Cancel',
+    cReset: 'The editor will go back to the starter code. Continue?',
+    cSwitch: 'Your edits will be discarded and the starter code of the chosen mission will load. Continue?',
+    cWipe: 'All mission progress and XP will be erased. Continue?',
+    cExample: "The coach's example village will replace the code in the editor. Continue?",
+    stepAria: (i, name, st) => `Mission ${i}: ${name} (${st})`, stDone: 'completed', stCurrent: 'up next', stLocked: 'locked',
+    noWorker: "The code runner could not start. Your browser may be blocking Web Workers; reload the page or try another browser.",
+    noGL: 'The 3D scene could not open in this browser. WebGL may be off; turn on hardware acceleration in the browser settings and reload.',
+    line: (n) => `Line ${n}`, xp: (n) => `${n} XP`,
+    roadmapTitle: 'Coming next',
+    modeRules: 'Rules', srvChecking: 'Looking for the server…', srvReady: 'AI coach ready',
+    srvNoServer: 'No server · rule-based coach', srvNoKey: 'No API key · rule-based coach',
+    noteSend: 'In AI mode the code in the editor is sent to a language model. Do not put personal details in your code.',
+    noteRules: 'Rules mode: everything stays in your browser, nothing is sent.',
+    pending: 'The coach is reading your code…', tagAi: (m) => `AI coach · ${m}`, tagRules: 'Rule-based coach', retry: 'Try again',
+    whyRules: { offline: 'The AI coach could not be reached', timeout: 'The AI coach took too long', rate_limited: 'Too many requests, wait a moment', unavailable: 'The AI coach cannot answer right now' },
+    btnShow: 'Describe my scene', btnChallenge: 'Give me a follow-up task', loadTask: 'Load the task code into the editor',
+    taskGoal: 'Goal', taskCrit: 'Success criteria',
+    cTask: "The editor will be replaced with the coach's task skeleton. Continue?",
+    verdictPass: 'Passed', verdictPartial: 'Partly there', verdictFail: 'Not yet', concept: 'Missing concept',
+  },
+};
+
+/* =====================================================================
+   State
+   ===================================================================== */
+const STORE_KEY = 'worldsmith.v1';
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}; } catch (e) { saved = {}; }
+const guessLang = () => (/^(tr|az)/i.test(navigator.language || '') ? 'tr' : 'en');
+const state = {
+  lang: saved.lang === 'en' || saved.lang === 'tr' ? saved.lang : guessLang(),
+  done: Array.isArray(saved.done) ? saved.done.filter((i) => Number.isInteger(i) && i >= 0 && i < 4) : [],
+  xp: Number.isFinite(saved.xp) ? saved.xp : 0,
+  cur: 0, hints: 0, dirty: false, running: false, last: null,
+  ai: saved.ai !== false,        // the learner's choice: AI coach or rules
+  server: 'checking',            // checking | ready | noserver | nokey (what /api/health said)
+  req: 0, busy: false, chat: [], task: null, turn: null,
+};
+const persist = () => {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ lang: state.lang, done: state.done, xp: state.xp, ai: state.ai })); } catch (e) { /* storage unavailable */ }
+};
+const tt = () => UI[state.lang];
+const pick = (o) => (o && typeof o === 'object' && 'tr' in o ? o[state.lang] : o);
+const firstOpen = () => { for (let i = 0; i < 4; i++) if (!state.done.includes(i)) return i; return 3; };
+
+/* =====================================================================
+   Missions
+   ===================================================================== */
+const START = {
+  first: L(
+`// Zemin rengi
+ground("#6a994e");
+
+// İlk ağacını buraya dik:
+// tree(x, z);
+`,
+`// Ground colour
+ground("#6a994e");
+
+// Plant your first tree here:
+// tree(x, z);
+`),
+  forest: L(
+`ground("#6a994e");
+
+// 12 ağaçlık bir orman kur.
+// Şimdilik 3 tane var, döngüyü genişlet:
+for (let i = 0; i < 3; i++) {
+  tree(i * 5 - 5, 0);
+}
+`,
+`ground("#6a994e");
+
+// Build a forest of 12 trees.
+// There are only 3 for now, widen the loop:
+for (let i = 0; i < 3; i++) {
+  tree(i * 5 - 5, 0);
+}
+`),
+  sunset: L(
+`ground("#6a994e");
+
+for (let i = 0; i < 14; i++) {
+  tree(random(-16, 16), random(-16, 16), random(0.8, 1.7));
+}
+
+// Işığı alçalt:  sun(yükseklik)   0 = ufuk, 90 = tepe
+// Sis ekle:      fog(miktar)      0 = yok, 1 = yoğun
+`,
+`ground("#6a994e");
+
+for (let i = 0; i < 14; i++) {
+  tree(random(-16, 16), random(-16, 16), random(0.8, 1.7));
+}
+
+// Lower the light:  sun(height)   0 = horizon, 90 = overhead
+// Add haze:         fog(amount)   0 = none, 1 = thick
+`),
+  village: L(
+`// Kendi köyünü kur.
+// Komutlar: ground, tree, rock, house, sun, fog, random
+ground("#6a994e");
+
+house(0, 0);
+`,
+`// Build your own village.
+// Commands: ground, tree, rock, house, sun, fog, random
+ground("#6a994e");
+
+house(0, 0);
+`),
+};
+
+const EXAMPLE = L(
+`// Koçun örnek köyü
+ground("#7aa35a");
+sun(12);
+fog(0.35);
+
+// Evler: merkezin etrafında bir halka
+for (let i = 0; i < 6; i++) {
+  const a = (i / 6) * Math.PI * 2;
+  house(Math.cos(a) * 8, Math.sin(a) * 8, 1);
+}
+
+// Dışarıda orman
+for (let i = 0; i < 40; i++) {
+  const a = random(0, Math.PI * 2);
+  const r = random(13, 19);
+  tree(Math.cos(a) * r, Math.sin(a) * r, random(0.8, 1.6));
+}
+
+// Köyün içinde birkaç kaya
+for (let i = 0; i < 5; i++) {
+  rock(random(-5, 5), random(-5, 5), random(0.6, 1.2));
+}
+`,
+`// The coach's example village
+ground("#7aa35a");
+sun(12);
+fog(0.35);
+
+// Houses: a ring around the centre
+for (let i = 0; i < 6; i++) {
+  const a = (i / 6) * Math.PI * 2;
+  house(Math.cos(a) * 8, Math.sin(a) * 8, 1);
+}
+
+// Forest on the outside
+for (let i = 0; i < 40; i++) {
+  const a = random(0, Math.PI * 2);
+  const r = random(13, 19);
+  tree(Math.cos(a) * r, Math.sin(a) * r, random(0.8, 1.6));
+}
+
+// A few rocks inside the village
+for (let i = 0; i < 5; i++) {
+  rock(random(-5, 5), random(-5, 5), random(0.6, 1.2));
+}
+`);
+
+const sameZ = (list) => list.length > 1 && list.every((p) => Math.abs(p.z - list[0].z) < 0.01);
+const sameX = (list) => list.length > 1 && list.every((p) => Math.abs(p.x - list[0].x) < 0.01);
+const minDist = (list) => {
+  let m = Infinity;
+  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) m = Math.min(m, Math.hypot(list[i].x - list[j].x, list[i].z - list[j].z));
+  return m;
+};
+const r1 = (n) => Math.round(n * 10) / 10;
+
+const MISSIONS = [
+  {
+    name: L('İlk ağaç', 'First tree'),
+    title: L('İlk ağacını dik', 'Plant your first tree'),
+    lesson: L(
+      'Sahne, yazdığın komutlardan oluşur. `tree(x, z)` bir ağaç diker. x sağa-sola, z öne-arkaya doğru ilerler; harita -20 ile 20 arasındadır.',
+      'A scene is built from the commands you write. `tree(x, z)` plants a tree. x moves left and right, z moves forward and back; the map spans -20 to 20.'),
+    intro: L(
+      'Hoş geldin. Editördeki yorum satırının altına bir `tree(x, z)` komutu yaz ve ilk ağacını dik. Sayıları sen seç.',
+      'Welcome. Write a `tree(x, z)` command below the comment and plant your first tree. Pick the numbers yourself.'),
+    starter: START.first,
+    goals: [{ label: L('Haritaya en az 1 ağaç dik', 'Plant at least 1 tree'), check: (c) => ({ done: c.counts.tree >= 1, now: `${c.counts.tree} / 1` }) }],
+    hints: [
+      L('Yorum satırının başındaki `//` işaretini kaldırıp `x` ve `z` yerine sayı yaz.', 'Remove the `//` at the start of the comment line and put numbers in place of `x` and `z`.'),
+      L('Örneğin `tree(4, -6);` ağacı sağa 4, arkaya 6 birim koyar.', 'For example `tree(4, -6);` puts the tree 4 units right and 6 units back.'),
+      L('Tam çözüm: satır olarak `tree(4, -6);` yaz, sonunda noktalı virgül olsun.', 'Full answer: write `tree(4, -6);` as a line, with the semicolon at the end.'),
+    ],
+    miss: (c) => (/\/\/\s*tree\s*\(/.test(c.code)
+      ? L('`tree(...)` satırı hâlâ `//` ile yorumda, bu yüzden çalışmıyor. Satırın başındaki `//` işaretini sil.', 'The `tree(...)` line is still commented out with `//`, so it does not run. Delete the `//` at the start of the line.')
+      : L('Sahnede ağaç yok. `tree(4, -6);` gibi bir satır ekle.', 'There are no trees in the scene. Add a line such as `tree(4, -6);`.')),
+    pass: (c) => {
+      const t = c.trees[0];
+      return (Math.abs(t.x) < 0.01 && Math.abs(t.z) < 0.01)
+        ? L('Ağacı tam merkeze diktin. x ve z değerlerini değiştirip nasıl kaydığına bak, sonra bir sonraki göreve geç.', 'You planted it right at the centre. Change x and z to see it slide around, then move on to the next mission.')
+        : L(`İlk ağaç yerinde: x=${r1(t.x)}, z=${r1(t.z)}. Bir sonraki görevde ağaçları tek tek yazmak yerine kodun yapmasını sağlayacaksın.`, `First tree is in: x=${r1(t.x)}, z=${r1(t.z)}. Next you will let the code do the repeating instead of typing each tree.`);
+    },
+  },
+  {
+    name: L('Orman', 'Forest'),
+    title: L('Bir orman kur', 'Grow a forest'),
+    lesson: L(
+      'Aynı satırı 12 kez yazmak yerine döngü kullan. `for (let i = 0; i < 12; i++) { ... }` içindeki kod 12 kez çalışır. `i` her turda 0, 1, 2… olur; konumu `i`\'ye bağlarsan ağaçlar yayılır. `random(a, b)` a ile b arasında bir sayı üretir.',
+      'Instead of writing the same line 12 times, use a loop. The code inside `for (let i = 0; i < 12; i++) { ... }` runs 12 times. `i` becomes 0, 1, 2… on each turn; tie the position to `i` and the trees spread out. `random(a, b)` gives a number between a and b.'),
+    intro: L(
+      'Şimdi ölçeği büyütelim. Başlangıç kodunda 3 ağaçlık bir döngü var. Onu 12 ağaca çıkar ve ağaçları tek sıradan kurtarıp haritaya dağıt.',
+      'Time to scale up. The starter has a loop of 3 trees. Take it to 12 and get the trees out of a single row.'),
+    starter: START.forest,
+    goals: [
+      { label: L('En az 12 ağaç', 'At least 12 trees'), check: (c) => ({ done: c.counts.tree >= 12, now: `${c.counts.tree} / 12` }) },
+      { label: L('Döngü kullan (for / while)', 'Use a loop (for / while)'), check: (c) => ({ done: c.hasLoop, now: c.hasLoop ? 'for' : '–' }) },
+    ],
+    hints: [
+      L('Döngünün şartı `i < 3`, yani 3 tur dönüyor. Bu sayıyı büyüt.', 'The loop condition is `i < 3`, so it runs 3 times. Make that number bigger.'),
+      L('Ağaçlar hep `z = 0` üzerinde, tek sırada. `random(-15, 15)` ile hem x hem z\'yi dağıt.', 'The trees all sit on `z = 0`, in one row. Spread both x and z with `random(-15, 15)`.'),
+      L('Tam çözüm: `for (let i = 0; i < 12; i++) { tree(random(-15, 15), random(-15, 15)); }`', 'Full answer: `for (let i = 0; i < 12; i++) { tree(random(-15, 15), random(-15, 15)); }`'),
+    ],
+    miss: (c) => {
+      if (c.counts.tree >= 12 && !c.hasLoop) return L('12 ağaç tamam ama hepsini tek tek yazmışsın. Aynı işi `for` ile yaptır; yarın 300 ağaç istesen de tek sayı değişir.', 'You have 12 trees, but you typed each one by hand. Let a `for` loop do it; asking for 300 trees tomorrow would be a one-number change.');
+      if (c.hasLoop) return L(`Döngü çalışıyor ama sahnede ${c.counts.tree} ağaç var, hedef 12. Döngünün kaç tur döndüğüne bak: \`i < ...\` kısmı.`, `The loop works but the scene has ${c.counts.tree} trees, the goal is 12. Check how many turns it runs: the \`i < ...\` part.`);
+      return L(`Sahnede ${c.counts.tree} ağaç var ve döngü yok. \`for (let i = 0; i < 12; i++) { ... }\` içine bir \`tree(...)\` koy.`, `The scene has ${c.counts.tree} trees and no loop. Put a \`tree(...)\` inside \`for (let i = 0; i < 12; i++) { ... }\`.`);
+    },
+    pass: (c) => (sameZ(c.trees)
+      ? L('12 ağaç var ama hepsi düz bir sırada. Doğal bir orman için `random(-15, 15)` ile z\'yi de dağıtmayı dene. Döngü fikri tamam: oyunlarda düşman dalgaları ve bölüm üretimi de böyle çalışır.', 'You have 12 trees but they stand in a straight row. For a natural forest, spread z with `random(-15, 15)` too. The loop idea is down: enemy waves and level generation work the same way.')
+      : L('Orman hazır. Döngü, aynı işi bir sayıya bağlı olarak tekrarlatmanın yolu; oyunlarda düşman dalgaları ve bölüm üretimi de böyle çalışır.', 'The forest is up. A loop repeats the same job driven by a number; enemy waves and level generation in games work the same way.')),
+  },
+  {
+    name: L('Gün batımı', 'Sunset'),
+    title: L('Gün batımını yarat', 'Set the sun low'),
+    lesson: L(
+      'Atmosferi iki komut belirler. `sun(yükseklik)` güneşin açısını ayarlar: 90 tepe noktası, 0 ufuk. Güneş alçaldıkça ışık turuncuya döner. `fog(miktar)` uzaktaki nesneleri sisle gizler; 0 sis yok, 1 çok yoğun.',
+      'Two commands set the atmosphere. `sun(height)` sets the sun angle: 90 is overhead, 0 is the horizon. The lower it goes, the more orange the light. `fog(amount)` hides distant objects in haze; 0 is none, 1 is very thick.'),
+    intro: L(
+      'Orman hazır, şimdi ona bir ruh hali ver. Işığı ufka yaklaştır ve biraz sis ekle. Sayılarla oynayıp neyin neyi değiştirdiğine bak.',
+      'The forest is ready, now give it a mood. Bring the light close to the horizon and add some haze. Play with the numbers and watch what changes.'),
+    starter: START.sunset,
+    goals: [
+      { label: L('Güneşi 15 veya altına indir', 'Lower the sun to 15 or less'), check: (c) => ({ done: c.sunH !== null && c.sunH <= 15, now: c.sunH === null ? 'sun(–)' : `sun(${r1(c.sunH)})` }) },
+      { label: L('Sisi 0,3 veya üstüne çıkar', 'Raise the fog to 0.3 or more'), check: (c) => ({ done: c.fogA !== null && c.fogA >= 0.3, now: c.fogA === null ? 'fog(–)' : `fog(${r1(c.fogA * 10) / 10})` }) },
+      { label: L('En az 8 ağaç kalsın', 'Keep at least 8 trees'), check: (c) => ({ done: c.counts.tree >= 8, now: `${c.counts.tree} / 8` }) },
+    ],
+    hints: [
+      L('Işık hâlâ gün ortası gibi. `sun(...)` komutunu hiç yazmadıysan yeni bir satıra ekle.', 'The light still looks like midday. If you have not written `sun(...)` yet, add it on a new line.'),
+      L('`sun(10);` ve `fog(0.5);` satırlarını döngünün altına yaz.', 'Write `sun(10);` and `fog(0.5);` below the loop.'),
+      L('Tam çözüm: iki satır ekle: `sun(10);` ve `fog(0.5);`', 'Full answer: add two lines: `sun(10);` and `fog(0.5);`'),
+    ],
+    miss: (c) => {
+      if (c.sunH === null) return L('Işık hâlâ gün ortasında. `sun(10);` ekleyip güneşi ufka indir.', 'The light is still at midday. Add `sun(10);` to bring the sun to the horizon.');
+      if (c.sunH > 15) return L(`\`sun(${r1(c.sunH)})\` hâlâ yüksek. Gün batımı için 15 veya altına in.`, `\`sun(${r1(c.sunH)})\` is still high. Go to 15 or lower for a sunset.`);
+      if (c.fogA === null) return L('Işık güzel. Şimdi sis ekle: `fog(0.5);` uzaktaki ağaçları yumuşatır.', 'The light looks good. Now add haze: `fog(0.5);` softens the distant trees.');
+      if (c.fogA < 0.3) return L(`\`fog(${r1(c.fogA * 10) / 10})\` çok hafif. 0,3'ün üstüne çık.`, `\`fog(${r1(c.fogA * 10) / 10})\` is too faint. Go above 0.3.`);
+      return L(`Ağaç sayısı ${c.counts.tree}'e düşmüş; en az 8 kalmalı.`, `The tree count dropped to ${c.counts.tree}; keep at least 8.`);
+    },
+    pass: () => L('Gün batımı hazır. Işık ve sis, bir oyunda ruh halini belirleyen en ucuz iki araç. Son görevde hepsini birleştireceksin.', 'Sunset is set. Light and fog are the two cheapest tools for mood in a game. In the last mission you will combine everything.'),
+  },
+  {
+    name: L('Kendi köyün', 'Your village'),
+    title: L('Kendi köyünü kur', 'Build your own village'),
+    lesson: L(
+      'Bu görevde kurallar serbest. `house(x, z)` ev, `rock(x, z)` kaya ekler; üçüncü bir sayı (`house(2, 3, 1.5)`) boyutu belirler. Evleri nereye koyacağın, yolun nerede geçeceği ve havanın nasıl olacağı sana kalmış.',
+      'The rules are open here. `house(x, z)` adds a house and `rock(x, z)` a rock; a third number (`house(2, 3, 1.5)`) sets the size. Where the houses go, where the path runs and what the weather is like is up to you.'),
+    intro: L(
+      'Son görev yaratıcılığa kalıyor. Minimum şartlar aşağıda; gerisi senin. Bitirince yaptığına bakıp yorum yapacağım.',
+      'The last mission is open-ended. The minimum goals are below; the rest is yours. When you finish I will look at what you made and give feedback.'),
+    starter: START.village,
+    goals: [
+      { label: L('En az 2 ev', 'At least 2 houses'), check: (c) => ({ done: c.counts.house >= 2, now: `${c.counts.house} / 2` }) },
+      { label: L('En az 6 ağaç', 'At least 6 trees'), check: (c) => ({ done: c.counts.tree >= 6, now: `${c.counts.tree} / 6` }) },
+      { label: L('En az 3 kaya', 'At least 3 rocks'), check: (c) => ({ done: c.counts.rock >= 3, now: `${c.counts.rock} / 3` }) },
+    ],
+    hints: [
+      L('Önceki görevlerden döngü kalıbını al: `for (let i = 0; i < 8; i++) { tree(random(-15, 15), random(-15, 15)); }`', 'Reuse the loop pattern from earlier missions: `for (let i = 0; i < 8; i++) { tree(random(-15, 15), random(-15, 15)); }`'),
+      L('Kayalar için de aynı kalıp: `rock(random(-10, 10), random(-10, 10));` bir döngü içinde.', 'Same pattern for rocks: `rock(random(-10, 10), random(-10, 10));` inside a loop.'),
+      L('Evleri elle koy: `house(-6, 2);` ve `house(6, -3, 1.3);`', 'Place houses by hand: `house(-6, 2);` and `house(6, -3, 1.3);`'),
+    ],
+    miss: (c) => {
+      const need = [];
+      if (c.counts.house < 2) need.push(L(`${2 - c.counts.house} ev daha`, `${2 - c.counts.house} more house(s)`));
+      if (c.counts.tree < 6) need.push(L(`${6 - c.counts.tree} ağaç daha`, `${6 - c.counts.tree} more tree(s)`));
+      if (c.counts.rock < 3) need.push(L(`${3 - c.counts.rock} kaya daha`, `${3 - c.counts.rock} more rock(s)`));
+      return L(`Köy şekilleniyor. Eksikler: ${need.map((n) => n.tr).join(', ')}.`, `The village is taking shape. Still missing: ${need.map((n) => n.en).join(', ')}.`);
+    },
+    pass: (c) => {
+      const tr = [], en = [];
+      if (c.houses.length > 1 && (sameX(c.houses) || sameZ(c.houses))) { tr.push('Evlerin hepsi tek çizgide, bir sokak gibi duruyor. Halka ya da kümeler denersen daha organik görünür.'); en.push('All the houses sit on one line, like a street. Try a ring or clusters for a more organic feel.'); }
+      else if (c.houses.length > 1 && minDist(c.houses) < 2.2) { tr.push('Bazı evler üst üste biniyor. Aralarını biraz aç.'); en.push('Some houses overlap. Give them a bit more room.'); }
+      else { tr.push('Evlerin dağılımı dengeli.'); en.push('The houses are spread out nicely.'); }
+      if (c.sunH !== null && c.sunH <= 15) { tr.push('Gün batımı havası köye yakışmış.'); en.push('The sunset mood suits the village.'); }
+      if (c.hasLoop) { tr.push('Döngü kullanman kodu kısa tutmuş.'); en.push('Using loops kept your code short.'); }
+      return L(`Köy hazır. ${tr.join(' ')} Patikayı tamamladın.`, `Village complete. ${en.join(' ')} You finished the path.`);
+    },
+  },
+];
+
+const ROADMAP = [L('Karakter hareketi', 'Character movement'), L('Düşman davranışı', 'Enemy behaviour'), L('Kendi modelini içe aktar', 'Import your own model')];
+
+/* =====================================================================
+   Code runner: user code runs in a Web Worker and only returns plain commands
+   ===================================================================== */
+function workerBody() {
+  const LIMIT = 400, MIN = -20, MAX = 20;
+  class ApiError extends Error { constructor(info) { super(info.code); this.info = info; } }
+  const mulberry32 = (a) => () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const show = (v) => (v === undefined ? 'undefined' : typeof v === 'string' ? JSON.stringify(v) : String(v));
+  self.onmessage = (e) => {
+    const code = String(e.data.code);
+    const cmds = [];
+    let objects = 0;
+    const rnd = mulberry32(1337);
+    const num = (fn, arg, v, lo, hi) => {
+      if (typeof v !== 'number' || !isFinite(v)) throw new ApiError({ code: 'num', fn, arg, got: show(v) });
+      if (v < lo || v > hi) throw new ApiError({ code: 'range', fn, arg, lo, hi, got: v });
+      return v;
+    };
+    const place = (kind, x, z, size) => {
+      if (size === undefined) size = 1;
+      x = num(kind, 'x', x, MIN, MAX); z = num(kind, 'z', z, MIN, MAX); size = num(kind, 'size', size, 0.3, 4);
+      if (++objects > LIMIT) throw new ApiError({ code: 'limit', max: LIMIT });
+      cmds.push({ t: kind, x, z, size });
+    };
+    const api = {
+      ground(color) {
+        if (typeof color !== 'string') throw new ApiError({ code: 'str', fn: 'ground', arg: 'color', got: show(color) });
+        cmds.push({ t: 'ground', color });
+      },
+      tree(x, z, size) { place('tree', x, z, size); },
+      rock(x, z, size) { place('rock', x, z, size); },
+      house(x, z, size) { place('house', x, z, size); },
+      sun(h) { cmds.push({ t: 'sun', h: num('sun', 'height', h, 0, 90) }); },
+      fog(a) { cmds.push({ t: 'fog', a: num('fog', 'amount', a, 0, 1) }); },
+      random(lo, hi) {
+        if (lo === undefined) { lo = 0; hi = 1; } else if (hi === undefined) { hi = lo; lo = 0; }
+        num('random', 'min', lo, -1e6, 1e6); num('random', 'max', hi, -1e6, 1e6);
+        return lo + rnd() * (hi - lo);
+      },
+    };
+    postMessage({ started: true });
+    try {
+      const fn = new Function(...Object.keys(api), '"use strict";\n' + code);
+      fn(...Object.values(api));
+      postMessage({ ok: true, cmds });
+    } catch (err) {
+      const m = /<anonymous>:(\d+):\d+/.exec(String((err && err.stack) || ''));
+      postMessage({
+        ok: false,
+        line: m ? Math.max(1, Number(m[1]) - 3) : null,
+        info: err instanceof ApiError ? err.info : { code: 'raw', name: String(err && err.name), message: String(err && err.message) },
+      });
+    }
+  };
+}
+const API_NAMES = ['ground', 'tree', 'rock', 'house', 'sun', 'fog', 'random'];
+let worker = null;
+function spawnWorker() {
+  const src = '(' + workerBody.toString() + ')();';
+  const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+  const w = new Worker(url);
+  URL.revokeObjectURL(url);
+  return w;
+}
+function execute(code) {
+  return new Promise((resolve) => {
+    try { if (!worker) worker = spawnWorker(); } catch (e) { resolve({ ok: false, line: null, info: { code: 'noworker' }, ms: 0 }); return; }
+    const t0 = performance.now();
+    const w = worker;
+    // The 1.5 s budget starts when the worker reports that it began running the user's code,
+    // so a busy main thread or a slow worker start never reads as an endless loop.
+    let timer = null;
+    const boot = setTimeout(() => { w.terminate(); worker = null; resolve({ ok: false, line: null, info: { code: 'noworker' }, ms: 0 }); }, 10000);
+    w.onmessage = (e) => {
+      if (e.data && e.data.started) {
+        clearTimeout(boot);
+        timer = setTimeout(() => { w.terminate(); worker = null; resolve({ ok: false, line: null, info: { code: 'timeout' }, ms: 1500 }); }, 1500);
+        return;
+      }
+      clearTimeout(boot); clearTimeout(timer);
+      resolve(Object.assign({}, e.data, { ms: Math.max(1, Math.round(performance.now() - t0)) }));
+    };
+    w.onerror = (e) => { clearTimeout(boot); clearTimeout(timer); worker = null; resolve({ ok: false, line: null, info: { code: 'raw', name: 'Error', message: e.message || 'unknown' }, ms: 0 }); };
+    w.postMessage({ code });
+  });
+}
+
+const lev = (a, b) => {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+};
+
+function explain(info) {
+  const tr = state.lang === 'tr';
+  switch (info.code) {
+    case 'num': return tr ? `\`${info.fn}()\`: \`${info.arg}\` bir sayı olmalı, ama ${info.got} geldi.` : `\`${info.fn}()\`: \`${info.arg}\` must be a number, but got ${info.got}.`;
+    case 'str': return tr ? `\`${info.fn}()\`: \`${info.arg}\` tırnak içinde bir yazı olmalı, ör. \`"#6a994e"\`; ${info.got} geldi.` : `\`${info.fn}()\`: \`${info.arg}\` must be text in quotes, e.g. \`"#6a994e"\`; got ${info.got}.`;
+    case 'range': return tr ? `\`${info.fn}()\`: \`${info.arg}\` ${info.lo} ile ${info.hi} arasında olmalı, ${info.got} verdin.` : `\`${info.fn}()\`: \`${info.arg}\` must be between ${info.lo} and ${info.hi}, you gave ${info.got}.`;
+    case 'limit': return tr ? `Sahneye en fazla ${info.max} nesne eklenebilir. Döngün çok fazla nesne üretiyor olabilir.` : `A scene can hold at most ${info.max} objects. Your loop may be creating too many.`;
+    case 'timeout': return tr ? 'Kod 1,5 saniyede bitmedi. Sonsuz bir döngü olabilir: `while` ya da `for` içinde çıkış koşulu var mı?' : 'The code did not finish in 1.5 seconds. It may be an endless loop: does your `while` or `for` have an exit condition?';
+    case 'color': return tr ? `\`ground()\`: \`${info.value}\` geçerli bir renk değil. \`"#6a994e"\` gibi bir kod ya da \`"green"\` gibi İngilizce bir renk adı kullan.` : `\`ground()\`: \`${info.value}\` is not a valid colour. Use a code like \`"#6a994e"\` or a name like \`"green"\`.`;
+    case 'noworker': return tt().noWorker;
+    default: break;
+  }
+  const msg = info.message || '';
+  let m = /^(\w+) is not defined$/.exec(msg);
+  if (m) {
+    const guess = API_NAMES.map((n) => [n, lev(m[1].toLowerCase(), n)]).sort((a, b) => a[1] - b[1])[0];
+    const near = guess && guess[1] <= 2 ? guess[0] : null;
+    if (tr) return `\`${m[1]}\` tanımlı değil.${near ? ` \`${near}\` mi demek istedin?` : ''} Kullanabileceğin komutlar: ${API_NAMES.join(', ')}.`;
+    return `\`${m[1]}\` is not defined.${near ? ` Did you mean \`${near}\`?` : ''} Available commands: ${API_NAMES.join(', ')}.`;
+  }
+  if (info.name === 'SyntaxError') return tr ? `Söz dizimi hatası: ${msg}. Eksik ya da fazla bir parantez, süslü parantez veya tırnak olabilir.` : `Syntax error: ${msg}. A bracket, brace or quote may be missing or extra.`;
+  m = /^Assignment to constant variable/.exec(msg);
+  if (m) return tr ? '`const` ile tanımlanan bir değişkene yeni değer atamaya çalıştın. `let` kullan.' : 'You tried to reassign a `const` variable. Use `let` instead.';
+  return `${info.name || 'Error'}: ${msg}`;
+}
+
+/* =====================================================================
+   3D scene
+   ===================================================================== */
+const canvas = $('#scene');
+let renderer = null, gl = true;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+} catch (e) { gl = false; }
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(36, 1.6, 0.1, 600);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x4a5a46, 0.6);
+const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+const world = new THREE.Group();
+const cam = { az: 0.7, polar: 1.0, zoom: 1, idle: 0 };
+const popList = [];
+const UNIT = { tree: 1.55, rock: 1.4, house: 2.0 };
+
+if (gl) {
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.set(2048, 2048);
+  const sc = sunLight.shadow.camera; sc.left = -36; sc.right = 36; sc.top = 36; sc.bottom = -36; sc.near = 1; sc.far = 200;
+  sunLight.shadow.bias = -0.0006;
+  scene.add(hemi, sunLight, world);
+} else {
+  const el = $('#glerr'); el.hidden = false; el.textContent = tt().noGL;
+}
+
+const matCache = new Map();
+const mat = (color) => {
+  if (!matCache.has(color)) matCache.set(color, new THREE.MeshStandardMaterial({ color, roughness: 0.95, metalness: 0, flatShading: true }));
+  return matCache.get(color);
+};
+const G = {
+  trunk: new THREE.CylinderGeometry(0.2, 0.26, 1, 6),
+  cone: new THREE.ConeGeometry(1, 1, 7),
+  rock: new THREE.DodecahedronGeometry(0.7, 0),
+  box: new THREE.BoxGeometry(1, 1, 1),
+  roof: new THREE.ConeGeometry(1, 1, 4),
+};
+const hash = (x, z) => (Math.imul(Math.round(x * 100) ^ 0x9e3779b1, 73856093) ^ Math.imul(Math.round(z * 100) ^ 0x85ebca6b, 19349663)) >>> 0;
+const mesh = (geo, color, x, y, z, sx, sy, sz) => {
+  const m = new THREE.Mesh(geo, mat(color));
+  m.position.set(x, y, z); m.scale.set(sx, sy, sz);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+};
+const LEAF = ['#3f7d3a', '#4b8b3e', '#2f6b4a', '#5a9a3c', '#357347'];
+const ROCK = ['#8a9490', '#767f7c', '#9aa19b'];
+const WALL = ['#d8c6a0', '#c98f6a', '#b9c3ca', '#e1b8a5'];
+const ROOF = ['#8a3b2e', '#4a5a6a', '#6b4a2e'];
+
+function makeTree(x, z, s) {
+  const h = hash(x, z);
+  const g = new THREE.Group();
+  const leaf = h % 9 === 0 ? '#c9822a' : LEAF[h % LEAF.length];
+  g.add(mesh(G.trunk, '#6b4a30', 0, 0.5, 0, 1, 1, 1));
+  g.add(mesh(G.cone, leaf, 0, 1.55, 0, 1.0, 1.7, 1.0));
+  g.add(mesh(G.cone, leaf, 0, 2.35, 0, 0.72, 1.4, 0.72));
+  g.rotation.y = (h % 360) * Math.PI / 180;
+  return g;
+}
+function makeRock(x, z, s) {
+  const h = hash(x, z);
+  const g = new THREE.Group();
+  const m = mesh(G.rock, ROCK[h % ROCK.length], 0, 0.28, 0, 1, 0.65, 1.1);
+  m.rotation.set((h % 7) * 0.2, (h % 13) * 0.5, 0);
+  g.add(m);
+  return g;
+}
+function makeHouse(x, z, s) {
+  const h = hash(x, z);
+  const g = new THREE.Group();
+  g.add(mesh(G.box, WALL[h % WALL.length], 0, 0.65, 0, 1.9, 1.3, 1.6));
+  const roof = mesh(G.roof, ROOF[h % ROOF.length], 0, 1.8, 0, 1.75, 1.0, 1.75);
+  roof.rotation.y = Math.PI / 4;
+  g.add(roof);
+  g.add(mesh(G.box, '#3a2c22', 0, 0.42, 0.82, 0.38, 0.84, 0.06));
+  g.rotation.y = ((h % 4) * Math.PI) / 2;
+  return g;
+}
+
+const slabTop = new THREE.Mesh(new THREE.BoxGeometry(44, 1.2, 44), new THREE.MeshStandardMaterial({ color: '#6a994e', roughness: 1, flatShading: true }));
+slabTop.position.y = -0.6; slabTop.receiveShadow = true;
+const slabSoil = new THREE.Mesh(new THREE.BoxGeometry(44, 3, 44), mat('#5b4636'));
+slabSoil.position.y = -2.7; slabSoil.receiveShadow = true;
+if (gl) scene.add(slabTop, slabSoil);
+
+const SKY = [[0, '#e0884a'], [10, '#eba56b'], [30, '#a9cfe0'], [60, '#86c5e8'], [90, '#7dbfe6']];
+function skyColor(e) {
+  for (let i = 1; i < SKY.length; i++) {
+    if (e <= SKY[i][0]) {
+      const a = SKY[i - 1], b = SKY[i];
+      return new THREE.Color(a[1]).lerp(new THREE.Color(b[1]), (e - a[0]) / (b[0] - a[0]));
+    }
+  }
+  return new THREE.Color(SKY[SKY.length - 1][1]);
+}
+let fogAmt = 0;
+function setAtmosphere(e, fogA) {
+  const rad = (e * Math.PI) / 180, az = 0.7;
+  sunLight.position.set(Math.cos(rad) * Math.sin(az) * 70, Math.max(Math.sin(rad), 0.04) * 70, Math.cos(rad) * Math.cos(az) * 70);
+  const k = Math.sin(rad);
+  sunLight.intensity = 0.3 + 0.62 * k;
+  sunLight.color.set('#ffa25a').lerp(new THREE.Color('#fff3df'), clamp(e / 45, 0, 1));
+  hemi.intensity = 0.38 + 0.32 * k;
+  const sky = skyColor(e);
+  scene.background = sky;
+  hemi.color.copy(sky).lerp(new THREE.Color('#ffffff'), 0.35);
+  fogAmt = fogA;
+  scene.fog = fogA > 0 ? new THREE.Fog(sky.clone(), 50, 150) : null;
+}
+
+let reduceMotion = false;
+try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* ignore */ }
+
+function rebuild(cmds, groundRgb, sunH, fogA) {
+  while (world.children.length) world.remove(world.children[0]);
+  popList.length = 0;
+  slabTop.material.color.setRGB(groundRgb[0] / 255, groundRgb[1] / 255, groundRgb[2] / 255);
+  setAtmosphere(sunH, fogA);
+  const now = performance.now();
+  let i = 0;
+  for (const c of cmds) {
+    if (c.t !== 'tree' && c.t !== 'rock' && c.t !== 'house') continue;
+    const g = c.t === 'tree' ? makeTree(c.x, c.z, c.size) : c.t === 'rock' ? makeRock(c.x, c.z, c.size) : makeHouse(c.x, c.z, c.size);
+    g.position.set(c.x, 0, c.z);
+    const sz = c.size * UNIT[c.t];
+    g.scale.setScalar(reduceMotion ? sz : 0.001);
+    world.add(g);
+    if (!reduceMotion) popList.push({ g, size: sz, t0: now + Math.min(i * 9, 420) });
+    i++;
+  }
+}
+
+function placeCamera() {
+  const w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
+  const aspect = w / h;
+  const r = 74 * cam.zoom * Math.max(1, 1.3 / aspect);
+  const p = cam.polar, a = cam.az;
+  camera.position.set(r * Math.sin(p) * Math.sin(a), r * Math.cos(p), r * Math.sin(p) * Math.cos(a));
+  camera.lookAt(0, 0, 0);
+}
+function resize() {
+  if (!gl) return;
+  const box = $('#preview').getBoundingClientRect();
+  const w = Math.max(1, Math.floor(box.width)), h = Math.max(1, Math.floor(box.height));
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+if (gl) {
+  new ResizeObserver(resize).observe($('#preview'));
+  let drag = null;
+  canvas.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, t: e.pointerType }; cam.idle = performance.now(); try { canvas.setPointerCapture(e.pointerId); } catch (er) { /* ignore */ } });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    cam.az -= (e.clientX - drag.x) * 0.008;
+    if (drag.t !== 'touch') cam.polar = clamp(cam.polar + (e.clientY - drag.y) * 0.006, 0.35, 1.35);
+    drag.x = e.clientX; drag.y = e.clientY; cam.idle = performance.now();
+  });
+  const end = () => { drag = null; cam.idle = performance.now(); };
+  canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+  canvas.addEventListener('wheel', (e) => { e.preventDefault(); cam.zoom = clamp(cam.zoom * (e.deltaY > 0 ? 1.07 : 0.93), 0.55, 1.5); cam.idle = performance.now(); }, { passive: false });
+  const easeOutBack = (k) => { const c1 = 1.4, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); };
+  const loop = (now) => {
+    if (!reduceMotion && now - cam.idle > 2500 && !drag) cam.az += 0.0016;
+    for (let i = popList.length - 1; i >= 0; i--) {
+      const p = popList[i];
+      const k = clamp((now - p.t0) / 280, 0, 1);
+      p.g.scale.setScalar(Math.max(0.001, p.size * (k === 0 ? 0.001 : easeOutBack(k))));
+      if (k >= 1) { p.g.scale.setScalar(p.size); popList.splice(i, 1); }
+    }
+    placeCamera();
+    if (scene.fog) { const d = camera.position.length(); scene.fog.near = d * (1.0 - 0.7 * fogAmt); scene.fog.far = d * (1.9 - 1.0 * fogAmt); }
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  };
+  setAtmosphere(55, 0);
+  resize();
+  requestAnimationFrame(loop);
+}
+
+/* =====================================================================
+   Editor
+   ===================================================================== */
+const cm = CodeMirror($('#edBody'), {
+  value: '', mode: 'javascript', theme: 'ws', lineNumbers: true, lineWrapping: false,
+  indentUnit: 2, tabSize: 2, matchBrackets: true, autoCloseBrackets: true, styleActiveLine: false,
+  extraKeys: {
+    'Ctrl-Enter': () => run(false), 'Cmd-Enter': () => run(false),
+    Tab: (c) => c.execCommand('insertSoftTab'),
+    Esc: () => $('#btnRun').focus(),
+  },
+});
+cm.addOverlay({
+  token(stream) {
+    if (stream.match(/\b(?:ground|tree|rock|house|sun|fog|random)\b(?=\s*\()/)) return 'ws-api';
+    stream.next();
+    return null;
+  },
+});
+cm.getInputField().setAttribute('aria-label', 'world.js');
+let errLine = null;
+const clearErr = () => { if (errLine !== null) { try { cm.removeLineClass(errLine, 'background', 'cm-err-line'); cm.removeLineClass(errLine, 'gutter', 'cm-err-gutter'); } catch (e) { /* line gone */ } errLine = null; } };
+const markErr = (n) => {
+  if (!n || n < 1 || n > cm.lineCount()) return;
+  errLine = n - 1;
+  cm.addLineClass(errLine, 'background', 'cm-err-line');
+  cm.addLineClass(errLine, 'gutter', 'cm-err-gutter');
+};
+cm.on('change', () => { state.dirty = true; });
+cm.on('focus', () => {
+  if (window.innerWidth < 960) setTimeout(() => $('#editorPanel').scrollIntoView({ block: 'center', behavior: 'smooth' }), 320);
+});
+
+/* =====================================================================
+   Analysis and run
+   ===================================================================== */
+function parseColor(str) {
+  const s = new Option().style;
+  s.color = str;
+  if (!s.color) return null;
+  const m = /rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(s.color);
+  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+}
+function analyse(code, cmds) {
+  const stripped = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+  const c = { code, cmds, counts: { tree: 0, rock: 0, house: 0 }, trees: [], houses: [], sunH: null, fogA: null, hasLoop: /\b(for|while)\b|\.forEach\s*\(|\.map\s*\(/.test(stripped) };
+  for (const k of cmds) {
+    if (k.t === 'tree') { c.counts.tree++; c.trees.push(k); }
+    else if (k.t === 'rock') c.counts.rock++;
+    else if (k.t === 'house') { c.counts.house++; c.houses.push(k); }
+    else if (k.t === 'sun') c.sunH = k.h;
+    else if (k.t === 'fog') c.fogA = k.a;
+  }
+  return c;
+}
+
+const checkSvg = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function setStatus(kind, text) {
+  const el = $('#status');
+  el.className = 'status' + (kind ? ' ' + kind : '');
+  el.innerHTML = '<span>' + md(text) + '</span>';
+}
+function addMsg(kind, text, extra) {
+  const box = $('#msgs');
+  const d = document.createElement('div');
+  d.className = 'msg ' + kind;
+  d.innerHTML = md(text) + (extra || '');
+  box.appendChild(d);
+  while (box.children.length > 40) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+  return d;
+}
+
+function renderChips(c) {
+  const T = tt();
+  $('#chips').innerHTML = [['chipTree', c ? c.counts.tree : 0], ['chipRock', c ? c.counts.rock : 0], ['chipHouse', c ? c.counts.house : 0]]
+    .map(([k, n]) => `<span class="chip">${esc(T[k])}<b>${n}</b></span>`).join('');
+  $('#empty').hidden = !!(c && c.cmds.some((k) => k.t === 'tree' || k.t === 'rock' || k.t === 'house'));
+}
+function renderGoals(c) {
+  const m = MISSIONS[state.cur];
+  $('#goals').innerHTML = m.goals.map((g) => {
+    const r = c ? g.check(c) : { done: false, now: '' };
+    return `<li class="goal${r.done ? ' done' : ''}"><span class="ck">${checkSvg}</span><span class="gl">${esc(pick(g.label))}</span><span class="now">${esc(r.now)}</span></li>`;
+  }).join('');
+}
+function renderPath() {
+  const T = tt();
+  $('#pathName').textContent = T.path;
+  const open = firstOpen();
+  $('#steps').innerHTML = MISSIONS.map((m, i) => {
+    const done = state.done.includes(i);
+    const cur = i === state.cur;
+    const locked = !done && i > open;
+    const st = done ? T.stDone : locked ? T.stLocked : T.stCurrent;
+    const cls = 'step' + (done ? ' done' : '') + (cur ? ' current' : '');
+    const li = `<li><button type="button" class="${cls}" data-idx="${i}" ${locked ? 'disabled' : ''} aria-label="${esc(T.stepAria(i + 1, pick(m.name), st))}" ${cur ? 'aria-current="step"' : ''}><span class="dot">${done ? checkSvg : i + 1}</span><span class="step-label">${esc(pick(m.name))}</span></button>${i < MISSIONS.length - 1 ? `<span class="link${done ? ' done' : ''}"></span>` : ''}</li>`;
+    return li;
+  }).join('');
+}
+function renderMission() {
+  const T = tt(), m = MISSIONS[state.cur];
+  $('#mCount').textContent = T.mission(state.cur + 1, MISSIONS.length);
+  $('#mTitle').textContent = pick(m.title);
+  $('#mLesson').innerHTML = md(pick(m.lesson));
+  renderGoals(state.last && state.last.mission === state.cur ? state.last.ctx : null);
+}
+function renderActions() {
+  const T = tt(), done = state.done.includes(state.cur);
+  const hb = $('#btnHint');
+  hb.textContent = state.hints >= 3 ? T.hintDone : T.hint(state.hints);
+  hb.disabled = state.hints >= 3 || done || state.busy;
+  hb.hidden = done;
+  $('#btnNext').hidden = !(done && state.cur < MISSIONS.length - 1);
+  $('#btnExample').hidden = !(done && state.cur === MISSIONS.length - 1);
+  const extras = done && aiOn();
+  $('#btnShow').hidden = !extras; $('#btnShow').textContent = T.btnShow; $('#btnShow').disabled = state.busy;
+  $('#btnChallenge').hidden = !extras; $('#btnChallenge').textContent = T.btnChallenge; $('#btnChallenge').disabled = state.busy;
+}
+function renderStatic() {
+  const T = tt();
+  document.documentElement.lang = state.lang;
+  document.querySelectorAll('[data-i]').forEach((el) => { const v = T[el.dataset.i]; if (typeof v === 'string') el.textContent = v; });
+  $('#langTr').setAttribute('aria-pressed', String(state.lang === 'tr'));
+  $('#langEn').setAttribute('aria-pressed', String(state.lang === 'en'));
+  $('#xp').textContent = T.xp(state.xp);
+  if (!gl) $('#glerr').textContent = T.noGL;
+  renderPath(); renderMission(); renderActions(); renderServer();
+  renderChips(state.last ? state.last.ctx : null);
+}
+
+function roadmapHtml() {
+  return `<ul>${ROADMAP.map((r) => `<li>${esc(pick(r))}</li>`).join('')}</ul>`;
+}
+
+/* =====================================================================
+   AI coach client. Asks the server (which holds the API key); on any
+   failure the page shows the built-in rule-based feedback instead, and says so.
+   ===================================================================== */
+const LESSON_IDS = ['first-tree', 'loop-forest', 'sunset', 'own-village'];
+const COACH_TIMEOUT = 13000;   // the server gives up at 12 s
+const aiOn = () => state.ai && state.server === 'ready';
+
+function sceneSummary(ctx) {
+  if (!ctx) return null;
+  const all = ctx.cmds.filter((k) => k.t === 'tree' || k.t === 'rock' || k.t === 'house');
+  const span = (key) => (all.length ? [r1(Math.min(...all.map((k) => k[key]))), r1(Math.max(...all.map((k) => k[key])))] : null);
+  return {
+    counts: ctx.counts, sunH: ctx.sunH, fogA: ctx.fogA === null ? null : Math.round(ctx.fogA * 100) / 100, hasLoop: ctx.hasLoop,
+    spread: all.length ? { x: span('x'), z: span('z') } : null,
+    treesInOneRow: sameZ(ctx.trees), housesInOneLine: sameX(ctx.houses) || sameZ(ctx.houses),
+  };
+}
+const currentCtx = () => (state.last && state.last.mission === state.cur ? state.last.ctx : null);
+
+async function askCoach(stage, opts) {
+  const ctx = opts && opts.noCtx ? null : currentCtx();
+  const body = {
+    lesson_id: LESSON_IDS[state.cur], stage, lang: state.lang, code: cm.getValue(),
+    run_output: sceneSummary(ctx), error: (opts && opts.error) || null,
+    goals: MISSIONS[state.cur].goals.map((g) => { const r = ctx ? g.check(ctx) : { done: false, now: '' }; return { label: g.label.en, done: r.done, now: r.now }; }),
+    hints_used: opts && Number.isInteger(opts.hints) ? opts.hints : state.hints, history: state.chat.slice(-6),
+  };
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), COACH_TIMEOUT);
+  try {
+    const r = await fetch('/api/coach', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
+    let data = null;
+    try { data = await r.json(); } catch (e) { data = null; }
+    if (r.ok && data && data.source === 'llm') return { ok: true, reply: data };
+    const code = data && data.error && data.error.code;
+    return { ok: false, why: code === 'rate_limited' ? 'rate_limited' : 'unavailable' };
+  } catch (e) {
+    return { ok: false, why: e && e.name === 'AbortError' ? 'timeout' : 'offline' };
+  } finally { clearTimeout(timer); }
+}
+
+function taskHtml(t) {
+  const T = tt();
+  return `<div class="task"><h4>${esc(t.title)}</h4><p><strong>${esc(T.taskGoal)}:</strong> ${md(t.goal)}</p>`
+    + `<strong>${esc(T.taskCrit)}</strong><ul>${t.success_criteria.map((c) => `<li>${md(c)}</li>`).join('')}</ul>`
+    + (t.starter_code ? `<button type="button" class="btn small" data-act="loadTask">${esc(T.loadTask)}</button>` : '') + '</div>';
+}
+function replyHtml(rep, fb) {
+  const T = tt();
+  let h = '';
+  if (rep.verdict) h += `<span class="verdict">${esc({ pass: T.verdictPass, partial: T.verdictPartial, fail: T.verdictFail }[rep.verdict])}.</span> `;
+  h += md(rep.message).replace(/\n/g, '<br>');
+  if (rep.hint) h += `<div style="margin-top:6px">${md(rep.hint).replace(/\n/g, '<br>')}</div>`;
+  if (rep.missing_concept && rep.verdict !== 'pass') h += `<div class="tag">${esc(T.concept)}: <b>${esc(rep.missing_concept)}</b></div>`;
+  if (rep.task) h += taskHtml(rep.task);
+  if (fb && fb.xp) h += `<div class="tag"><b>+50 XP</b></div>`;
+  if (fb && fb.extra) h += fb.extra;
+  return h + `<div class="tag"><b>${esc(T.tagAi(rep.model || 'AI'))}</b></div>`;
+}
+function rulesTag(why) {
+  const T = tt();
+  return `<div class="tag rules"><b>${esc(T.tagRules)}</b><span>${esc(T.whyRules[why] || T.whyRules.unavailable)}</span>`
+    + `<button type="button" class="linkbtn" data-act="retry">${esc(T.retry)}</button></div>`;
+}
+
+/* One coach turn: show a pending bubble, ask, then fill it with the AI reply or the rule-based fallback.
+   fb = { kind, text, extra?, xp? } is the rule-based feedback, already computed locally. Returns true on an AI reply. */
+async function coachTurn(stage, fb, opts) {
+  const id = ++state.req;
+  state.turn = { stage, fb, opts };
+  state.busy = true;
+  const el = addMsg('pending', tt().pending);
+  const res = await askCoach(stage, opts);   // builds the request body synchronously, before its first await
+  if (id !== state.req || !el.isConnected) { el.remove(); return false; }   // a newer turn or mission replaced this one
+  state.busy = false;
+  renderActions();
+  if (res.ok) {
+    const rep = res.reply;
+    el.className = 'msg ' + (stage === 'teach' ? 'hint' : rep.verdict === 'pass' ? 'success' : 'info');
+    el.innerHTML = replyHtml(rep, fb);
+    state.chat.push({ role: 'coach', text: rep.message });
+    if (rep.task) state.task = rep.task;
+  } else {
+    el.className = 'msg ' + fb.kind;
+    const body = fb.text ? md(fb.text) : '';
+    el.innerHTML = body + (fb.extra || '') + rulesTag(res.why);
+  }
+  const box = $('#msgs'); box.scrollTop = box.scrollHeight;
+  return res.ok;
+}
+
+function renderServer() {
+  const T = tt(), s = $('#srv');
+  const on = state.server === 'ready';
+  s.className = 'srv ' + (on ? 'ready' : state.server === 'checking' ? '' : 'off');
+  s.textContent = on ? T.srvReady : { checking: T.srvChecking, nokey: T.srvNoKey, noserver: T.srvNoServer }[state.server];
+  const useAi = state.ai && on;
+  $('#modeAi').disabled = !on;
+  $('#modeAi').setAttribute('aria-pressed', String(useAi));
+  $('#modeRules').textContent = T.modeRules;
+  $('#modeRules').setAttribute('aria-pressed', String(!useAi));
+  $('#aiNote').textContent = useAi ? T.noteSend : T.noteRules;
+}
+async function probeServer() {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 4000);
+  try {
+    const r = await fetch('/api/health', { cache: 'no-store', signal: ctl.signal });
+    const d = await r.json();
+    state.server = d && d.ok ? (d.configured ? 'ready' : 'nokey') : 'noserver';
+  } catch (e) { state.server = 'noserver'; } finally { clearTimeout(timer); }
+  renderServer(); renderActions();
+}
+
+async function run(silent) {
+  if (state.running) return;
+  state.running = true;
+  clearErr();
+  const code = cm.getValue();
+  const res = await execute(code);
+  state.running = false;
+  const m = MISSIONS[state.cur];
+
+  if (!res.ok) {
+    const text = explain(res.info);
+    const lineTxt = res.line ? `${tt().line(res.line)}: ` : '';
+    setStatus('err', lineTxt + text);
+    markErr(res.line);
+    if (!silent) {
+      const msg = (state.lang === 'tr' ? 'Kod hata verdi. ' : 'The code hit an error. ') + text + (state.lang === 'tr' ? ' Düzelttikten sonra tekrar çalıştır.' : ' Fix it and run again.');
+      if (aiOn()) coachTurn('evaluate', { kind: 'error', text: msg }, { noCtx: true, error: { code: String((res.info && res.info.code) || 'raw'), line: res.line || null, message: text } });
+      else addMsg('error', msg);
+    }
+    return;
+  }
+
+  let rgb = [106, 153, 78], sunH = 55, fogA = 0;
+  for (const k of res.cmds) {
+    if (k.t === 'ground') {
+      const p = parseColor(k.color);
+      if (!p) {
+        const text = explain({ code: 'color', value: k.color });
+        setStatus('err', text);
+        if (!silent) addMsg('error', (state.lang === 'tr' ? 'Zemin rengi okunamadı. ' : 'The ground colour could not be read. ') + text);
+        return;
+      }
+      rgb = p;
+    } else if (k.t === 'sun') sunH = k.h;
+    else if (k.t === 'fog') fogA = k.a;
+  }
+  if (gl) rebuild(res.cmds, rgb, sunH, fogA);
+  const ctx = analyse(code, res.cmds);
+  state.last = { mission: state.cur, ctx };
+  renderChips(ctx);
+  renderGoals(ctx);
+  const nObj = ctx.counts.tree + ctx.counts.rock + ctx.counts.house;
+  setStatus('ok', tt().ok(nObj, res.ms));
+  if (silent) return;
+
+  const allDone = m.goals.every((g) => g.check(ctx).done);
+  if (!allDone) {
+    if (aiOn()) coachTurn('evaluate', { kind: 'info', text: pick(m.miss(ctx)) });
+    else addMsg('info', pick(m.miss(ctx)));
+    return;
+  }
+  const first = !state.done.includes(state.cur);
+  let text = pick(m.pass(ctx));
+  if (first) {
+    state.done.push(state.cur);
+    state.xp += 50;
+    persist();
+    text += ' +50 XP';
+    const xp = $('#xp'); xp.textContent = tt().xp(state.xp); xp.classList.remove('pop'); void xp.offsetWidth; xp.classList.add('pop');
+    try { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); } catch (e) { /* unsupported */ }
+  }
+  const tail = state.cur === MISSIONS.length - 1 ? `<div style="margin-top:8px"><strong>${esc(tt().roadmapTitle)}</strong>${roadmapHtml()}</div>` : '';
+  renderPath(); renderActions();
+  // Goal checks above decide pass/fail and XP. The AI only explains; its verdict must agree (server enforces it).
+  if (aiOn()) coachTurn('evaluate', { kind: 'success', text, extra: tail, xp: first });
+  else addMsg('success', text, tail);
+}
+
+/* =====================================================================
+   Navigation, confirm bar and wiring
+   ===================================================================== */
+let confirmYes = null;
+function ask(text, yes) {
+  $('#confirmText').textContent = text;
+  confirmYes = yes;
+  $('#confirm').hidden = false;
+  $('#confirmNo').focus();
+}
+function closeAsk() { $('#confirm').hidden = true; confirmYes = null; }
+
+function loadMission(i, silentIntro) {
+  state.cur = i; state.hints = 0; state.last = null;
+  state.req++; state.busy = false; state.chat = []; state.task = null; state.turn = null;   // drop any coach answer still in flight
+  clearErr();
+  cm.setValue(pick(MISSIONS[i].starter));
+  cm.clearHistory();
+  state.dirty = false;
+  $('#msgs').innerHTML = '';
+  renderPath(); renderMission(); renderActions();
+  addMsg('info', pick(MISSIONS[i].intro));
+  run(true);
+}
+
+$('#btnRun').addEventListener('click', () => run(false));
+$('#btnReset').addEventListener('click', () => ask(tt().cReset, () => { clearErr(); cm.setValue(pick(MISSIONS[state.cur].starter)); state.dirty = false; run(true); }));
+$('#btnHint').addEventListener('click', () => {
+  const m = MISSIONS[state.cur];
+  if (state.hints >= 3 || state.busy) return;
+  const fb = { kind: 'hint', text: pick(m.hints[state.hints]) };
+  if (aiOn()) coachTurn('teach', fb, { hints: state.hints });   // levels used so far; a retry asks for the same level
+  else addMsg('hint', fb.text);
+  state.hints++;
+  renderActions();
+});
+$('#btnShow').addEventListener('click', () => {
+  if (state.busy) return;
+  coachTurn('showcase', { kind: 'info', text: '' });
+});
+$('#btnChallenge').addEventListener('click', () => {
+  if (state.busy) return;
+  coachTurn('challenge', { kind: 'info', text: '' });
+});
+$('#modeAi').addEventListener('click', () => { state.ai = true; persist(); renderServer(); renderActions(); });
+$('#modeRules').addEventListener('click', () => { state.ai = false; state.req++; state.busy = false; persist(); renderServer(); renderActions(); });
+$('#msgs').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-act]');
+  if (!b) return;
+  if (b.dataset.act === 'retry' && state.turn && !state.busy) {
+    const t = state.turn;
+    b.closest('.msg').remove();
+    coachTurn(t.stage, t.fb, t.opts);
+  } else if (b.dataset.act === 'loadTask' && state.task) {
+    ask(tt().cTask, () => { clearErr(); cm.setValue(state.task.starter_code); state.dirty = true; cm.focus(); });
+  }
+});
+$('#btnNext').addEventListener('click', () => loadMission(state.cur + 1));
+$('#btnExample').addEventListener('click', () => ask(tt().cExample, () => { clearErr(); cm.setValue(pick(EXAMPLE)); state.dirty = false; run(false); }));
+$('#btnWipe').addEventListener('click', () => ask(tt().cWipe, () => { state.done = []; state.xp = 0; persist(); loadMission(0); renderStatic(); }));
+$('#confirmYes').addEventListener('click', () => { const f = confirmYes; closeAsk(); if (f) f(); });
+$('#confirmNo').addEventListener('click', closeAsk);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#confirm').hidden) closeAsk(); });
+$('#steps').addEventListener('click', (e) => {
+  const b = e.target.closest('button.step');
+  if (!b || b.disabled) return;
+  const i = Number(b.dataset.idx);
+  if (i === state.cur) return;
+  const go = () => loadMission(i);
+  if (state.dirty) ask(tt().cSwitch, go); else go();
+});
+function setLang(l) {
+  if (l === state.lang) return;
+  state.lang = l; persist();
+  renderStatic();
+  if (state.last) { /* keep feedback text, only chrome changes */ }
+}
+$('#langTr').addEventListener('click', () => setLang('tr'));
+$('#langEn').addEventListener('click', () => setLang('en'));
+
+/* boot */
+renderStatic();
+setStatus('', tt().idle);
+loadMission(firstOpen());
+probeServer();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => cm.refresh());
+setTimeout(() => cm.refresh(), 60);
+window.addEventListener('resize', () => cm.refresh());
+})();
+</script>

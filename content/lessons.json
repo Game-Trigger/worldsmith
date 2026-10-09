@@ -1,0 +1,75 @@
+{
+  "api_reference": "The learner writes JavaScript for a tiny scene API. Only these functions exist: ground(color), tree(x, z, size?), rock(x, z, size?), house(x, z, size?), sun(height 0..90), fog(amount 0..1), random(min, max). x and z are in -20..20, size in 0.3..4. At most 400 objects. Nothing else (no DOM, no network, no other globals).",
+  "lessons": [
+    {
+      "id": "first-tree",
+      "index": 0,
+      "title": { "tr": "İlk ağacını dik", "en": "Plant your first tree" },
+      "concept": "A command call needs concrete numbers for its arguments.",
+      "goals": ["Plant at least 1 tree"],
+      "typical_gaps": [
+        "the tree line is still commented out with //",
+        "x and z were left as letters instead of numbers",
+        "the call is missing parentheses, comma or semicolon"
+      ],
+      "reference_solution": "ground(\"#6a994e\");\ntree(4, -6);",
+      "leak_patterns": [
+        "\\btree\\s*\\(\\s*-?\\d"
+      ]
+    },
+    {
+      "id": "loop-forest",
+      "index": 1,
+      "title": { "tr": "Bir orman kur", "en": "Grow a forest" },
+      "concept": "A for loop repeats a block; the loop variable can drive positions; the loop condition sets how many turns.",
+      "goals": ["At least 12 trees", "Use a loop (for / while)"],
+      "typical_gaps": [
+        "trees were typed one by one instead of in a loop",
+        "the loop condition i < N gives fewer turns than needed",
+        "every tree has the same z so the forest is a single row",
+        "random() is used for x only"
+      ],
+      "reference_solution": "ground(\"#6a994e\");\nfor (let i = 0; i < 12; i++) {\n  tree(random(-15, 15), random(-15, 15));\n}",
+      "leak_patterns": [
+        "i\\s*<\\s*(1[2-9]|[2-9]\\d|\\d{3})\\b[^\\n]{0,80}tree\\s*\\(",
+        "tree\\s*\\(\\s*random\\s*\\(\\s*-?\\d+\\s*,\\s*-?\\d+\\s*\\)\\s*,\\s*random"
+      ]
+    },
+    {
+      "id": "sunset",
+      "index": 2,
+      "title": { "tr": "Gün batımını yarat", "en": "Set the sun low" },
+      "concept": "sun(height) and fog(amount) set mood; lower sun means warmer light; the scale of each argument matters.",
+      "goals": ["Lower the sun to 15 or less", "Raise the fog to 0.3 or more", "Keep at least 8 trees"],
+      "typical_gaps": [
+        "sun() was never called so the light stays at midday",
+        "sun() value is still above 15 (90 is overhead, 0 is the horizon)",
+        "fog() is missing or too faint",
+        "fog was given a value above 1",
+        "trees were deleted while editing"
+      ],
+      "reference_solution": "ground(\"#6a994e\");\nfor (let i = 0; i < 14; i++) {\n  tree(random(-16, 16), random(-16, 16), random(0.8, 1.7));\n}\nsun(10);\nfog(0.5);",
+      "leak_patterns": [
+        "\\bsun\\s*\\(\\s*\\d",
+        "\\bfog\\s*\\(\\s*0?\\.\\d"
+      ]
+    },
+    {
+      "id": "own-village",
+      "index": 3,
+      "title": { "tr": "Kendi köyünü kur", "en": "Build your own village" },
+      "concept": "Combine loops, placement and atmosphere into an original scene; composition matters (spacing, grouping, variety).",
+      "goals": ["At least 2 houses", "At least 6 trees", "At least 3 rocks"],
+      "typical_gaps": [
+        "not enough houses, trees or rocks yet",
+        "houses stand on one straight line",
+        "houses overlap",
+        "no loop used for repeated objects"
+      ],
+      "reference_solution": "ground(\"#7aa35a\");\nsun(12);\nfog(0.35);\nfor (let i = 0; i < 6; i++) {\n  const a = (i / 6) * Math.PI * 2;\n  house(Math.cos(a) * 8, Math.sin(a) * 8, 1);\n}\nfor (let i = 0; i < 40; i++) {\n  const a = random(0, Math.PI * 2);\n  const r = random(13, 19);\n  tree(Math.cos(a) * r, Math.sin(a) * r, random(0.8, 1.6));\n}\nfor (let i = 0; i < 5; i++) {\n  rock(random(-5, 5), random(-5, 5), random(0.6, 1.2));\n}",
+      "leak_patterns": [
+        "Math\\.cos\\s*\\(\\s*a\\s*\\)\\s*\\*\\s*8"
+      ]
+    }
+  ]
+}

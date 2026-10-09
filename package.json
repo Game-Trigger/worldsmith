@@ -1,0 +1,14 @@
+{
+  "name": "worldsmith",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser-based game-development learning app: live code + 3D scene + AI coach",
+  "scripts": {
+    "build": "python build.py",
+    "serve": "python -m http.server 8765 --directory dist"
+  },
+  "dependencies": {
+    "codemirror": "5.65.16",
+    "three": "0.149.0"
+  }
+}

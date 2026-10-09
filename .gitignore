@@ -1,0 +1,8 @@
+node_modules/
+.env
+dist/
+server/logs/
+__pycache__/
+*.pyc
+tests/.e2e_logs/
+tests/.eval_logs/
